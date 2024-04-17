@@ -103801,6 +103801,13 @@
 								"Target" 		"TARGET"
 								"Duration"		"3.0"
 							}
+							"RunScript"
+							{
+								"ScriptFile"    "game_mechanics.lua"
+								"Function"      "ProvideVision"
+								"radius"		"225"
+								"duration"		"2.5" // delay is 2.25, but 2.5 just to be sure
+							}
 						}
 					}
 	        	}
