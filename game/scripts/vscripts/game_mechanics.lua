@@ -24464,6 +24464,19 @@ function WalkingLaserTrap( event )
     end)
 end
 
+function ProvideVision(event)
+    local location = event.location
+
+    if(event.caster) then
+        location = event.caster:GetAbsOrigin()
+    end
+
+    local radius = event.radius or 100
+    local duration = event.duration or 5
+
+    AddFOWViewer(DOTA_TEAM_GOODGUYS, location, radius, duration, false)
+end
+
 function SpinningLaserTrap( event )
     local caster = event.caster
     local ability = event.ability
@@ -24485,6 +24498,11 @@ function SpinningLaserTrap( event )
         laser_time_counter[i] = 0
         directions[i] = Vector(0,0,0) + RandomVector(1)
         local unit = CreateUnitByName("temple_walking_bot2", caster:GetAbsOrigin() + RandomVector(250), true, nil, nil, DOTA_TEAM_BADGUYS )
+        ProvideVision({
+            caster = unit,
+            duration = duration,
+            radius = 100
+        })
         bots[i] = unit
         unit.noexp = 1
         unit.damageimune = 1
