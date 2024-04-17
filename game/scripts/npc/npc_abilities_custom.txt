@@ -91098,6 +91098,13 @@
 								"Target" 		"TARGET"
 								"Duration"		"%duration"
 							}
+							"RunScript"
+							{
+								"ScriptFile"    "game_mechanics.lua"
+								"Function"      "ProvideVision"
+								"radius"		"900"
+								"duration"		"%duration"
+							}
 						}
 					}
         		}
