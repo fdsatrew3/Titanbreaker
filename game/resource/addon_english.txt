@@ -1277,9 +1277,9 @@
 		"DOTA_Tooltip_Ability_Feral5_dmg"    "%Agility and Strength to Damage:" 
 
 		"DOTA_Tooltip_Ability_empty_spell1"  "Unused"  
-		"DOTA_Tooltip_Ability_empty_spell1_Description"  "Unused Slot. Temple Heroes gain a random Ability every Level. You can always unlearn the rightmost Ability in your Hero Stats interface."
+		"DOTA_Tooltip_Ability_empty_spell1_Description"  "Unused Slot."
 		"DOTA_Tooltip_Ability_empty_spell2"  "Unused"  
-		"DOTA_Tooltip_Ability_empty_spell2_Description"  "Unused Slot. Temple Heroes gain a random Ability every Level. You can always unlearn the rightmost Ability in your Hero Stats interface."
+		"DOTA_Tooltip_Ability_empty_spell2_Description"  "Unused Slot."
 
 
 		"DOTA_Tooltip_Ability_ShapeshiftFeral"  "Feralform"  
