@@ -12029,6 +12029,8 @@ function SwapAbilitiesDelayed(caster, ability1, ability2, enabled1, enabled2, de
     Timers:CreateTimer(delay, function()
         caster:SwapAbilities(ability1, ability2, enabled1, enabled2)
     end)
+
+    --caster:SwapAbilities(ability1, ability2, enabled1, enabled2)
 end
 
 function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
@@ -12038,18 +12040,25 @@ function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
     local human4 = nil
     local human5 = nil
 
+    print("shapeshiftInit", shapeshiftInit)
+
     if(shapeshiftInit) then
         human1 = caster:AddAbility("RegrowthFeral")
         human2 = caster:AddAbility("RootsDruidFeral")
         human3 = caster:AddAbility("CycloneDruidFeral")
-        human4 = caster:AddAbility("empty_spell1")
-        human5 = caster:AddAbility("empty_spell2")
+        --human4 = caster:AddAbility("empty_spell1")
+        --human5 = caster:AddAbility("empty_spell2")
+        human1:SetHidden(true)
+        human2:SetHidden(true)
+        human3:SetHidden(true)
+        --human4:SetHidden(true)
+        --human5:SetHidden(true)
     else
         human1 = caster:FindAbilityByName("RegrowthFeral")
         human2 = caster:FindAbilityByName("RootsDruidFeral")
         human3 = caster:FindAbilityByName("CycloneDruidFeral")
-        human4 = caster:FindAbilityByName("empty_spell1")
-        human5 = caster:FindAbilityByName("empty_spell2")
+        --human4 = caster:FindAbilityByName("empty_spell1")
+        --human5 = caster:FindAbilityByName("empty_spell2")
     end
 
     local feral1 = caster:FindAbilityByName("Feral2")
@@ -12061,42 +12070,47 @@ function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
     human1:SetLevel(level)
     human2:SetLevel(level)
     human3:SetLevel(level)
-    human4:SetLevel(1)
-    human5:SetLevel(1)
+    --human4:SetLevel(1)
+    --human5:SetLevel(1)
 
     if(human) then
-        SwapAbilitiesDelayed(caster, "Feral2", "RegrowthFeral", false, true, 0)
-        SwapAbilitiesDelayed(caster, "Feral3", "RootsDruidFeral", false, true, 0.03)
-        SwapAbilitiesDelayed(caster, "Feral4", "CycloneDruidFeral", false, true, 0.06)
-        SwapAbilitiesDelayed(caster, "Feral1", "empty_spell1", false, true, 0.09)
-        SwapAbilitiesDelayed(caster, "Feral5", "empty_spell2", false, true, 0.12)
+        print("human")
 
+        SwapAbilitiesDelayed(caster, "Feral2", "RegrowthFeral", false, true, 0)
+        SwapAbilitiesDelayed(caster, "Feral3", "RootsDruidFeral", false, true, 0.05)
+        SwapAbilitiesDelayed(caster, "Feral4", "CycloneDruidFeral", false, true, 0.15)
+        --SwapAbilitiesDelayed(caster, "Feral1", "empty_spell1", false, true, 0.09)
+        --SwapAbilitiesDelayed(caster, "Feral5", "empty_spell2", false, true, 0.12)
+        
         -- This should be enough to prevent console casting orders that ignores Hidden behavior in some cases
         feral1:SetActivated(false)
         feral2:SetActivated(false)
         feral3:SetActivated(false)
         feral4:SetActivated(false)
         feral5:SetActivated(false)
-
+        
         human1:SetActivated(true)
         human2:SetActivated(true)
         human3:SetActivated(true)
-        human4:SetActivated(true)
-        human5:SetActivated(true)
-
+        --human4:SetActivated(true)
+        --human5:SetActivated(true)
 
         -- MarkAbilityButtonDirty to fix ui bug that ability very rare always gray (disabled) due to some valve bug
         human1:MarkAbilityButtonDirty()
         human2:MarkAbilityButtonDirty()
         human3:MarkAbilityButtonDirty()
-        human4:MarkAbilityButtonDirty()
-        human5:MarkAbilityButtonDirty()
+        --human4:MarkAbilityButtonDirty()
+        --human5:MarkAbilityButtonDirty()
     else
-        SwapAbilitiesDelayed(caster, "RegrowthFeral", "Feral2", false, true, 0.00)
-        SwapAbilitiesDelayed(caster, "RootsDruidFeral", "Feral3", false, true, 0.03)
-        SwapAbilitiesDelayed(caster, "CycloneDruidFeral", "Feral4", false, true, 0.06)
-        SwapAbilitiesDelayed(caster, "empty_spell1", "Feral1", false, true, 0.09)
-        SwapAbilitiesDelayed(caster, "empty_spell2", "Feral5", false, true, 0.12)
+        print("wolf")
+
+        if(shapeshiftInit == nil) then
+            SwapAbilitiesDelayed(caster, "Feral2", "RegrowthFeral", true, false, 0)
+            SwapAbilitiesDelayed(caster, "Feral3", "RootsDruidFeral", true, false, 0.05)
+            SwapAbilitiesDelayed(caster, "Feral4", "CycloneDruidFeral", true, false, 0.15)
+            --SwapAbilitiesDelayed(caster, "Feral1", "empty_spell1", true, false, 0.09)
+            --SwapAbilitiesDelayed(caster, "Feral5", "empty_spell2", true, false, 0.12)
+        end
 
         -- This should be enough to prevent console casting orders that ignores Hidden behavior in some cases
         feral1:SetActivated(true)
@@ -12108,9 +12122,8 @@ function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
         human1:SetActivated(false)
         human2:SetActivated(false)
         human3:SetActivated(false)
-        human4:SetActivated(false)
-        human5:SetActivated(false)
-
+        --human4:SetActivated(false)
+        --human5:SetActivated(false)
 
         -- MarkAbilityButtonDirty to fix ui bug that ability very rare always gray (disabled) due to some valve bug
         feral1:MarkAbilityButtonDirty()
@@ -12124,81 +12137,33 @@ end
 
 function ShapeshiftFeral(event)
 	local caster = event.caster
-	local level = caster:GetAbilityByIndex(5):GetLevel()
-	if caster:HasModifier("modifier_catform") then
-        -- to human form
-        if not caster:HasModifier("modifier_feralcd") then
-            event.ability:ApplyDataDrivenModifier(caster, caster, "modifier_feralcd", {Duration = 30 * GetInnerCooldownFactor(caster)})
-            event.ability:ApplyDataDrivenModifier(caster, caster, "modifier_feraldef", {Duration = 5})
-        end
+	local level = caster:FindAbilityByName("ShapeshiftFeral"):GetLevel()
 
-        caster.resourcesystem = nil
+    if(caster.shapeshiftInit) then
         caster.Catform = 0
-        caster:RemoveModifierByName("modifier_tigerfury")
-		caster:RemoveModifierByName("modifier_combopoint")
-		caster:RemoveModifierByName("modifier_season2gladiator")
+    end
+
+	if caster.Catform == 1 then
+        -- to human form
+        caster.Catform = 0
 		caster.ComboPoints = 0
-		caster:RemoveModifierByName("modifier_catform")
-        event.ability:ApplyDataDrivenModifier(caster, caster, "modifier_catform_off", nil)
-		
+        print("HUMAN SWAP")
         ShapeshiftFeralAbilitiesSwap(caster, true, level, event.shapeshiftInit)
 
         CheckForMaxManaCap(caster)
         caster:SetMana(caster:GetMaxMana()) --(caster.OldMana)
-		--model change
-		if COverthrowGameMode.EnableShapeshift == 1 then
-			local model = "models/heroes/dazzle/dazzle.vmdl"
-			caster:SetOriginalModel(model)
-			caster:SetModelScale(0.80)
-			ShowWearables(event)
-
-            --caster:FadeGesture(ACT_DOTA_RUN) 
-            StartAnimation(caster, {activity=ACT_DOTA_RUN, duration=0.1, rate=1.0})
-            COverthrowGameMode:EquipArtifactCosmeticRewardsGlobal(caster)
-		end
 	else 
         -- to feral form
         caster.resourcesystem = 4
         caster.Catform = 1
-		caster.OldMana = caster:GetMana()
-        caster:RemoveModifierByName("modifier_catform_off")
-		event.ability:ApplyDataDrivenModifier(caster, caster, "modifier_catform", nil)
 
+        print("FERAL SWAP")
         ShapeshiftFeralAbilitiesSwap(caster, false, level, event.shapeshiftInit)
 
-        CheckForMaxManaCap(caster)
-		--model change, only when synced
-		if COverthrowGameMode.EnableShapeshift == 1 then
-            COverthrowGameMode:RemoveAllCosmeticsGlobal(caster)
-			local model = "models/items/lycan/wolves/hunter_kings_wolves/hunter_kings_wolves.vmdl"
-			local scale = 0.9
-			--new form
-			if caster.artifact_offhand and caster.artifact_offhand == 6 then
-				model = "models/items/lycan/wolves/blood_moon_hunter_wolves/blood_moon_hunter_wolves.vmdl"
-				scale = 0.9
-			end
-            if caster.artifact_offhand and caster.artifact_offhand == 7 then
-                model = "models/items/lycan/ultimate/blood_moon_hunter_shapeshift_form/blood_moon_hunter_shapeshift_form.vmdl"
-                scale = 0.7
-            end
-            if caster.season2_2vs2 and caster.season2_2vs2 == 1 then
-                model = "models/items/lycan/ultimate/hunter_kings_trueform/hunter_kings_trueform.vmdl"
-                scale = 0.65
-            end
-
-			caster.old_model = caster:GetModelName()
-			caster:SetOriginalModel(model)
-			caster:SetModelScale(scale)
-			HideWearables(event)
-
-            --caster:FadeGesture(ACT_DOTA_RUN) 
-            StartAnimation(caster, {activity=ACT_DOTA_RUN, duration=0.1, rate=1.0})
-			if caster.season2_2vs2 and caster.season2_2vs2 == 1 then
-				caster:GetAbilityByIndex(5):ApplyDataDrivenModifier(caster, caster, "modifier_season2gladiator", nil)
-			end
-		end
-		
+        CheckForMaxManaCap(caster)		
 	end
+
+    StartAnimation(caster, {activity=ACT_DOTA_RUN, duration=0.1, rate=1.0})
 end
 
 function RemoveInstantAbility(event)

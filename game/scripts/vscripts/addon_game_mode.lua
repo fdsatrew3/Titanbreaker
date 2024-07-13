@@ -10766,7 +10766,6 @@ if heroName == "npc_dota_hero_dazzle" then
  hero.resourcesystem = 4
  hero.ComboPoints = 0
  hero.Shapeshift = 0
- hero.Catform = 1
  hero.spell1 = 1
  hero.spell2 = 1
  hero.spell3 = 0
