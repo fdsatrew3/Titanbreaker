@@ -12032,8 +12032,6 @@ function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
     local human4 = nil
     local human5 = nil
 
-    print("shapeshiftInit", shapeshiftInit)
-
     if(shapeshiftInit) then
         human1 = caster:AddAbility("RegrowthFeral")
         human2 = caster:AddAbility("RootsDruidFeral")
@@ -12061,8 +12059,6 @@ function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
     human5:SetLevel(1)
 
     if(human) then
-        print("human")
-
         caster:SwapAbilities("Feral2", "RegrowthFeral", true, true)
         caster:SwapAbilities("Feral3", "RootsDruidFeral", true, true)
         caster:SwapAbilities("Feral4", "CycloneDruidFeral", true, true)
@@ -12117,8 +12113,30 @@ function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
         feral4:MarkAbilityButtonDirty()
         feral5:MarkAbilityButtonDirty()
     end
+
+    SetIsAbilityHiddenByShapeshift(feral1, human)
+    SetIsAbilityHiddenByShapeshift(feral2, human)
+    SetIsAbilityHiddenByShapeshift(feral3, human)
+    SetIsAbilityHiddenByShapeshift(feral4, human)
+    SetIsAbilityHiddenByShapeshift(feral5, human)
+    SetIsAbilityHiddenByShapeshift(human1, not human)
+    SetIsAbilityHiddenByShapeshift(human2, not human)
+    SetIsAbilityHiddenByShapeshift(human3, not human)
+    SetIsAbilityHiddenByShapeshift(human4, not human)
+    SetIsAbilityHiddenByShapeshift(human5, not human)
 end
 
+function SetIsAbilityHiddenByShapeshift(ability, state)
+    ability._IsAbilityHiddenByShapeshift = state
+end
+
+function IsAbilityHiddenByShapeshift(ability)
+    if(ability._IsAbilityHiddenByShapeshift == nil) then
+        return false
+    end
+
+    return ability._IsAbilityHiddenByShapeshift
+end
 
 function ShapeshiftFeral(event)
 	local caster = event.caster
@@ -12132,20 +12150,61 @@ function ShapeshiftFeral(event)
         -- to human form
         caster.Catform = 0
 		caster.ComboPoints = 0
-        print("HUMAN SWAP")
+        caster.resourcesystem = nil
+        caster:RemoveModifierByName("modifier_tigerfury")
+		caster:RemoveModifierByName("modifier_combopoint")
+		caster:RemoveModifierByName("modifier_season2gladiator")
+		caster:RemoveModifierByName("modifier_catform")
+
+        event.ability:ApplyDataDrivenModifier(caster, caster, "modifier_catform_off", nil)
+
         ShapeshiftFeralAbilitiesSwap(caster, true, level, event.shapeshiftInit)
 
         CheckForMaxManaCap(caster)
-        caster:SetMana(caster:GetMaxMana()) --(caster.OldMana)
+        caster:SetMana(caster:GetMaxMana())
+
+		--model change
+		if COverthrowGameMode.EnableShapeshift == 1 then
+			local model = "models/heroes/dazzle/dazzle.vmdl"
+			caster:SetOriginalModel(model)
+			caster:SetModelScale(0.80)
+			ShowWearables(event)
+			StartAnimation(caster, {activity=ACT_DOTA_RUN, duration=0.1, rate=1.0})
+            COverthrowGameMode:EquipArtifactCosmeticRewardsGlobal(caster)
+		end
 	else 
         -- to feral form
         caster.resourcesystem = 4
         caster.Catform = 1
 
-        print("FERAL SWAP")
         ShapeshiftFeralAbilitiesSwap(caster, false, level, event.shapeshiftInit)
 
-        CheckForMaxManaCap(caster)		
+        CheckForMaxManaCap(caster)
+        
+        --model change, only when synced
+		if COverthrowGameMode.EnableShapeshift == 1 then
+            COverthrowGameMode:RemoveAllCosmeticsGlobal(caster)
+			local model = "models/items/lycan/wolves/hunter_kings_wolves/hunter_kings_wolves.vmdl"
+			local scale = 0.9
+			--new form
+			if caster.artifact_offhand and caster.artifact_offhand == 6 then
+				model = "models/items/lycan/wolves/blood_moon_hunter_wolves/blood_moon_hunter_wolves.vmdl"
+				scale = 0.9
+			end
+            if caster.artifact_offhand and caster.artifact_offhand == 7 then
+                model = "models/items/lycan/ultimate/blood_moon_hunter_shapeshift_form/blood_moon_hunter_shapeshift_form.vmdl"
+                scale = 0.7
+            end
+            if caster.season2_2vs2 and caster.season2_2vs2 == 1 then
+                model = "models/items/lycan/ultimate/hunter_kings_trueform/hunter_kings_trueform.vmdl"
+                scale = 0.65
+            end
+
+			caster.old_model = caster:GetModelName()
+			caster:SetOriginalModel(model)
+			caster:SetModelScale(scale)
+			HideWearables(event)
+        end
 	end
 
     StartAnimation(caster, {activity=ACT_DOTA_RUN, duration=0.1, rate=1.0})
