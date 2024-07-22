@@ -12025,14 +12025,6 @@ function ChainLightningOld(event)
 	]]
 end
 
-function SwapAbilitiesDelayed(caster, ability1, ability2, enabled1, enabled2, delay)
-    Timers:CreateTimer(delay, function()
-        caster:SwapAbilities(ability1, ability2, enabled1, enabled2)
-    end)
-
-    --caster:SwapAbilities(ability1, ability2, enabled1, enabled2)
-end
-
 function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
     local human1 = nil
     local human2 = nil
@@ -12046,19 +12038,14 @@ function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
         human1 = caster:AddAbility("RegrowthFeral")
         human2 = caster:AddAbility("RootsDruidFeral")
         human3 = caster:AddAbility("CycloneDruidFeral")
-        --human4 = caster:AddAbility("empty_spell1")
-        --human5 = caster:AddAbility("empty_spell2")
-        human1:SetHidden(true)
-        human2:SetHidden(true)
-        human3:SetHidden(true)
-        --human4:SetHidden(true)
-        --human5:SetHidden(true)
+        human4 = caster:AddAbility("empty_spell1")
+        human5 = caster:AddAbility("empty_spell2")
     else
         human1 = caster:FindAbilityByName("RegrowthFeral")
         human2 = caster:FindAbilityByName("RootsDruidFeral")
         human3 = caster:FindAbilityByName("CycloneDruidFeral")
-        --human4 = caster:FindAbilityByName("empty_spell1")
-        --human5 = caster:FindAbilityByName("empty_spell2")
+        human4 = caster:FindAbilityByName("empty_spell1")
+        human5 = caster:FindAbilityByName("empty_spell2")
     end
 
     local feral1 = caster:FindAbilityByName("Feral2")
@@ -12070,17 +12057,17 @@ function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
     human1:SetLevel(level)
     human2:SetLevel(level)
     human3:SetLevel(level)
-    --human4:SetLevel(1)
-    --human5:SetLevel(1)
+    human4:SetLevel(1)
+    human5:SetLevel(1)
 
     if(human) then
         print("human")
 
-        SwapAbilitiesDelayed(caster, "Feral2", "RegrowthFeral", false, true, 0)
-        SwapAbilitiesDelayed(caster, "Feral3", "RootsDruidFeral", false, true, 0.05)
-        SwapAbilitiesDelayed(caster, "Feral4", "CycloneDruidFeral", false, true, 0.15)
-        --SwapAbilitiesDelayed(caster, "Feral1", "empty_spell1", false, true, 0.09)
-        --SwapAbilitiesDelayed(caster, "Feral5", "empty_spell2", false, true, 0.12)
+        caster:SwapAbilities("Feral2", "RegrowthFeral", true, true)
+        caster:SwapAbilities("Feral3", "RootsDruidFeral", true, true)
+        caster:SwapAbilities("Feral4", "CycloneDruidFeral", true, true)
+        caster:SwapAbilities("Feral1", "empty_spell1", true, true)
+        caster:SwapAbilities("Feral5", "empty_spell2", true, true)
         
         -- This should be enough to prevent console casting orders that ignores Hidden behavior in some cases
         feral1:SetActivated(false)
@@ -12092,24 +12079,22 @@ function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
         human1:SetActivated(true)
         human2:SetActivated(true)
         human3:SetActivated(true)
-        --human4:SetActivated(true)
-        --human5:SetActivated(true)
+        human4:SetActivated(true)
+        human5:SetActivated(true)
 
         -- MarkAbilityButtonDirty to fix ui bug that ability very rare always gray (disabled) due to some valve bug
         human1:MarkAbilityButtonDirty()
         human2:MarkAbilityButtonDirty()
         human3:MarkAbilityButtonDirty()
-        --human4:MarkAbilityButtonDirty()
-        --human5:MarkAbilityButtonDirty()
+        human4:MarkAbilityButtonDirty()
+        human5:MarkAbilityButtonDirty()
     else
-        print("wolf")
-
         if(shapeshiftInit == nil) then
-            SwapAbilitiesDelayed(caster, "Feral2", "RegrowthFeral", true, false, 0)
-            SwapAbilitiesDelayed(caster, "Feral3", "RootsDruidFeral", true, false, 0.05)
-            SwapAbilitiesDelayed(caster, "Feral4", "CycloneDruidFeral", true, false, 0.15)
-            --SwapAbilitiesDelayed(caster, "Feral1", "empty_spell1", true, false, 0.09)
-            --SwapAbilitiesDelayed(caster, "Feral5", "empty_spell2", true, false, 0.12)
+            caster:SwapAbilities("Feral2", "RegrowthFeral", true, true)
+            caster:SwapAbilities("Feral3", "RootsDruidFeral", true, true)
+            caster:SwapAbilities("Feral4", "CycloneDruidFeral", true, true)
+            caster:SwapAbilities("Feral1", "empty_spell1", true, true)
+            caster:SwapAbilities("Feral5", "empty_spell2", true, true)
         end
 
         -- This should be enough to prevent console casting orders that ignores Hidden behavior in some cases
@@ -12122,8 +12107,8 @@ function ShapeshiftFeralAbilitiesSwap(caster, human, level, shapeshiftInit)
         human1:SetActivated(false)
         human2:SetActivated(false)
         human3:SetActivated(false)
-        --human4:SetActivated(false)
-        --human5:SetActivated(false)
+        human4:SetActivated(false)
+        human5:SetActivated(false)
 
         -- MarkAbilityButtonDirty to fix ui bug that ability very rare always gray (disabled) due to some valve bug
         feral1:MarkAbilityButtonDirty()
