@@ -15173,6 +15173,9 @@ function GlobalOnAbilityExecuted( event )
             end
         end
     end
+    if(caster and ability) then
+        COverthrowGameMode:CheckAbilityAutoCast(caster, ability)
+    end
     if caster and caster.talents and ability and (not ability:IsItem()) then
         if caster:HasModifier("modifier_affix_totemcast_heal") and COverthrowGameMode.totemCastUnit and not COverthrowGameMode.totemCastUnit:IsNull() and COverthrowGameMode.totemCastUnit:IsAlive() then
             DamageUnit({caster = COverthrowGameMode.totemCastUnit, target = caster, ability = COverthrowGameMode.totemCastUnit:GetAbilityByIndex(0), damage = 0, difficultyscale = 150})
@@ -30589,60 +30592,6 @@ function WarriorBerserkerRage(event)
     end
 end
 
-function AbilityAutoCastOld(event)
-	-- unfinished or unused thing
-	--[[
-    local caster = event.caster
-    local target = event.target
-    local ability = caster:GetAbilityByIndex(0)
-    local ability2 = caster:GetAbilityByIndex(1)
-
-    local abilityToCast = ability
-    if ability2:GetCooldownTimeRemaining() <= 0 and ability2:GetLevel() > 0 then
-        abilityToCast = ability2
-    end
-
-    Timers:CreateTimer(0.05, function()
-        local order = 
-        {
-            UnitIndex = caster:entindex(),
-            OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
-            AbilityIndex = abilityToCast:GetEntityIndex(), 
-            Queue = false,
-            TargetIndex = target:entindex()
-        }
-
-        ExecuteOrderFromTable(order)
-    end) --]]
-end
-
-function AbilityAutoCastV2(event)
-    if not event.autocast then
-        return
-    end
-
-    local caster = event.caster
-    local target = event.target
-    local ability = caster:GetAbilityByIndex(event.abilityIndex) -- should be fine
-
-    if ability:GetCooldownTimeRemaining() > 0 or ability:GetLevel() <= 0 then
-        return
-    end
-
-    Timers:CreateTimer(0.05, function()
-        local order = 
-        {
-            UnitIndex = caster:entindex(),
-            OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
-            AbilityIndex = ability:GetEntityIndex(), 
-            Queue = false,
-            TargetIndex = target:entindex()
-        }
-
-        ExecuteOrderFromTable(order)
-    end)
-end
-
 function DivineSphereTakeDamage(event)
     local caster = event.caster
     HealUnit({caster = caster, target = caster, heal = 0, percenthp = 5, ability = event.ability})
@@ -30753,12 +30702,12 @@ function CheckForFlurryProc(event)
             end
         else
             -- Something happened like frozen cooldown, restarts timer
-            return 0.01
+            return 0.05
         end
     end)
 end
 
-function AbilityAutoCastCheck(event)
+function AbilityTunnelVisionCheck(event)
     local caster = event.caster
     if caster.talents[165] <= 0 then
         return
@@ -30767,22 +30716,7 @@ function AbilityAutoCastCheck(event)
     local target = event.target
     local ability = caster:GetAbilityByIndex(0)
 
-    local abilityToCast = ability
-
-    Timers:CreateTimer(0.1, function()
-        local order = 
-        {
-            UnitIndex = caster:entindex(),
-            OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
-            AbilityIndex = abilityToCast:GetEntityIndex(), 
-            Queue = false,
-            TargetIndex = target:entindex()
-        }
-
-        ExecuteOrderFromTable(order)
-
-        ApplyBuffStack({caster = caster, target = caster, ability = caster.combat_system_ability, dur = 3, buff = "modifier_talent_tunnel"})
-    end)
+    ApplyBuffStack({caster = caster, target = caster, ability = caster.combat_system_ability, dur = 3, buff = "modifier_talent_tunnel"})
 end
 
 function StampedeBonusDamageProc(event)
@@ -31855,4 +31789,115 @@ function AstralGuardianRayOfTheSunParticle(event)
         ParticleManager:DestroyParticle(particle, false)
         ParticleManager:ReleaseParticleIndex(particle)
     end
+end
+
+function COverthrowGameMode:CheckAbilityAutoCast(caster, ability)
+    if(caster:IsRealHero() == false) then
+        return
+    end
+    local target = ability:GetCursorTarget()
+    local tickRate = 0.05
+    Timers:CreateTimer(0, function()
+        -- Too bad
+        if(ability:GetAutoCastState() == false) then
+            return
+        end
+        -- Caster dead...
+        if(caster:IsAlive() == false) then
+            return
+        end
+        -- Ignore dead guys
+        if(target == nil or target:IsNull() or target:IsAlive() == false) then
+            return
+        end
+        -- Check for too far enemies (2500+)
+        local casterPosition = caster:GetAbsOrigin()
+        local targetPosition = target:GetAbsOrigin()
+        local dx = casterPosition.x - targetPosition.x
+        local dy = targetPosition.y - targetPosition.y
+        local distanceToTargetSqr = dx * dx + dy * dy
+        if(distanceToTargetSqr >= 6250000) then
+            return
+        end
+        -- Wait for cd and mana
+        if(ability:IsFullyCastable() == false) then
+            return tickRate
+        end
+        -- Waiting for silence
+        if(caster:IsSilenced()) then
+            return tickRate
+        end
+        -- Waiting for stun
+        if(caster:IsStunned()) then
+            return tickRate
+        end
+        -- Waiting for channel
+        if(caster:IsChanneling()) then
+            return tickRate
+        end
+        -- Casting something else, waiting for that
+        if(caster:GetCurrentActiveAbility() ~= nil) then
+            return tickRate
+        end
+        -- If caster moving most likely he is running from death...
+        if(caster:IsMoving()) then
+            return
+        end
+
+        local abilityToAutoCast = COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
+
+        ExecuteOrderFromTable({
+            UnitIndex = caster:entindex(),
+            OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
+            AbilityIndex = abilityToAutoCast:GetEntityIndex(), 
+            Queue = false,
+            TargetIndex = target:entindex()
+        })
+    end)
+end
+
+function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
+    -- Caster should be fine and ready to cast any ability now so no need to check for that (only manacosts and cooldowns for combo abilities)
+
+    -- CM: Q Q W combo, Q = Ice_Bolt, W = Frost_Shatter
+    if(caster:GetUnitName() == "npc_dota_hero_crystal_maiden") then
+        if(caster._autoCastCMIceBolt == nil) then
+            caster._autoCastCMIceBolt = caster:FindAbilityByName("Ice_Bolt")
+        end
+        if(caster._autoCastCMFrostShatter == nil) then
+            caster._autoCastCMFrostShatter = caster:FindAbilityByName("Frost_Shatter")
+        end
+        local winterChillStacks = caster:FindModifierByName("modifier_winterschill")
+        if(ability == caster._autoCastCMIceBolt) then
+            -- If Frost Shatter ready and autocasted do Q Q W combo else just Q spam
+            if(caster._autoCastCMFrostShatter:GetLevel() > 0 and caster._autoCastCMFrostShatter:IsFullyCastable() and caster._autoCastCMFrostShatter:GetAutoCastState()) then
+                -- If CM have required stacks
+                -- Ignores debuffs from rest abilities for now because very unlikely someone will use them
+                if (winterChillStacks and winterChillStacks._usedByCMFrostShatterAutoCast == nil and winterChillStacks:GetStackCount() >= 2) then
+                    -- CM W spend stacks on hit instead of cast so we should prevent W spam...
+                    winterChillStacks._usedByCMFrostShatterAutoCast = true
+                    return caster._autoCastCMFrostShatter
+                end
+            end
+
+            return caster._autoCastCMIceBolt
+        end
+        if(ability == caster._autoCastCMFrostShatter) then
+            -- If Ice Bolt ready and autocasted do Q Q W combo else just W spam
+            if(caster._autoCastCMIceBolt:GetLevel() > 0 and caster._autoCastCMIceBolt:IsFullyCastable()) then
+                -- If CM have required stacks
+                -- Ignores debuffs from rest abilities for now because very unlikely someone will use them
+                if (winterChillStacks and winterChillStacks._usedByCMFrostShatterAutoCast == nil and winterChillStacks:GetStackCount() >= 2 and caster._autoCastCMIceBolt:GetAutoCastState()) then
+                    return ability
+                else
+                    return caster._autoCastCMIceBolt
+                end
+            end
+
+            -- Fallback to ice bolt that should be always ready
+            return caster._autoCastCMIceBolt
+        end
+    end
+
+    return ability
 end

@@ -4,7 +4,7 @@
 
 // FOR FUTURE REFERENCE:
 // In order to disable facet hero key here must be unique and not match dota one (npc_dota_hero_riki_titanbreaker) + empty facets block
-// In order to disable innate abilities replace every unused slot with generic_hidden to override valve kv innate ability (be aware of 32 abilities cap that you may reach because valve adding abilities during runtime)
+// In order to disable innate abilities replace every unused slot with generic_hidden to override valve kv innate ability (be aware of 35 abilities cap that you may reach because valve adding abilities during runtime)
 // If new hero will be ever added set his "BaseAttackSpeed" to 100 to prevent random dota patch break attack speed calculation for certain heroes
 
 "DOTAHeroes"

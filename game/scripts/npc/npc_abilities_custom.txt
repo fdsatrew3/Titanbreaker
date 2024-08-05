@@ -265,7 +265,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastCheck"
+				"Function"	"AbilityTunnelVisionCheck"
 			}
 			"TrackingProjectile"
 			{
@@ -16280,7 +16280,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastCheck"
+				"Function"	"AbilityTunnelVisionCheck"
 			}
 			"Random"
 			{
@@ -16454,7 +16454,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastCheck"
+				"Function"	"AbilityTunnelVisionCheck"
 			}
 		}
 		"OnAbilityPhaseInterrupted"
@@ -17435,7 +17435,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastCheck"
+				"Function"	"AbilityTunnelVisionCheck"
 			}
 			"FireSound"
 			{
@@ -28961,7 +28961,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastCheck"
+				"Function"	"AbilityTunnelVisionCheck"
 			}
 			"FireSound"
 			{
@@ -45788,13 +45788,6 @@
 				"Function"	"ChannelManaFixEnd"
 				"mana"	"0"
 			}
-			"RunScript"
-			{
-				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastV2"
-				"autocast"	"%autocast"
-				"abilityIndex"	"2"
-			}
 			"TrackingProjectile"
 			{
 				"Target"	"TARGET"
@@ -47555,7 +47548,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastCheck"
+				"Function"	"AbilityTunnelVisionCheck"
 			}
 			"FireSound"
 			{
@@ -48614,7 +48607,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastCheck"
+				"Function"	"AbilityTunnelVisionCheck"
 			}
 			"TrackingProjectile"
 			{
@@ -49164,7 +49157,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastCheck"
+				"Function"	"AbilityTunnelVisionCheck"
 			}
 			"FireEffect"
 			{
@@ -50766,7 +50759,7 @@
 	{
 		"BaseClass"	"ability_datadriven"
 		"AbilityTextureName"	"crystal_maiden_freezing_field"
-		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_AUTOCAST"
 		"AbilityUnitTargetTeam"	"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"AbilityUnitTargetType"	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
 		"AbilityUnitDamageType"	"DAMAGE_TYPE_MAGICAL"
@@ -51204,7 +51197,7 @@
 	{
 		"BaseClass"	"ability_datadriven"
 		"AbilityTextureName"	"winter_wyvern_splinter_blast"
-		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_AUTOCAST"
 		"AbilityUnitTargetTeam"	"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"AbilityUnitTargetType"	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
 		"AbilityUnitDamageType"	"DAMAGE_TYPE_MAGICAL"
@@ -51288,7 +51281,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastCheck"
+				"Function"	"AbilityTunnelVisionCheck"
 			}
 		}
 		"OnAbilityPhaseInterrupted"
@@ -53273,7 +53266,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"AbilityAutoCastCheck"
+				"Function"	"AbilityTunnelVisionCheck"
 			}
 			"FireSound"
 			{
