@@ -61483,6 +61483,11 @@
 						"ScriptFile"	"game_mechanics.lua"
 						"Function"	"OutOfCombatCounter"
 					}
+					"ApplyModifier"
+					{
+						"ModifierName"	"modifier_hero_lua_events"
+						"Target"	"CASTER"
+					}
 				}
 				"OnDealDamage"
 				{

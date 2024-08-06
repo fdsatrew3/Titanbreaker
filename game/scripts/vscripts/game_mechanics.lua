@@ -12349,7 +12349,7 @@ function COverthrowGameMode:GetAbilityIndexCustom(ability)
     return ability:GetAbilityIndex()
 end
 
-function GetAbilityBehaviorSafe(ability)
+function COverthrowGameMode:GetAbilityBehaviorSafe(ability)
     -- No idea if this true or no, but very valve like (this bug happened when valve decide to destroy custom games and destroyed they own event custom game with countless hot fixes this night after that...)
     -- Valve did add GetBehaviorInt() but that overflows with some behavior flags like DOTA_ABILITY_BEHAVIOR_OVERSHOOT
     local behavior = ability:GetBehavior()
@@ -12370,7 +12370,8 @@ function COverthrowGameMode:GetAbilityByIndexCustom(hero, index, fromStance)
 
         if(COverthrowGameMode:GetAbilityIndexCustom(ability) == index and COverthrowGameMode:IsStanceAbility(ability) == fromStance) then
             -- Probably enough to filter out valve weird internal abilities (they all have index = 0...)
-            if(bit.band(GetAbilityBehaviorSafe(ability), DOTA_ABILITY_BEHAVIOR_NOT_LEARNABLE) ~= 0) then
+            -- Maybe ~= 0 should be replaced with ~= DOTA_ABILITY_BEHAVIOR_NOT_LEARNABLE
+            if(bit.band(COverthrowGameMode:GetAbilityBehaviorSafe(ability), DOTA_ABILITY_BEHAVIOR_NOT_LEARNABLE) ~= 0) then
                 local abilityName = ability:GetAbilityName()
                 -- Dazzle abilities
                 if(abilityName == "empty_spell1" or abilityName == "empty_spell2") then
@@ -15054,6 +15055,14 @@ function MultistrikeProc(caster, originalTarget)
     end
 end
 
+-- Called after OnSpellStart(), target can be nil
+function COverthrowGameMode:GlobalOnAbilityFullyCast(caster, ability, target)
+    if(target ~= nil) then
+        COverthrowGameMode:CheckAbilityAutoCast(caster, ability, target)
+    end
+end
+
+-- Called before OnSpellStart(), after mana, cooldowns and rest stuff
 function GlobalOnAbilityExecuted( event )
     local caster = event.caster
     local target = event.target
@@ -15172,9 +15181,6 @@ function GlobalOnAbilityExecuted( event )
                 ReduceCooldown(myevent)
             end
         end
-    end
-    if(caster and ability) then
-        COverthrowGameMode:CheckAbilityAutoCast(caster, ability)
     end
     if caster and caster.talents and ability and (not ability:IsItem()) then
         if caster:HasModifier("modifier_affix_totemcast_heal") and COverthrowGameMode.totemCastUnit and not COverthrowGameMode.totemCastUnit:IsNull() and COverthrowGameMode.totemCastUnit:IsAlive() then
@@ -31791,15 +31797,18 @@ function AstralGuardianRayOfTheSunParticle(event)
     end
 end
 
-function COverthrowGameMode:CheckAbilityAutoCast(caster, ability)
-    if(caster:IsRealHero() == false) then
-        return
-    end
-    local target = ability:GetCursorTarget()
+function COverthrowGameMode:CheckAbilityAutoCast(caster, ability, target)
     local tickRate = 0.05
-    Timers:CreateTimer(0, function()
+    Timers:CreateTimer(0.01, function()
+        local abilityToAutoCast = COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
+
+        -- Any order except cast ability on target was issued, cancel autocasts
+        if(COverthrowGameMode:IsAbilityAutoCastCancelled(caster)) then
+            COverthrowGameMode:SetIsAbilityAutoCastCancelled(caster, false)
+            return
+        end
         -- Too bad
-        if(ability:GetAutoCastState() == false) then
+        if(abilityToAutoCast:GetAutoCastState() == false) then
             return
         end
         -- Caster dead...
@@ -31820,7 +31829,7 @@ function COverthrowGameMode:CheckAbilityAutoCast(caster, ability)
             return
         end
         -- Wait for cd and mana
-        if(ability:IsFullyCastable() == false) then
+        if(abilityToAutoCast:IsFullyCastable() == false) then
             return tickRate
         end
         -- Waiting for silence
@@ -31844,8 +31853,6 @@ function COverthrowGameMode:CheckAbilityAutoCast(caster, ability)
             return
         end
 
-        local abilityToAutoCast = COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
-
         ExecuteOrderFromTable({
             UnitIndex = caster:entindex(),
             OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
@@ -31867,37 +31874,42 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         if(caster._autoCastCMFrostShatter == nil) then
             caster._autoCastCMFrostShatter = caster:FindAbilityByName("Frost_Shatter")
         end
-        local winterChillStacks = caster:FindModifierByName("modifier_winterschill")
+
+        local winterChillStacks = caster:GetModifierStackCount("modifier_winterschill", nil)
+
         if(ability == caster._autoCastCMIceBolt) then
             -- If Frost Shatter ready and autocasted do Q Q W combo else just Q spam
             if(caster._autoCastCMFrostShatter:GetLevel() > 0 and caster._autoCastCMFrostShatter:IsFullyCastable() and caster._autoCastCMFrostShatter:GetAutoCastState()) then
                 -- If CM have required stacks
                 -- Ignores debuffs from rest abilities for now because very unlikely someone will use them
-                if (winterChillStacks and winterChillStacks._usedByCMFrostShatterAutoCast == nil and winterChillStacks:GetStackCount() >= 2) then
-                    -- CM W spend stacks on hit instead of cast so we should prevent W spam...
-                    winterChillStacks._usedByCMFrostShatterAutoCast = true
+                if (winterChillStacks >= 2) then
                     return caster._autoCastCMFrostShatter
                 end
+
+                return caster._autoCastCMIceBolt
             end
 
             return caster._autoCastCMIceBolt
         end
         if(ability == caster._autoCastCMFrostShatter) then
-            -- If Ice Bolt ready and autocasted do Q Q W combo else just W spam
-            if(caster._autoCastCMIceBolt:GetLevel() > 0 and caster._autoCastCMIceBolt:IsFullyCastable()) then
-                -- If CM have required stacks
-                -- Ignores debuffs from rest abilities for now because very unlikely someone will use them
-                if (winterChillStacks and winterChillStacks._usedByCMFrostShatterAutoCast == nil and winterChillStacks:GetStackCount() >= 2 and caster._autoCastCMIceBolt:GetAutoCastState()) then
-                    return ability
-                else
-                    return caster._autoCastCMIceBolt
-                end
-            end
-
-            -- Fallback to ice bolt that should be always ready
             return caster._autoCastCMIceBolt
         end
     end
 
     return ability
+end
+
+function COverthrowGameMode:IsAbilityAutoCastCancelled(caster)
+    if(caster == nil) then
+        return false
+    end
+    if(caster._isAbilityAutoCastCancelled == nil) then
+        return false
+    end
+
+    return caster._isAbilityAutoCastCancelled
+end
+
+function COverthrowGameMode:SetIsAbilityAutoCastCancelled(caster, state)
+    caster._isAbilityAutoCastCancelled = state
 end

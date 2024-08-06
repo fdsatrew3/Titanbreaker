@@ -10305,6 +10305,36 @@ function COverthrowGameMode:ExecuteOrderFilter( filterTable )
 
 	local orderType = filterTable["order_type"]
 
+  -- Auto casting helper
+  if(orderType ~= DOTA_UNIT_ORDER_CAST_TARGET) then
+    -- Don't treat toggle orders as auto cast interrupt
+    if(orderType ~= DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO and orderType ~= DOTA_UNIT_ORDER_CAST_TOGGLE and orderType ~= DOTA_UNIT_ORDER_CAST_TOGGLE_ALT) then
+      local hero = filterTable.units and filterTable.units["0"] or nil
+      if(hero ~= nil and hero > -1) then
+        hero = EntIndexToHScript(hero)
+        if(hero and hero:IsRealHero()) then
+          -- Cancel any ongoing autocasts if player executes any non cast target order
+          COverthrowGameMode:SetIsAbilityAutoCastCancelled(hero, true)
+        end
+      end
+    end
+  else
+    local hero = filterTable.units and filterTable.units["0"] or nil
+    if(hero ~= nil and hero > -1) then
+      hero = EntIndexToHScript(hero)
+      if(hero and hero:IsRealHero()) then
+        local ability = filterTable["entindex_ability"]
+        if(ability ~= nil and ability > -1) then
+          ability = EntIndexToHScript(ability)
+          if(ability ~= nil and bit.band(COverthrowGameMode:GetAbilityBehaviorSafe(ability), DOTA_ABILITY_BEHAVIOR_AUTOCAST) == DOTA_ABILITY_BEHAVIOR_AUTOCAST) then
+            -- Continue any ongoing autocasts if player executes cast target order
+            COverthrowGameMode:SetIsAbilityAutoCastCancelled(hero, false)
+          end
+        end
+      end
+    end
+  end
+
   -- Fix for bug: can't drop items from inventory to village while dead/fake dead?
   if(orderType == DOTA_UNIT_ORDER_DROP_ITEM_AT_FOUNTAIN) then
     local itemInInventory = filterTable["entindex_ability"]
