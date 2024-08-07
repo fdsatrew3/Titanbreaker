@@ -31810,13 +31810,19 @@ function COverthrowGameMode:CheckAbilityAutoCast(hero, ability, target)
 
     hero._lastAutoCastTarget = target
     hero._autoCastInternalTimer = Timers:CreateTimer(0, function()
-        for i=0, COverthrowGameMode.heroAbilityCount do
-            local ability = hero:GetAbilityByIndex(i)
-            if(ability and ability:GetAutoCastState() == true) then
-                COverthrowGameMode:_CheckAbilityAutoCast(hero, hero._lastAutoCastTarget, ability)
-                return tickRate
+        local status, errorMessage = pcall(function ()
+            for i=0, COverthrowGameMode.heroAbilityCount do
+                local ability = hero:GetAbilityByIndex(i)
+                if(ability and ability:GetAutoCastState() == true) then
+                    COverthrowGameMode:_CheckAbilityAutoCast(hero, hero._lastAutoCastTarget, ability)
+                    return
+                end
             end
+        end)
+        if(status ~= true) then
+            print("CheckAbilityAutoCast timer error: ", errorMessage)
         end
+
         return tickRate
     end)
 end
@@ -31885,11 +31891,11 @@ function COverthrowGameMode:TryCancelAutoCasts(caster)
     end
 end
 
--- Target can be nil
+-- target can be nil
 function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
     -- Caster should be fine and ready to cast any ability now so no need to check for that (at least only manacosts and cooldowns for desired abilities needs checking)
 
-    -- CM: Q Q W combo, Q = Ice_Bolt, W = Frost_Shatter
+    -- CM: Q Q W combo, Q = Ice_Bolt, W = Frost_Shatter (Q can be casted more often than two times per combo while waiting for W)
     if(caster:GetUnitName() == "npc_dota_hero_crystal_maiden") then
         if(caster._autoCastCMIceBolt == nil) then
             caster._autoCastCMIceBolt = caster:FindAbilityByName("Ice_Bolt")
