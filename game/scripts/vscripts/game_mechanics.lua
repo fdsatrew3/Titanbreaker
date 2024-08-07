@@ -15057,12 +15057,10 @@ end
 
 -- Called after OnSpellStart(), target can be nil
 function COverthrowGameMode:GlobalOnAbilityFullyCast(caster, ability, target)
-    if(target ~= nil) then
-        COverthrowGameMode:CheckAbilityAutoCast(caster, ability, target)
-    end
+    COverthrowGameMode:CheckAbilityAutoCast(caster, ability, target)
 end
 
--- Called before OnSpellStart(), after mana, cooldowns and rest stuff
+-- Called before OnSpellStart(). After mana, cooldowns and rest stuff
 function GlobalOnAbilityExecuted( event )
     local caster = event.caster
     local target = event.target
@@ -31797,26 +31795,40 @@ function AstralGuardianRayOfTheSunParticle(event)
     end
 end
 
-function COverthrowGameMode:CheckAbilityAutoCast(caster, ability, target)
-    local tickRate = 0.05
-    Timers:CreateTimer(0.01, function()
-        local abilityToAutoCast = COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
+function COverthrowGameMode:CheckAbilityAutoCast(hero, ability, target)
+    -- If ability doesn't have autocast turned on don't try start auto casts queue
+    if(ability:GetAutoCastState() == false) then
+        return
+    end
 
-        -- Any order except cast ability on target was issued, cancel autocasts
-        if(COverthrowGameMode:IsAbilityAutoCastCancelled(caster)) then
-            COverthrowGameMode:SetIsAbilityAutoCastCancelled(caster, false)
-            return
+    -- Do nothing if there is auto cast queue already
+    if(hero._autoCastInternalTimer ~= nil) then
+        return
+    end
+
+    local tickRate = 0.05
+
+    hero._lastAutoCastTarget = target
+    hero._autoCastInternalTimer = Timers:CreateTimer(0, function()
+        for i=0, COverthrowGameMode.heroAbilityCount do
+            local ability = hero:GetAbilityByIndex(i)
+            if(ability and ability:GetAutoCastState() == true) then
+                COverthrowGameMode:_CheckAbilityAutoCast(hero, hero._lastAutoCastTarget, ability)
+                return tickRate
+            end
         end
-        -- Too bad
-        if(abilityToAutoCast:GetAutoCastState() == false) then
-            return
-        end
-        -- Caster dead...
-        if(caster:IsAlive() == false) then
-            return
-        end
+        return tickRate
+    end)
+end
+
+function COverthrowGameMode:_CheckAbilityAutoCast(caster, target, ability)
+    -- Caster dead...
+    if(caster:IsAlive() == false) then
+        return
+    end
+    if(target ~= nil) then
         -- Ignore dead guys
-        if(target == nil or target:IsNull() or target:IsAlive() == false) then
+        if(target:IsNull() or target:IsAlive() == false) then
             return
         end
         -- Check for too far enemies (2500+)
@@ -31828,43 +31840,54 @@ function COverthrowGameMode:CheckAbilityAutoCast(caster, ability, target)
         if(distanceToTargetSqr >= 6250000) then
             return
         end
-        -- Wait for cd and mana
-        if(abilityToAutoCast:IsFullyCastable() == false) then
-            return tickRate
-        end
-        -- Waiting for silence
-        if(caster:IsSilenced()) then
-            return tickRate
-        end
-        -- Waiting for stun
-        if(caster:IsStunned()) then
-            return tickRate
-        end
-        -- Waiting for channel
-        if(caster:IsChanneling()) then
-            return tickRate
-        end
-        -- Casting something else, waiting for that
-        if(caster:GetCurrentActiveAbility() ~= nil) then
-            return tickRate
-        end
-        -- If caster moving most likely he is running from death...
-        if(caster:IsMoving()) then
-            return
-        end
+    end
+    -- Waiting for silence
+    if(caster:IsSilenced()) then
+        return
+    end
+    -- Waiting for stun
+    if(caster:IsStunned()) then
+        return
+    end
+    -- Waiting for channel
+    if(caster:IsChanneling()) then
+        return
+    end
+    -- Casting something else, waiting for that
+    if(caster:GetCurrentActiveAbility() ~= nil) then
+        return
+    end
+    -- If caster moving most likely he is running from death...
+    if(caster:IsMoving()) then
+        return
+    end
 
-        ExecuteOrderFromTable({
-            UnitIndex = caster:entindex(),
-            OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
-            AbilityIndex = abilityToAutoCast:GetEntityIndex(), 
-            Queue = false,
-            TargetIndex = target:entindex()
-        })
-    end)
+    local abilityToAutoCast = COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
+
+    -- Nothing worth casting, too bad...
+    if(abilityToAutoCast == nil) then
+        return
+    end
+
+    ExecuteOrderFromTable({
+        UnitIndex = caster:entindex(),
+        OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
+        AbilityIndex = abilityToAutoCast:GetEntityIndex(), 
+        Queue = false,
+        TargetIndex = target:entindex()
+    })
 end
 
+function COverthrowGameMode:TryCancelAutoCasts(caster)
+    if(caster._autoCastInternalTimer ~= nil) then
+        Timers:RemoveTimer(caster._autoCastInternalTimer)
+        caster._autoCastInternalTimer = nil
+    end
+end
+
+-- Target can be nil
 function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
-    -- Caster should be fine and ready to cast any ability now so no need to check for that (only manacosts and cooldowns for combo abilities)
+    -- Caster should be fine and ready to cast any ability now so no need to check for that (at least only manacosts and cooldowns for desired abilities needs checking)
 
     -- CM: Q Q W combo, Q = Ice_Bolt, W = Frost_Shatter
     if(caster:GetUnitName() == "npc_dota_hero_crystal_maiden") then
@@ -31875,41 +31898,34 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             caster._autoCastCMFrostShatter = caster:FindAbilityByName("Frost_Shatter")
         end
 
+        local isIceBoltReadyForAutoCast = caster._autoCastCMIceBolt:GetAutoCastState() and caster._autoCastCMIceBolt:GetLevel() > 0 and caster._autoCastCMIceBolt:IsFullyCastable()
+        local isFrostShatterReadyForAutoCast = caster._autoCastCMFrostShatter:GetAutoCastState() and caster._autoCastCMFrostShatter:GetLevel() > 0 and caster._autoCastCMFrostShatter:IsFullyCastable()
+
         local winterChillStacks = caster:GetModifierStackCount("modifier_winterschill", nil)
 
         if(ability == caster._autoCastCMIceBolt) then
             -- If Frost Shatter ready and autocasted do Q Q W combo else just Q spam
-            if(caster._autoCastCMFrostShatter:GetLevel() > 0 and caster._autoCastCMFrostShatter:IsFullyCastable() and caster._autoCastCMFrostShatter:GetAutoCastState()) then
-                -- If CM have required stacks
-                -- Ignores debuffs from rest abilities for now because very unlikely someone will use them
-                if (winterChillStacks >= 2) then
-                    return caster._autoCastCMFrostShatter
-                end
+            if(winterChillStacks >= 2 and isFrostShatterReadyForAutoCast) then
+                return caster._autoCastCMFrostShatter
+            end
 
+            -- Continue Q spam if W cast not possible or not desired
+            if(isIceBoltReadyForAutoCast) then
+                return caster._autoCastCMIceBolt
+            end
+        end
+        if(ability == caster._autoCastCMFrostShatter) then
+            -- You always want continue stacking Q after W cast
+            if(isIceBoltReadyForAutoCast) then
                 return caster._autoCastCMIceBolt
             end
 
-            return caster._autoCastCMIceBolt
+            -- If Q autocast turned off, but W autocast enabled spam it until impossible
+            if(isFrostShatterReadyForAutoCast) then
+                return caster._autoCastCMFrostShatter
+            end
         end
-        if(ability == caster._autoCastCMFrostShatter) then
-            return caster._autoCastCMIceBolt
-        end
     end
 
-    return ability
-end
-
-function COverthrowGameMode:IsAbilityAutoCastCancelled(caster)
-    if(caster == nil) then
-        return false
-    end
-    if(caster._isAbilityAutoCastCancelled == nil) then
-        return false
-    end
-
-    return caster._isAbilityAutoCastCancelled
-end
-
-function COverthrowGameMode:SetIsAbilityAutoCastCancelled(caster, state)
-    caster._isAbilityAutoCastCancelled = state
+    return nil
 end

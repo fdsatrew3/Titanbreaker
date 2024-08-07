@@ -10306,30 +10306,20 @@ function COverthrowGameMode:ExecuteOrderFilter( filterTable )
 	local orderType = filterTable["order_type"]
 
   -- Auto casting helper
-  if(orderType ~= DOTA_UNIT_ORDER_CAST_TARGET) then
-    -- Don't treat toggle orders as auto cast interrupt
-    if(orderType ~= DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO and orderType ~= DOTA_UNIT_ORDER_CAST_TOGGLE and orderType ~= DOTA_UNIT_ORDER_CAST_TOGGLE_ALT) then
-      local hero = filterTable.units and filterTable.units["0"] or nil
-      if(hero ~= nil and hero > -1) then
-        hero = EntIndexToHScript(hero)
-        if(hero and hero:IsRealHero()) then
-          -- Cancel any ongoing autocasts if player executes any non cast target order
-          COverthrowGameMode:SetIsAbilityAutoCastCancelled(hero, true)
-        end
-      end
-    end
-  else
+  if(orderType ~= DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO and orderType ~= DOTA_UNIT_ORDER_CAST_TOGGLE and orderType ~= DOTA_UNIT_ORDER_CAST_TOGGLE_ALT) then
     local hero = filterTable.units and filterTable.units["0"] or nil
     if(hero ~= nil and hero > -1) then
       hero = EntIndexToHScript(hero)
       if(hero and hero:IsRealHero()) then
-        local ability = filterTable["entindex_ability"]
-        if(ability ~= nil and ability > -1) then
-          ability = EntIndexToHScript(ability)
-          if(ability ~= nil and bit.band(COverthrowGameMode:GetAbilityBehaviorSafe(ability), DOTA_ABILITY_BEHAVIOR_AUTOCAST) == DOTA_ABILITY_BEHAVIOR_AUTOCAST) then
-            -- Continue any ongoing autocasts if player executes cast target order
-            COverthrowGameMode:SetIsAbilityAutoCastCancelled(hero, false)
+        if(filterTable["entindex_ability"] ~= nil and filterTable["entindex_ability"] > -1) then
+          -- Tries cancel auto casts if this is order for non auto cast (most likely player issues order)
+          local ability = EntIndexToHScript(filterTable["entindex_ability"])
+          if(ability and ability:GetAutoCastState() == false) then
+            COverthrowGameMode:TryCancelAutoCasts(hero)
           end
+        else
+          -- Cancel auto casts for any order not related to abilities
+          COverthrowGameMode:TryCancelAutoCasts(hero)
         end
       end
     end
@@ -10606,7 +10596,7 @@ function COverthrowGameMode:OnHeroInGame(hero)
   end)
 
   SetupFlurryAbility(hero, heroName)
-
+  
   --jungle mode
   if self.junglemode then
     hero:SetCanSellItems(false)
@@ -20760,6 +20750,7 @@ function COverthrowGameMode:RemoveFacetsAndInnateAbilties(hero)
 end
 
 function SetupFlurryAbility(hero, heroName)
+  -- IMPORTANT: If ever another stance ability added to flurry look Wounding_Strike example how to setup it (should be castable while hidden, only lua supports that)
   if heroName == "npc_dota_hero_drow_ranger" or heroName == "npc_dota_hero_windrunner" or heroName == "npc_dota_hero_sniper" or heroName == "npc_dota_hero_axe" then
     hero.flurryAbility = 0
   end
