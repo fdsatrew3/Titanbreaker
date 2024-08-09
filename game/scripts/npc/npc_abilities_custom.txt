@@ -50757,7 +50757,8 @@
 	}
 	"Frost_Shatter"
 	{
-		"BaseClass"	"ability_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"abilities/heroes/winter_wizard/frost_shatter"
 		"AbilityTextureName"	"crystal_maiden_freezing_field"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_AUTOCAST"
 		"AbilityUnitTargetTeam"	"DOTA_UNIT_TARGET_TEAM_ENEMY"
@@ -50777,123 +50778,7 @@
 		"AbilityCastRange"	"600"
 		"AbilityCastRangeBuffer"	"250"
 		"AbilityDuration"	"0.0 0.0 0.0 0.0"
-		"OnProjectileHitUnit"
-		{
-			"RunScript"
-			{
-				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"DamageUnit"
-				"damage"	"%AbilityDamage"
-				"icelance"	"1"
-				"spelldamagefactor"	"%spelldmg"
-				"attributefactor"	"%dmgfromstat"
-				"frostdmg"	"1"
-				"critchancefactor"	"%critchancefactor"
-				"spellcastfrenzy"	"%frenzy"
-				"spellcastfrenzy_max"	"1"
-			}
-			"FireSound"
-			{
-				"EffectName"	"hero_Crystal.projectileImpact"
-				"Target"	"TARGET"
-			}
-		}
-		"OnSpellStart"
-		{
-			"TrackingProjectile"
-			{
-				"Target"	"TARGET"
-				"EffectName"	"particles/items2_fx/skadi_projectile.vpcf"
-				"Dodgeable"	"1"
-				"ProvidesVision"	"1"
-				"VisionRadius"	"300"
-				"MoveSpeed"	"1000"
-				"SourceAttachment"	"DOTA_PROJECTILE_ATTACHMENT_ATTACK_1"
-			}
-			"FireSound"
-			{
-				"EffectName"	"hero_Crystal.preAttack"
-				"Target"	"CASTER"
-			}
-			"RunScript"
-			{
-				"ScriptFile"	"game_mechanics.lua"
-				"Function"	"MulticastItem"
-			}
-			"Random"
-			{
-				"Chance"	"%stackchance"
-				"OnSuccess"
-				{
-					"RunScript"
-					{
-						"ScriptFile"	"game_mechanics.lua"
-						"Function"	"ApplyBuffStack"
-						"max"	"10"
-						"addstacks"	"1"
-						"buff"	"modifier_ice_shatter"
-						"self"	"1"
-						"dur"	"10"
-					}
-				}
-			}
-		}
-		"precache"
-		{
-			"particle"	"particles/items2_fx/skadi_projectile.vpcf"
-		}
-		"Modifiers"
-		{
-			"modifier_ice_shatter"
-			{
-				"Passive"	"0"
-				"TextureName"	"crystal_maiden_crystal_nova"
-				"IsDebuff"	"0"
-				"IsBuff"	"1"
-				"IsHidden"	"0"
-				"IsPurgable"	"1"
-			}
-			"modifier_multicast_item"
-			{
-				"Passive"	"0"
-				"IsHidden"	"1"
-				"IsDebuff"	"0"
-				"IsPurgable"	"0"
-				"Attributes"	"MODIFIER_ATTRIBUTE_MULTIPLE"
-				"OnCreated"
-				{
-					"FireEffect"
-					{
-						"EffectName"	"particles/econ/items/crystal_maiden/crystal_maiden_cowl_of_ice/maiden_crystal_nova_e_cowlofice.vpcf"
-						"EffectAttachType"	"attach_hitloc"
-						"Target"	"CASTER"
-						"ControlPointEntities"
-						{
-							"CASTER"	"attach_hitloc"
-						}
-					}
-				}
-				"ThinkInterval"	"0.3"
-				"OnIntervalThink"
-				{
-					"TrackingProjectile"
-					{
-						"Target"	"TARGET"
-						"EffectName"	"particles/items2_fx/skadi_projectile.vpcf"
-						"Dodgeable"	"1"
-						"ProvidesVision"	"1"
-						"VisionRadius"	"300"
-						"MoveSpeed"	"750"
-						"SourceAttachment"	"DOTA_PROJECTILE_ATTACHMENT_ATTACK_1"
-					}
-					"FireSound"
-					{
-						"EffectName"	"hero_Crystal.preAttack"
-						"Target"	"CASTER"
-					}
-				}
-			}
-		}
+
 		"AbilityValues"
 		{
 			"dmgfromstat"	"300 350 350 350"
