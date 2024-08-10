@@ -31909,8 +31909,8 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             caster._autoCastCMFrostShatter = caster:FindAbilityByName("Frost_Shatter")
         end
 
-        local isIceBoltReadyForAutoCast = caster._autoCastCMIceBolt:GetAutoCastState() and caster._autoCastCMIceBolt:GetLevel() > 0 and caster._autoCastCMIceBolt:IsFullyCastable()
-        local isFrostShatterReadyForAutoCast = caster._autoCastCMFrostShatter:GetAutoCastState() and caster._autoCastCMFrostShatter:GetLevel() > 0 and caster._autoCastCMFrostShatter:IsFullyCastable()
+        local isIceBoltReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)
+        local isFrostShatterReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)
 
         local winterChillStacks = caster:GetModifierStackCount("modifier_winterschill", nil)
 
@@ -31937,6 +31937,9 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
                 return caster._autoCastCMFrostShatter
             end
         end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
     end
 
     -- Venge: Q spam for both stances
@@ -31949,7 +31952,7 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         end
 
         if(ability == caster._autoCastVengeMoon1) then
-            local isMoon1ReadyForAutoCast = caster._autoCastVengeMoon1:GetAutoCastState() and caster._autoCastVengeMoon1:GetLevel() > 0 and caster._autoCastVengeMoon1:IsFullyCastable()
+            local isMoon1ReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastVengeMoon1)
             if(isMoon1ReadyForAutoCast) then
                 return ability
             end
@@ -31957,12 +31960,82 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         
         -- Venge sun1 can be nil due to stance ability still not used
         if(ability == caster._autoCastVengeSun1) then
-            local isSun1ReadyForAutoCast = caster._autoCastVengeSun1:GetAutoCastState() and caster._autoCastVengeSun1:GetLevel() > 0 and caster._autoCastVengeSun1:IsFullyCastable()
+            local isSun1ReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastVengeSun1)
             if(isSun1ReadyForAutoCast) then
                 return ability
             end
         end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
+    -- Pugna: Q E combo with W sometimes for debuff
+    if(casterName == "npc_dota_hero_pugna") then
+        if(caster._autoCastPugnaSoulFlame == nil) then
+            caster._autoCastPugnaSoulFlame = caster:FindAbilityByName("destro1")
+        end
+        if(caster._autoCastPugnaIgnite == nil) then
+            caster._autoCastPugnaIgnite = caster:FindAbilityByName("destro2")
+        end
+        if(caster._autoCastPugnaChaosBlast == nil) then
+            caster._autoCastPugnaChaosBlast = caster:FindAbilityByName("destro3")
+        end
+
+        local isPugnaSoulFlameReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaSoulFlame)
+        local isPugnaIgniteReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaIgnite)
+        local isPugnaChaosBlastReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaChaosBlast)
+
+        if(ability == caster._autoCastPugnaSoulFlame) then
+            if(isPugnaIgniteReadyForAutoCast and target ~= nil and target:HasModifier("modifier_magmaburn2") == false) then
+                return caster._autoCastPugnaIgnite
+            end
+
+            if(isPugnaChaosBlastReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
+                return caster._autoCastPugnaChaosBlast
+            end
+
+            if(isPugnaSoulFlameReadyForAutoCast) then
+                return caster._autoCastPugnaSoulFlame
+            end
+        end
+
+        if(ability == caster._autoCastPugnaIgnite) then
+            if(isPugnaChaosBlastReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
+                return caster._autoCastPugnaChaosBlast
+            end
+
+            if(isPugnaSoulFlameReadyForAutoCast) then
+                return caster._autoCastPugnaSoulFlame
+            end
+        end
+
+        if(ability == caster._autoCastPugnaChaosBlast) then
+            if(isPugnaChaosBlastReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
+                return caster._autoCastPugnaChaosBlast
+            end
+
+            if(isPugnaIgniteReadyForAutoCast and target ~= nil and target:HasModifier("modifier_magmaburn2") == false) then
+                return caster._autoCastPugnaIgnite
+            end
+
+            if(isPugnaSoulFlameReadyForAutoCast) then
+                return caster._autoCastPugnaSoulFlame
+            end
+        end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
     end
 
     return nil
+end
+
+function IsAbilityReadyForAutoCast(ability)
+    if(not ability or ability.GetAutoCastState == nil) then
+        return false
+    end
+
+    -- IsFullyCastable() = caster have enough mana and ability coooldown ready
+    return ability:GetAutoCastState() and ability:GetLevel() > 0 and ability:IsFullyCastable()
 end
