@@ -831,6 +831,7 @@ function DamageUnit( event )
     	caster:SetModifierStackCount("modifier_souls", event.ability, caster.souls)
     end]]
     -- consume
+    -- TODO: Replace that with ConsumeSouls(event) to prevent copy paste?
     local nodamageatall = 1
     if event.consumesouls ~= nil then
     	if caster.souls == nil then
@@ -27883,13 +27884,18 @@ function ConsumeSouls( event )
     local caster = event.caster
     local removeBuff = false
     if caster.souls then
-        if caster.souls >= event.amount then
-            caster.souls = caster.souls - event.amount
-            caster:SetModifierStackCount("modifier_souls", nil, caster.souls)
-            if caster.souls <= 0 then
-                caster:RemoveModifierByName("modifier_souls")
+        -- ConsumeComboPoints used for Nemesis path talent?
+        if ConsumeComboPoints(caster, target) then
+            if caster.souls >= event.amount then
+                caster.souls = caster.souls - event.amount
+                caster:SetModifierStackCount("modifier_souls", nil, caster.souls)
+                if caster.souls <= 0 then
+                    caster:RemoveModifierByName("modifier_souls")
+                end
+                GlobalOnConsumeSoul(caster)
+            else
+                removeBuff = true
             end
-            GlobalOnConsumeSoul(caster)
         else
             removeBuff = true
         end

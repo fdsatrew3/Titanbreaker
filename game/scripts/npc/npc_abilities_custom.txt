@@ -25752,7 +25752,6 @@
 				"attributefactor"	"%dmgfromstat"
 				"ignitecritchancefactor"	"%critchance"
 				"critdmgbonusfactor"	"%critdmg"
-				"consumesouls"	"2"
 				"shadowdmg"	"1"
 				"chaosdmg"	"1"
 				"netherchaos"	"1"
@@ -25776,6 +25775,12 @@
 		}
 		"OnSpellStart"
 		{
+			"RunScript"
+			{
+				"ScriptFile"	"game_mechanics.lua"
+				"Function"	"ConsumeSouls"
+				"amount"	"2"
+			}
 			"TrackingProjectile"
 			{
 				"Target"	"TARGET"
