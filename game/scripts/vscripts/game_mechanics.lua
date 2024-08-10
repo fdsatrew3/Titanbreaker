@@ -32190,7 +32190,7 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             local isLinaFireLanceReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastFireLance)
             local isLinaMoltenLavaReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastMoltenLava)
             local isLinaFirewingReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastFirewing)
-            
+
             if(isLinaFireLanceReadyForAutoCast) then
                 return caster._autoCastFireLance
             end
@@ -32205,6 +32205,33 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             end
         end
 
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
+    -- Invoker: Q W spam
+    if(casterName == "npc_dota_hero_invoker") then
+        if(caster._autoCastInvokerArcaneBarrage == nil) then
+            caster._autoCastInvokerArcaneBarrage = caster:FindAbilityByName("Arcane1")
+            DetermineAutoCastOrderForAbility(caster._autoCastInvokerArcaneBarrage)
+        end
+        if(caster._autoCastInvokerNetherBlast == nil) then
+            caster._autoCastInvokerNetherBlast = caster:FindAbilityByName("Arcane2")
+            DetermineAutoCastOrderForAbility(caster._autoCastInvokerNetherBlast)
+        end
+
+        local isInvokerArcaneBarrageReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastInvokerArcaneBarrage)
+        local isInvokerNetherBlastReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastInvokerNetherBlast)
+
+        if(ability == caster._autoCastInvokerArcaneBarrage or ability == caster._autoCastInvokerNetherBlast) then
+            if(isInvokerNetherBlastReadyForAutoCast) then
+                return caster._autoCastInvokerNetherBlast
+            end
+            if(isInvokerArcaneBarrageReadyForAutoCast) then
+                return caster._autoCastInvokerArcaneBarrage
+            end
+        end
+        
         -- Returns nil to prevent rest calculations of rest conditions that will be always false
         return nil
     end
