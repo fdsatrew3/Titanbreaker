@@ -31886,13 +31886,39 @@ function COverthrowGameMode:_CheckAbilityAutoCast(caster, target, ability)
         return
     end
 
-    ExecuteOrderFromTable({
-        UnitIndex = caster:entindex(),
-        OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
-        AbilityIndex = abilityToAutoCast:GetEntityIndex(), 
-        Queue = false,
-        TargetIndex = target:entindex()
-    })
+    local autoCastOrder = GetAutoCastOrderForAbility(abilityToAutoCast)
+
+    -- Unsupported behavior or something wrong, too bad
+    if(autoCastOrder == nil) then
+        return
+    end
+
+    if(autoCastOrder == DOTA_UNIT_ORDER_CAST_NO_TARGET) then
+        ExecuteOrderFromTable({
+            UnitIndex = caster:entindex(),
+            OrderType = DOTA_UNIT_ORDER_CAST_NO_TARGET,
+            AbilityIndex = abilityToAutoCast:GetEntityIndex(), 
+            Queue = false
+        })
+        return
+    end
+
+    if(autoCastOrder == DOTA_UNIT_ORDER_CAST_TARGET and target) then
+        ExecuteOrderFromTable({
+            UnitIndex = caster:entindex(),
+            OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
+            AbilityIndex = abilityToAutoCast:GetEntityIndex(), 
+            Queue = false,
+            TargetIndex = target:entindex()
+        })
+        return
+    end
+
+    -- Support for point target abilities?
+    --if(autoCastOrder == DOTA_UNIT_ORDER_CAST_POSITION) then
+        --CastAbilityOnPosition(some_args)
+        --return
+    --end
 end
 
 function COverthrowGameMode:TryCancelAutoCasts(caster)
@@ -31910,9 +31936,11 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
     if(casterName == "npc_dota_hero_crystal_maiden") then
         if(caster._autoCastCMIceBolt == nil) then
             caster._autoCastCMIceBolt = caster:FindAbilityByName("Ice_Bolt")
+            DetermineAutoCastOrderForAbility(caster._autoCastCMIceBolt)
         end
         if(caster._autoCastCMFrostShatter == nil) then
             caster._autoCastCMFrostShatter = caster:FindAbilityByName("Frost_Shatter")
+            DetermineAutoCastOrderForAbility(caster._autoCastCMFrostShatter)
         end
 
         local isIceBoltReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)
@@ -31952,9 +31980,11 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
     if(casterName == "npc_dota_hero_vengefulspirit") then
         if(caster._autoCastVengeMoon1 == nil) then
             caster._autoCastVengeMoon1 = caster:FindAbilityByName("moon11")
+            DetermineAutoCastOrderForAbility(caster._autoCastVengeMoon1)
         end
         if(caster._autoCastVengeSun1 == nil) then
             caster._autoCastVengeSun1 = caster:FindAbilityByName("moon1")
+            DetermineAutoCastOrderForAbility(caster._autoCastVengeSun1)
         end
 
         if(ability == caster._autoCastVengeMoon1) then
@@ -31980,12 +32010,15 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
     if(casterName == "npc_dota_hero_pugna") then
         if(caster._autoCastPugnaSoulFlame == nil) then
             caster._autoCastPugnaSoulFlame = caster:FindAbilityByName("destro1")
+            DetermineAutoCastOrderForAbility(caster._autoCastPugnaSoulFlame)
         end
         if(caster._autoCastPugnaIgnite == nil) then
             caster._autoCastPugnaIgnite = caster:FindAbilityByName("destro2")
+            DetermineAutoCastOrderForAbility(caster._autoCastPugnaIgnite)
         end
         if(caster._autoCastPugnaChaosBlast == nil) then
             caster._autoCastPugnaChaosBlast = caster:FindAbilityByName("destro3")
+            DetermineAutoCastOrderForAbility(caster._autoCastPugnaChaosBlast)
         end
 
         local isPugnaSoulFlameReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaSoulFlame)
@@ -32014,6 +32047,11 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             if(isPugnaSoulFlameReadyForAutoCast) then
                 return caster._autoCastPugnaSoulFlame
             end
+
+            -- If ignire refreshed spam it because dot stacks?
+            if(isPugnaIgniteReadyForAutoCast) then
+                return caster._autoCastPugnaIgnite
+            end
         end
 
         if(ability == caster._autoCastPugnaChaosBlast) then
@@ -32034,7 +32072,99 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         return nil
     end
 
+    -- Grimstroke: Q E or Q W combos
+    if(casterName == "npc_dota_hero_grimstroke") then
+        if(caster._autoCastGrimstrokeSoulcoil == nil) then
+            caster._autoCastGrimstrokeSoulcoil = caster:FindAbilityByName("demo1")
+            DetermineAutoCastOrderForAbility(caster._autoCastGrimstrokeSoulcoil)
+        end
+        if(caster._autoCastGrimstrokeDemonBolt == nil) then
+            caster._autoCastGrimstrokeDemonBolt = caster:FindAbilityByName("demo2")
+            DetermineAutoCastOrderForAbility(caster._autoCastGrimstrokeDemonBolt)
+        end
+        if(caster._autoCastGrimstrokeHellfire == nil) then
+            caster._autoCastGrimstrokeHellfire = caster:FindAbilityByName("demo3")
+            DetermineAutoCastOrderForAbility(caster._autoCastGrimstrokeHellfire)
+        end
+
+        local isGrimstrokeSoulcoilReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastGrimstrokeSoulcoil)
+        local isGrimstrokeDemonBoltReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastGrimstrokeDemonBolt)
+        local isGrimstrokeHellfireReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastGrimstrokeHellfire)
+
+        if(ability == caster._autoCastGrimstrokeSoulcoil) then
+            if(isGrimstrokeHellfireReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
+                return caster._autoCastGrimstrokeHellfire
+            end
+            
+            if(isGrimstrokeDemonBoltReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
+                return caster._autoCastGrimstrokeDemonBolt
+            end
+
+            if(isGrimstrokeSoulcoilReadyForAutoCast) then
+                return caster._autoCastGrimstrokeSoulcoil
+            end
+        end
+
+        if(ability == caster._autoCastGrimstrokeDemonBolt) then
+            if(isGrimstrokeDemonBoltReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
+                return caster._autoCastGrimstrokeDemonBolt
+            end
+            if(isGrimstrokeSoulcoilReadyForAutoCast) then
+                return caster._autoCastGrimstrokeSoulcoil
+            end
+        end
+
+        if(ability == caster._autoCastGrimstrokeHellfire) then
+            if(isGrimstrokeHellfireReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
+                return caster._autoCastGrimstrokeHellfire
+            end
+
+            if(isGrimstrokeSoulcoilReadyForAutoCast) then
+                return caster._autoCastGrimstrokeSoulcoil
+            end
+        end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
     return nil
+end
+
+function GetAutoCastOrderForAbility(ability)
+    if(not ability or ability.GetAutoCastState == nil) then
+        return nil
+    end
+
+    if(ability._autoCastOrder ~= nil) then
+        return ability._autoCastOrder
+    end
+
+    return nil
+end
+
+function DetermineAutoCastOrderForAbility(ability)
+    if(not ability or ability.GetAutoCastState == nil) then
+        return
+    end
+
+    local abilityBehavior = COverthrowGameMode:GetAbilityBehaviorSafe(ability)
+
+    if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_NO_TARGET) == DOTA_ABILITY_BEHAVIOR_NO_TARGET) then
+        ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_NO_TARGET
+        return
+    end
+
+    if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) == DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) then
+        ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_TARGET
+        return
+    end
+
+    -- Is such abilities even exists?
+    --if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_POINT) == DOTA_ABILITY_BEHAVIOR_POINT) then
+    --    ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_POSITION
+    --    return
+    --end
 end
 
 function IsAbilityReadyForAutoCast(ability)

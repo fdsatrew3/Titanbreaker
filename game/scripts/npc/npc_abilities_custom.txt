@@ -26218,7 +26218,7 @@
 	{
 		"BaseClass"	"ability_datadriven"
 		"AbilityTextureName"	"demo1"
-		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_AUTOCAST"
 		"AbilityUnitTargetTeam"	"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"AbilityUnitTargetType"	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
 		"AbilityUnitDamageType"	"DAMAGE_TYPE_MAGICAL"
@@ -26358,7 +26358,7 @@
 	{
 		"BaseClass"	"ability_datadriven"
 		"AbilityTextureName"	"demo2"
-		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_AUTOCAST"
 		"AbilityUnitTargetTeam"	"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"AbilityUnitTargetType"	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
 		"AbilityUnitDamageType"	"DAMAGE_TYPE_MAGICAL"
@@ -26386,7 +26386,6 @@
 				"damage"	"%AbilityDamage"
 				"spelldamagefactor"	"%spelldmg"
 				"attributefactor"	"%dmgfromstat"
-				"consumesouls"	"2"
 				"shadowdmg"	"1"
 			}
 			"RunScript"
@@ -26417,6 +26416,12 @@
 		}
 		"OnSpellStart"
 		{
+			"RunScript"
+			{
+				"ScriptFile"	"game_mechanics.lua"
+				"Function"	"ConsumeSouls"
+				"amount"	"2"
+			}
 			"TrackingProjectile"
 			{
 				"Target"	"TARGET"
@@ -26489,7 +26494,7 @@
 	{
 		"BaseClass"	"ability_datadriven"
 		"AbilityTextureName"	"dragon_knight_breathe_fire"
-		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_CHANNELLED | DOTA_ABILITY_BEHAVIOR_IGNORE_BACKSWING"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_CHANNELLED | DOTA_ABILITY_BEHAVIOR_IGNORE_BACKSWING | DOTA_ABILITY_BEHAVIOR_AUTOCAST"
 		"AbilityUnitTargetTeam"	"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"AbilityUnitTargetType"	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
 		"AbilityUnitDamageType"	"DAMAGE_TYPE_MAGICAL"
