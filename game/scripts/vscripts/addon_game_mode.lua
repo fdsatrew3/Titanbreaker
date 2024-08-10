@@ -10314,7 +10314,8 @@ function COverthrowGameMode:ExecuteOrderFilter( filterTable )
         if(filterTable["entindex_ability"] ~= nil and filterTable["entindex_ability"] > -1) then
           -- Tries cancel auto casts if this is order for non auto cast (most likely player issues order)
           local ability = EntIndexToHScript(filterTable["entindex_ability"])
-          if(ability and ability:GetAutoCastState() == false) then
+          -- No idea why GetAutoCastState can be nil, probably some weird things
+          if(ability and ability.GetAutoCastState and ability:GetAutoCastState() == false) then
             COverthrowGameMode:TryCancelAutoCasts(hero)
           end
         else

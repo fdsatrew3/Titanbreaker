@@ -31899,9 +31899,9 @@ end
 -- target can be nil
 function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
     -- Caster should be fine and ready to cast any ability now so no need to check for that (at least only manacosts and cooldowns for desired abilities needs checking)
-
+    local casterName = caster:GetUnitName()
     -- CM: Q Q W combo, Q = Ice_Bolt, W = Frost_Shatter (Q can be casted more often than two times per combo while waiting for W)
-    if(caster:GetUnitName() == "npc_dota_hero_crystal_maiden") then
+    if(casterName == "npc_dota_hero_crystal_maiden") then
         if(caster._autoCastCMIceBolt == nil) then
             caster._autoCastCMIceBolt = caster:FindAbilityByName("Ice_Bolt")
         end
@@ -31925,6 +31925,7 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
                 return caster._autoCastCMIceBolt
             end
         end
+
         if(ability == caster._autoCastCMFrostShatter) then
             -- You always want continue stacking Q after W cast
             if(isIceBoltReadyForAutoCast) then
@@ -31934,6 +31935,31 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             -- If Q autocast turned off, but W autocast enabled spam it until impossible
             if(isFrostShatterReadyForAutoCast) then
                 return caster._autoCastCMFrostShatter
+            end
+        end
+    end
+
+    -- Venge: Q spam for both stances
+    if(casterName == "npc_dota_hero_vengefulspirit") then
+        if(caster._autoCastVengeMoon1 == nil) then
+            caster._autoCastVengeMoon1 = caster:FindAbilityByName("moon11")
+        end
+        if(caster._autoCastVengeSun1 == nil) then
+            caster._autoCastVengeSun1 = caster:FindAbilityByName("moon1")
+        end
+
+        if(ability == caster._autoCastVengeMoon1) then
+            local isMoon1ReadyForAutoCast = caster._autoCastVengeMoon1:GetAutoCastState() and caster._autoCastVengeMoon1:GetLevel() > 0 and caster._autoCastVengeMoon1:IsFullyCastable()
+            if(isMoon1ReadyForAutoCast) then
+                return ability
+            end
+        end
+        
+        -- Venge sun1 can be nil due to stance ability still not used
+        if(ability == caster._autoCastVengeSun1) then
+            local isSun1ReadyForAutoCast = caster._autoCastVengeSun1:GetAutoCastState() and caster._autoCastVengeSun1:GetLevel() > 0 and caster._autoCastVengeSun1:IsFullyCastable()
+            if(isSun1ReadyForAutoCast) then
+                return ability
             end
         end
     end
