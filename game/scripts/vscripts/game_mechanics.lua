@@ -31825,7 +31825,7 @@ function COverthrowGameMode:CheckAbilityAutoCast(hero, ability, target)
             for i=0, COverthrowGameMode.heroAbilityCount do
                 local ability = hero:GetAbilityByIndex(i)
                 if(ability and ability:GetAutoCastState() == true) then
-                    COverthrowGameMode:_CheckAbilityAutoCast(hero, hero._lastAutoCastTarget, ability)
+                    COverthrowGameMode:_CheckAbilityAutoCast(hero, ability, hero._lastAutoCastTarget)
                     return
                 end
             end
@@ -31838,7 +31838,8 @@ function COverthrowGameMode:CheckAbilityAutoCast(hero, ability, target)
     end)
 end
 
-function COverthrowGameMode:_CheckAbilityAutoCast(caster, target, ability)
+-- Target can be nil
+function COverthrowGameMode:_CheckAbilityAutoCast(caster, ability, target)
     -- Caster dead...
     if(caster:IsAlive() == false) then
         return
@@ -31914,11 +31915,27 @@ function COverthrowGameMode:_CheckAbilityAutoCast(caster, target, ability)
         return
     end
 
-    -- Support for point target abilities?
-    --if(autoCastOrder == DOTA_UNIT_ORDER_CAST_POSITION) then
-        --CastAbilityOnPosition(some_args)
-        --return
-    --end
+    if(autoCastOrder == DOTA_UNIT_ORDER_CAST_POSITION) then
+        local position = abilityToAutoCast:GetCursorPosition()
+        -- Hopefully this will be enough to detect default(Vector) == ability never casted
+        if(math.abs(position.x + position.y) < 0.01) then
+            if(target ~= nil) then
+                position = target:GetAbsOrigin()
+            else
+                -- Nothing can be done, too bad
+                return
+            end
+        end
+
+        ExecuteOrderFromTable({
+            UnitIndex = caster:entindex(),
+            OrderType = DOTA_UNIT_ORDER_CAST_POSITION,
+            AbilityIndex = abilityToAutoCast:GetEntityIndex(), 
+            Queue = false,
+            Position = position
+        })
+        return
+    end
 end
 
 function COverthrowGameMode:TryCancelAutoCasts(caster)
@@ -32149,6 +32166,49 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         return nil
     end
 
+    -- Lina: Q W E R spam
+    if(casterName == "npc_dota_hero_lina") then
+        if(caster._autoCastFireball == nil) then
+            caster._autoCastFireball = caster:FindAbilityByName("Magma_Bolt")
+            DetermineAutoCastOrderForAbility(caster._autoCastFireball)
+        end
+        if(caster._autoCastFireLance == nil) then
+            caster._autoCastFireLance = caster:FindAbilityByName("Fire_Lance")
+            DetermineAutoCastOrderForAbility(caster._autoCastFireLance)
+        end
+        if(caster._autoCastMoltenLava == nil) then
+            caster._autoCastMoltenLava = caster:FindAbilityByName("Molten_Lava")
+            DetermineAutoCastOrderForAbility(caster._autoCastMoltenLava)
+        end
+        if(caster._autoCastFirewing == nil) then
+            caster._autoCastFirewing = caster:FindAbilityByName("Dragon_Claw")
+            DetermineAutoCastOrderForAbility(caster._autoCastFirewing)
+        end
+
+        if(ability == caster._autoCastFireball or ability == caster._autoCastFireLance or ability == caster._autoCastMoltenLava or ability == caster._autoCastFirewing) then
+            local isLinaFireballReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastFireball)
+            local isLinaFireLanceReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastFireLance)
+            local isLinaMoltenLavaReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastMoltenLava)
+            local isLinaFirewingReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastFirewing)
+            
+            if(isLinaFireLanceReadyForAutoCast) then
+                return caster._autoCastFireLance
+            end
+            if(isLinaMoltenLavaReadyForAutoCast) then
+                return caster._autoCastMoltenLava
+            end
+            if(isLinaFirewingReadyForAutoCast) then
+                return caster._autoCastFirewing
+            end
+            if(isLinaFireballReadyForAutoCast) then
+                return caster._autoCastFireball
+            end
+        end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
     return nil
 end
 
@@ -32171,6 +32231,7 @@ function DetermineAutoCastOrderForAbility(ability)
 
     local abilityBehavior = COverthrowGameMode:GetAbilityBehaviorSafe(ability)
 
+    -- Grimstroke Hellfire, maybe something else
     if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_NO_TARGET) == DOTA_ABILITY_BEHAVIOR_NO_TARGET) then
         ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_NO_TARGET
         return
@@ -32181,11 +32242,11 @@ function DetermineAutoCastOrderForAbility(ability)
         return
     end
 
-    -- Is such abilities even exists?
-    --if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_POINT) == DOTA_ABILITY_BEHAVIOR_POINT) then
-    --    ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_POSITION
-    --    return
-    --end
+    -- Lina abilities, maybe something else
+    if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_POINT) == DOTA_ABILITY_BEHAVIOR_POINT) then
+        ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_POSITION
+        return
+    end
 end
 
 function IsAbilityReadyForAutoCast(ability)
