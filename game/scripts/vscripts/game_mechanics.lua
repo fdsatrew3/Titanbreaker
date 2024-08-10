@@ -32130,6 +32130,25 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         return nil
     end
 
+    -- Shadow Shaman: Q spam
+    if(casterName == "npc_dota_hero_shadow_shaman") then
+        if(caster._autoCastLightningBolt == nil) then
+            caster._autoCastLightningBolt = caster:FindAbilityByName("Lightning_Bolt")
+            DetermineAutoCastOrderForAbility(caster._autoCastLightningBolt)
+        end
+
+        local isShadowShamanLightningBoltReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastLightningBolt)
+
+        if(ability == caster._autoCastLightningBolt) then
+            if(isShadowShamanLightningBoltReadyForAutoCast) then
+                return caster._autoCastLightningBolt
+            end
+        end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
     return nil
 end
 
