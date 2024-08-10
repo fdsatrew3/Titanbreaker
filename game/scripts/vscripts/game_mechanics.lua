@@ -32026,7 +32026,8 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         local isPugnaChaosBlastReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaChaosBlast)
 
         if(ability == caster._autoCastPugnaSoulFlame) then
-            if(isPugnaIgniteReadyForAutoCast and target ~= nil and target:HasModifier("modifier_magmaburn2") == false) then
+            -- If ignire refreshed spam it because dot stacks?
+            if(isPugnaIgniteReadyForAutoCast) then
                 return caster._autoCastPugnaIgnite
             end
 
@@ -32040,6 +32041,11 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         end
 
         if(ability == caster._autoCastPugnaIgnite) then
+            -- If ignire refreshed spam it because dot stacks?
+            if(isPugnaIgniteReadyForAutoCast) then
+                return caster._autoCastPugnaIgnite
+            end
+
             if(isPugnaChaosBlastReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
                 return caster._autoCastPugnaChaosBlast
             end
@@ -32047,20 +32053,16 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             if(isPugnaSoulFlameReadyForAutoCast) then
                 return caster._autoCastPugnaSoulFlame
             end
+        end
 
+        if(ability == caster._autoCastPugnaChaosBlast) then
             -- If ignire refreshed spam it because dot stacks?
             if(isPugnaIgniteReadyForAutoCast) then
                 return caster._autoCastPugnaIgnite
             end
-        end
 
-        if(ability == caster._autoCastPugnaChaosBlast) then
             if(isPugnaChaosBlastReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
                 return caster._autoCastPugnaChaosBlast
-            end
-
-            if(isPugnaIgniteReadyForAutoCast and target ~= nil and target:HasModifier("modifier_magmaburn2") == false) then
-                return caster._autoCastPugnaIgnite
             end
 
             if(isPugnaSoulFlameReadyForAutoCast) then
