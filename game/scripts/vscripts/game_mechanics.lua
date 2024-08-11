@@ -32288,7 +32288,7 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             caster._autoCastOracleHolyLight = caster:FindAbilityByName("holy1")
             DetermineAutoCastOrderForAbility(caster._autoCastOracleHolyLight)
         end
-        -- Should be Q E spam, but now it have issues
+        -- Should be Q E spam, but now it have issues (atm this thing can't support auto casting while walking)
         --[[
         if(caster._autoCastOracleDivineNova == nil) then
             caster._autoCastOracleDivineNova = caster:FindAbilityByName("holy3")
@@ -32296,10 +32296,10 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         end
         --]]
 
-        local isOracleHolyLightReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastOracleHolyLight)
         --local isOracleDivineNovaReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastOracleDivineNova)
 
         if(ability == caster._autoCastOracleHolyLight) then -- or ability == caster._autoCastOracleDivineNova) then
+            local isOracleHolyLightReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastOracleHolyLight)
             --[[
             if(isOracleDivineNovaReadyForAutocast) then
                 return caster._autoCastOracleDivineNova
@@ -32307,6 +32307,64 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             --]]
             if(isOracleHolyLightReadyForAutocast) then
                 return caster._autoCastOracleHolyLight
+            end
+        end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
+    -- TODO: Nature's Phophet not supported for same reasons as oracle (atm this thing can't support auto casting while walking)
+    -- WD: Q spam
+    if(casterName == "npc_dota_hero_witch_doctor") then
+        if(caster._autoCastWDHealingWave == nil) then
+            caster._autoCastWDHealingWave = caster:FindAbilityByName("resto1")
+            DetermineAutoCastOrderForAbility(caster._autoCastWDHealingWave)
+        end
+
+        if(ability == caster._autoCastWDHealingWave) then
+            local isWDHealingWaveReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastWDHealingWave)
+
+            if(isWDHealingWaveReadyForAutocast) then
+                return caster._autoCastWDHealingWave
+            end
+        end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
+    -- Silencer: Q spam. Should be Q E, but alt cast...
+    if(casterName == "npc_dota_hero_silencer") then
+        if(caster._autoCastSilencerLightOfHeaven == nil) then
+            caster._autoCastSilencerLightOfHeaven = caster:FindAbilityByName("Light_of_Heaven")
+            DetermineAutoCastOrderForAbility(caster._autoCastSilencerLightOfHeaven)
+        end
+
+        if(ability == caster._autoCastSilencerLightOfHeaven) then
+            local isSilencerLightOfHeavenReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastSilencerLightOfHeaven)
+
+            if(isSilencerLightOfHeavenReadyForAutocast) then
+                return caster._autoCastSilencerLightOfHeaven
+            end
+        end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
+    -- Ench: Q Spam. Is somebody will even notice this change?
+    if(casterName == "npc_dota_hero_enchantress") then
+        if(caster._autoCastEnchCripplingSpear == nil) then
+            caster._autoCastEnchCripplingSpear = caster:FindAbilityByName("ench1")
+            DetermineAutoCastOrderForAbility(caster._autoCastEnchCripplingSpear)
+        end
+
+        if(ability == caster._autoCastEnchCripplingSpear) then
+            local isEnchCripplingSpearReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastEnchCripplingSpear)
+
+            if(isEnchCripplingSpearReadyForAutocast) then
+                return caster._autoCastEnchCripplingSpear
             end
         end
 

@@ -1,6 +1,6 @@
 modifier_hero_lua_events = class({
     IsHidden = function()
-        return false
+        return true
     end,
     IsPurgable = function()
         return false
