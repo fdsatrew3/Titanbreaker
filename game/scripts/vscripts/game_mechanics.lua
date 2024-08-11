@@ -32372,6 +32372,41 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         return nil
     end
 
+    -- Sniper: Q Spam. W and E sometimes for buffs
+    if(casterName == "npc_dota_hero_sniper") then
+        if(caster._autoCastSniperQ == nil) then
+            caster._autoCastSniperQ = caster:FindAbilityByName("beast1")
+            DetermineAutoCastOrderForAbility(caster._autoCastSniperQ)
+        end
+        if(caster._autoCastSniperW == nil) then
+            caster._autoCastSniperW = caster:FindAbilityByName("Hunter_Assassinate")
+            DetermineAutoCastOrderForAbility(caster._autoCastSniperW)
+        end
+        if(caster._autoCastSniperE == nil) then
+            caster._autoCastSniperE = caster:FindAbilityByName("Snipe")
+            DetermineAutoCastOrderForAbility(caster._autoCastSniperE)
+        end
+
+        if(ability == caster._autoCastSniperQ or ability == caster._autoCastSniperW or ability == caster._autoCastSniperE) then
+            local isSniperQReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastSniperQ)
+            local isSniperWReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastSniperW)
+            local isSniperEReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastSniperE)
+
+            if(caster:GetModifierStackCount("modifier_abil_bonus_5_percent", nil) < 5 and isSniperWReadyForAutocast) then
+                return caster._autoCastSniperW
+            end
+            if(caster:HasModifier("modifier_companion") == false and isSniperEReadyForAutocast) then
+                return caster._autoCastSniperE
+            end
+            if(isSniperQReadyForAutocast) then
+                return caster._autoCastSniperQ
+            end
+        end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
     return nil
 end
 
