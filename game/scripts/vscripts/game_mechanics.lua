@@ -831,8 +831,9 @@ function DamageUnit( event )
     	caster:SetModifierStackCount("modifier_souls", event.ability, caster.souls)
     end]]
     -- consume
-    --[[
+
     local nodamageatall = 1
+    --[[
     if event.consumesouls ~= nil then
     	if caster.souls == nil then
     		caster.souls = 0
@@ -32042,41 +32043,11 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             DetermineAutoCastOrderForAbility(caster._autoCastPugnaChaosBlast)
         end
 
-        local isPugnaSoulFlameReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaSoulFlame)
-        local isPugnaIgniteReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaIgnite)
-        local isPugnaChaosBlastReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaChaosBlast)
+        if(ability == caster._autoCastPugnaSoulFlame or ability == caster._autoCastPugnaIgnite or ability == caster._autoCastPugnaChaosBlast) then
+            local isPugnaSoulFlameReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaSoulFlame)
+            local isPugnaIgniteReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaIgnite)
+            local isPugnaChaosBlastReadyForAutoCast = IsAbilityReadyForAutoCast(caster._autoCastPugnaChaosBlast)
 
-        if(ability == caster._autoCastPugnaSoulFlame) then
-            -- If ignire refreshed spam it because dot stacks?
-            if(isPugnaIgniteReadyForAutoCast) then
-                return caster._autoCastPugnaIgnite
-            end
-
-            if(isPugnaChaosBlastReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
-                return caster._autoCastPugnaChaosBlast
-            end
-
-            if(isPugnaSoulFlameReadyForAutoCast) then
-                return caster._autoCastPugnaSoulFlame
-            end
-        end
-
-        if(ability == caster._autoCastPugnaIgnite) then
-            -- If ignire refreshed spam it because dot stacks?
-            if(isPugnaIgniteReadyForAutoCast) then
-                return caster._autoCastPugnaIgnite
-            end
-
-            if(isPugnaChaosBlastReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
-                return caster._autoCastPugnaChaosBlast
-            end
-
-            if(isPugnaSoulFlameReadyForAutoCast) then
-                return caster._autoCastPugnaSoulFlame
-            end
-        end
-
-        if(ability == caster._autoCastPugnaChaosBlast) then
             -- If ignire refreshed spam it because dot stacks?
             if(isPugnaIgniteReadyForAutoCast) then
                 return caster._autoCastPugnaIgnite
@@ -32236,6 +32207,59 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             end
         end
         
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
+    -- Dark Seer: Q spam, W spam, D spam or Q D spam
+    if(casterName == "npc_dota_hero_dark_seer") then
+        if(caster._autoCastMindstorm == nil) then
+            caster._autoCastMindstorm = caster:FindAbilityByName("shadow1")
+            DetermineAutoCastOrderForAbility(caster._autoCastMindstorm)
+        end
+        if(caster._autoCastMindshatter == nil) then
+            caster._autoCastMindshatter = caster:FindAbilityByName("shadow11")
+            DetermineAutoCastOrderForAbility(caster._autoCastMindshatter)
+        end
+        if(caster._autoCastDreamFeast == nil) then
+            caster._autoCastDreamFeast = caster:FindAbilityByName("shadow3")
+            DetermineAutoCastOrderForAbility(caster._autoCastDreamFeast)
+        end
+
+        local isDarkSeerMindstormReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastMindstorm)
+        local isDarkSeerMindshatterReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastMindshatter)
+        local isDarkSeerDreamFeastReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastDreamFeast)
+
+        if(ability == caster._autoCastMindstorm) then
+            if(isDarkSeerDreamFeastReadyForAutocast) then
+                return caster._autoCastDreamFeast
+            end
+            if(isDarkSeerMindstormReadyForAutocast) then
+                return caster._autoCastMindstorm
+            end
+        end
+
+        if(ability == caster._autoCastMindshatter) then
+            if(isDarkSeerDreamFeastReadyForAutocast) then
+                return caster._autoCastDreamFeast
+            end
+            if(isDarkSeerMindshatterReadyForAutocast) then
+                return caster._autoCastMindshatter
+            end
+        end
+
+        if(ability == caster._autoCastDreamFeast) then
+            if(isDarkSeerDreamFeastReadyForAutocast) then
+                return caster._autoCastDreamFeast
+            end
+            if(isDarkSeerMindshatterReadyForAutocast) then
+                return caster._autoCastMindshatter
+            end
+            if(isDarkSeerMindstormReadyForAutocast) then
+                return caster._autoCastMindstorm
+            end
+        end
+
         -- Returns nil to prevent rest calculations of rest conditions that will be always false
         return nil
     end
