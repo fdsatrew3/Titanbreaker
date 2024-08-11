@@ -32372,7 +32372,7 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         return nil
     end
 
-    -- Sniper: Q Spam. W and E sometimes for buffs
+    -- Sniper: Q Spam, W spam. W and E sometimes for buffs
     if(casterName == "npc_dota_hero_sniper") then
         if(caster._autoCastSniperQ == nil) then
             caster._autoCastSniperQ = caster:FindAbilityByName("beast1")
@@ -32391,9 +32391,23 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             local isSniperQReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastSniperQ)
             local isSniperWReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastSniperW)
             local isSniperEReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastSniperE)
-
-            if(caster:GetModifierStackCount("modifier_abil_bonus_5_percent", nil) < 5 and isSniperWReadyForAutocast) then
-                return caster._autoCastSniperW
+            local isOnlyWReadyForAutoCast = isSniperWReadyForAutocast and isSniperQReadyForAutocast == false and isSniperEReadyForAutocast == false
+            if(isOnlyWReadyForAutoCast or isSniperWReadyForAutocast) then
+                local sniperWbuff = caster:FindModifierByName("modifier_abil_bonus_5_percent")
+                local sniperWstacks = sniperWbuff and sniperWbuff:GetStackCount() or 0
+                if(sniperWbuff) then
+                    -- Stack till max stacks
+                    if(sniperWbuff:GetStackCount() < 5) then
+                        return caster._autoCastSniperW
+                    else
+                        -- Refresh if it will soon expire
+                        if(sniperWbuff:GetElapsedTime() > sniperWbuff:GetDuration() / 2) then
+                            return caster._autoCastSniperW
+                        end
+                    end
+                else
+                    return caster._autoCastSniperW
+                end
             end
             if(caster:HasModifier("modifier_companion") == false and isSniperEReadyForAutocast) then
                 return caster._autoCastSniperE
