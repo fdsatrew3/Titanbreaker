@@ -9512,13 +9512,6 @@ function FatalThrowHit(event)
 		--myevent.dur = caster.FatalThrowCP*event.silence
 		--ApplyBuff(myevent)
 
-        -- This was intentionally made to don't care if spell was interrupted or no
-        if(caster:HasModifier("modifier_fatal_throw_inner_cd") == false and event.ability:IsAltCasted()) then
-            SpellInterrupt({caster = caster, target = target, dur = event.ability:GetSpecialValueFor("silence_duration"), ability = event.ability})
-            local innerCd = event.ability:GetSpecialValueFor("silence_inner_cd") * GetInnerCooldownFactor(caster)
-            event.ability:ApplyDataDrivenModifier(caster, caster, "modifier_fatal_throw_inner_cd", { duration = innerCd})
-        end
-
         if caster.fatalThrowBonus and caster.fatalThrowBonus >= 1 then
             event.fatalThrowBonus = 1
         end
@@ -9541,6 +9534,18 @@ function FatalThrowHit(event)
             ChainProjectile( caster, target, event.ability, 1, "particles/units/heroes/hero_phantom_assassin/phantom_assassin_stifling_dagger.vpcf", {target}, "Hero_PhantomAssassin.Dagger.Cast", 0.25, 600 )
         end
 	end
+end
+
+function DaggerStrikeHit(event)
+	local caster = event.caster
+	local target = event.target
+
+    -- This was intentionally made to don't care if spell was interrupted or no
+    if(caster:HasModifier("modifier_dagger_strike_inner_cd") == false and event.ability:IsAltCasted()) then
+        SpellInterrupt({caster = caster, target = target, dur = event.ability:GetSpecialValueFor("silence_duration"), ability = event.ability})
+        local innerCd = event.ability:GetSpecialValueFor("silence_inner_cd") * GetInnerCooldownFactor(caster)
+        event.ability:ApplyDataDrivenModifier(caster, caster, "modifier_dagger_strike_inner_cd", { duration = innerCd})
+    end
 end
 
 function SacredSpearHit(event)
@@ -31892,6 +31897,8 @@ function COverthrowGameMode:_CheckAbilityAutoCast(caster, ability, target)
         return
     end
 
+    print("abilityToAutoCast", abilityToAutoCast:GetAbilityName())
+
     local autoCastOrder = GetAutoCastOrderForAbility(abilityToAutoCast)
 
     -- Unsupported behavior or something wrong, too bad
@@ -32417,6 +32424,41 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
             end
         end
 
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
+    -- PA: D E spam
+    if(casterName == "npc_dota_hero_phantom_assassin") then
+        if(caster._autoCastPhantomAssasinE == nil) then
+            caster._autoCastPhantomAssasinE = caster:FindAbilityByName("Fatal_Throw")
+            DetermineAutoCastOrderForAbility(caster._autoCastPhantomAssasinE)
+        end
+        if(caster._autoCastPhantomAssasinD == nil) then
+            caster._autoCastPhantomAssasinD = caster:FindAbilityByName("Ambush")
+            DetermineAutoCastOrderForAbility(caster._autoCastPhantomAssasinD)
+        end
+
+        local isPhantomAssassinEReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastPhantomAssasinE)
+        local isPhantomAssassinDReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastPhantomAssasinD)
+
+        if(ability == caster._autoCastPhantomAssasinE) then
+            print("Casted e")
+            if(isPhantomAssassinDReadyForAutocast) then
+                print("Return D")
+                return caster._autoCastPhantomAssasinD
+            end
+        end
+
+        if(ability == caster._autoCastPhantomAssasinD) then
+            print("Casted D")
+            if(isPhantomAssassinEReadyForAutocast) then
+                print(" return E")
+                return caster._autoCastPhantomAssasinE
+            end
+        end
+
+        print("Return nothing")
         -- Returns nil to prevent rest calculations of rest conditions that will be always false
         return nil
     end

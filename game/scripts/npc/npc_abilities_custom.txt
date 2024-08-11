@@ -52571,7 +52571,7 @@
 	{
 		"BaseClass"	"ability_datadriven"
 		"AbilityTextureName"	"fix/cruel_shadowstalker_fatal_throw"
-		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_ALT_CASTABLE"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_AUTOCAST"
 		"AbilityUnitTargetTeam"	"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"AbilityUnitTargetType"	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
 		"AbilityUnitDamageType"	"DAMAGE_TYPE_PHYSICAL"
@@ -52656,14 +52656,6 @@
 					"MODIFIER_PROPERTY_MOVESPEED_BONUS_PERCENTAGE"	"-50"
 				}
 			}
-			"modifier_fatal_throw_inner_cd"
-			{
-				"Passive"	"0"
-				"IsBuff"	"0"
-				"IsDebuff"	"1"
-				"IsHidden"	"0"
-				"IsPurgable"	"0"
-			}
 		}
 		"AbilityValues"
 		{
@@ -52671,8 +52663,6 @@
 			"auto"	"300 350 350 350"
 			"slowdur"	"1.5 1.5 3 3"
 			"pure"	"0 0 25 25"
-			"silence_duration"	"0.5"
-			"silence_inner_cd"	"5"
 		}
 	}
 	"Numbing_Cut"
@@ -52777,7 +52767,7 @@
 	{
 		"BaseClass"	"ability_datadriven"
 		"AbilityTextureName"	"fix/strike6"
-		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_AUTOCAST"
 		"AbilityUnitTargetTeam"	"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"AbilityUnitTargetType"	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
 		"AbilityUnitDamageType"	"DAMAGE_TYPE_PHYSICAL"
@@ -52919,8 +52909,8 @@
 	"Dagger_Strike"
 	{
 		"BaseClass"	"ability_datadriven"
-		"AbilityTextureName"	"queenofpain_shadow_strike"
-		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_IMMEDIATE"
+		"AbilityTextureName"	"fix/cruel_shadowstalker_dagger_strike"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_UNIT_TARGET | DOTA_ABILITY_BEHAVIOR_IMMEDIATE | DOTA_ABILITY_BEHAVIOR_ALT_CASTABLE"
 		"AbilityUnitTargetTeam"	"DOTA_UNIT_TARGET_TEAM_ENEMY"
 		"AbilityUnitTargetType"	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
 		"AbilityUnitDamageType"	"DAMAGE_TYPE_PHYSICAL"
@@ -52945,6 +52935,11 @@
 			{
 				"Target"	"CASTER"
 				"ModifierName"	"modifier_combopoint"
+			}
+			"RunScript"
+			{
+				"ScriptFile"	"game_mechanics.lua"
+				"Function"	"DaggerStrikeHit"
 			}
 			"RunScript"
 			{
@@ -53069,12 +53064,22 @@
 					}
 				}
 			}
+			"modifier_dagger_strike_inner_cd"
+			{
+				"Passive"	"0"
+				"IsBuff"	"0"
+				"IsDebuff"	"1"
+				"IsHidden"	"0"
+				"IsPurgable"	"0"
+			}
 		}
 		"AbilityValues"
 		{
 			"dmgfromstat"	"125 150 150 150"
 			"critchance"	"1 1 1.25 1.25"
 			"poisondur"	"0 0 0 20"
+			"silence_duration"	"0.5"
+			"silence_inner_cd"	"5"
 		}
 	}
 	"Holy_Judgement"
