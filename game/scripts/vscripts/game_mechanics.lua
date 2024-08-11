@@ -831,7 +831,7 @@ function DamageUnit( event )
     	caster:SetModifierStackCount("modifier_souls", event.ability, caster.souls)
     end]]
     -- consume
-    -- TODO: Replace that with ConsumeSouls(event) to prevent copy paste?
+    --[[
     local nodamageatall = 1
     if event.consumesouls ~= nil then
     	if caster.souls == nil then
@@ -850,6 +850,7 @@ function DamageUnit( event )
             end
         end
     end
+    --]]
 
     -- add auto attack damage?
 	if damage_scaling > 0 then
@@ -31819,7 +31820,10 @@ function COverthrowGameMode:CheckAbilityAutoCast(hero, ability, target)
 
     local tickRate = 0.05
 
-    hero._lastAutoCastTarget = target
+    if(target ~= nil) then
+        hero._lastAutoCastTarget = target
+    end
+    
     hero._autoCastInternalTimer = Timers:CreateTimer(0, function()
         local status, errorMessage = pcall(function ()
             for i=0, COverthrowGameMode.heroAbilityCount do
@@ -31918,7 +31922,7 @@ function COverthrowGameMode:_CheckAbilityAutoCast(caster, ability, target)
     if(autoCastOrder == DOTA_UNIT_ORDER_CAST_POSITION) then
         local position = abilityToAutoCast:GetCursorPosition()
         -- Hopefully this will be enough to detect default(Vector) == ability never casted
-        if(math.abs(position.x + position.y) < 0.01) then
+        if(math.abs(position.x) + math.abs(position.y) < 0.01) then
             if(target ~= nil) then
                 position = target:GetAbsOrigin()
             else
