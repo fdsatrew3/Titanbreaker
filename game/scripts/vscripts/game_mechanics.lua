@@ -32264,6 +32264,24 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         return nil
     end
 
+    -- Omni: Q spam
+    if(casterName == "npc_dota_hero_omniknight") then
+        if(caster._autoCastDivineLight == nil) then
+            caster._autoCastDivineLight = caster:FindAbilityByName("Divine_Light")
+            DetermineAutoCastOrderForAbility(caster._autoCastDivineLight)
+        end
+
+        if(ability == caster._autoCastDivineLight) then
+            local isOmniDivineLightReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastDivineLight)
+            if(isOmniDivineLightReadyForAutocast) then
+                return caster._autoCastDivineLight
+            end
+        end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
     return nil
 end
 
