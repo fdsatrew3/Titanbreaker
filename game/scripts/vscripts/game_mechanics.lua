@@ -32282,6 +32282,38 @@ function COverthrowGameMode:GetNextAbilityForAutoCast(caster, ability, target)
         return nil
     end
 
+    -- Oracle: Q spam
+    if(casterName == "npc_dota_hero_oracle") then
+        if(caster._autoCastOracleHolyLight == nil) then
+            caster._autoCastOracleHolyLight = caster:FindAbilityByName("holy1")
+            DetermineAutoCastOrderForAbility(caster._autoCastOracleHolyLight)
+        end
+        -- Should be Q E spam, but now it have issues
+        --[[
+        if(caster._autoCastOracleDivineNova == nil) then
+            caster._autoCastOracleDivineNova = caster:FindAbilityByName("holy3")
+            DetermineAutoCastOrderForAbility(caster._autoCastOracleDivineNova)
+        end
+        --]]
+
+        local isOracleHolyLightReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastOracleHolyLight)
+        --local isOracleDivineNovaReadyForAutocast = IsAbilityReadyForAutoCast(caster._autoCastOracleDivineNova)
+
+        if(ability == caster._autoCastOracleHolyLight) then -- or ability == caster._autoCastOracleDivineNova) then
+            --[[
+            if(isOracleDivineNovaReadyForAutocast) then
+                return caster._autoCastOracleDivineNova
+            end 
+            --]]
+            if(isOracleHolyLightReadyForAutocast) then
+                return caster._autoCastOracleHolyLight
+            end
+        end
+
+        -- Returns nil to prevent rest calculations of rest conditions that will be always false
+        return nil
+    end
+
     return nil
 end
 
