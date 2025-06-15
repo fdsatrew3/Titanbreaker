@@ -7,6 +7,7 @@ end
 function item_neutral_base_custom:GetActiveNeutralItemName()
     local activeNeutralItemName = self:GetAbilityName():gsub("item_neutral", "item_neutral_active")
     print(activeNeutralItemName)
+    self:GetCaster():AddItemByName(activeNeutralItemName)
 end
 
 for i=1,40 do 
