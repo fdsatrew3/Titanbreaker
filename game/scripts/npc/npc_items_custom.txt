@@ -54,8 +54,8 @@
 	}
 	"item_neutral_1"
 	{
-		"ID"	"9001"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_seer_stone"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -76,8 +76,8 @@
 	}
 	"item_neutral_2"
 	{
-		"ID"	"9002"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_phoenix_ash"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -98,8 +98,8 @@
 	}
 	"item_neutral_3"
 	{
-		"ID"	"9003"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_helm_of_the_undying"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -120,8 +120,8 @@
 	}
 	"item_neutral_4"
 	{
-		"ID"	"9004"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_tome_of_aghanim"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -142,8 +142,8 @@
 	}
 	"item_neutral_5"
 	{
-		"ID"	"9005"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_apex"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -164,8 +164,8 @@
 	}
 	"item_neutral_6"
 	{
-		"ID"	"9006"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_third_eye"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -186,8 +186,8 @@
 	}
 	"item_neutral_7"
 	{
-		"ID"	"9007"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_ballista"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -208,8 +208,8 @@
 	}
 	"item_neutral_8"
 	{
-		"ID"	"9008"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_havoc_hammer"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -230,8 +230,8 @@
 	}
 	"item_neutral_9"
 	{
-		"ID"	"9009"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_enchanted_quiver"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -252,8 +252,8 @@
 	}
 	"item_neutral_10"
 	{
-		"ID"	"9010"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_greater_faerie_fire"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -274,8 +274,8 @@
 	}
 	"item_neutral_11"
 	{
-		"ID"	"9011"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_essence_ring"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -296,8 +296,8 @@
 	}
 	"item_neutral_12"
 	{
-		"ID"	"9012"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_paladin_sword"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -318,8 +318,8 @@
 	}
 	"item_neutral_13"
 	{
-		"ID"	"9013"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_quickening_charm"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -340,8 +340,8 @@
 	}
 	"item_neutral_14"
 	{
-		"ID"	"9014"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_mirror_shield"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -362,8 +362,8 @@
 	}
 	"item_neutral_15"
 	{
-		"ID"	"9015"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_minotaur_horn"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -397,8 +397,8 @@
 	}
 	"item_neutral_16"
 	{
-		"ID"	"9016"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_timeless_relic"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -434,8 +434,8 @@
 	}
 	"item_neutral_17"
 	{
-		"ID"	"9017"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_vampire_fangs"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -456,8 +456,8 @@
 	}
 	"item_neutral_18"
 	{
-		"ID"	"9018"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_craggy_coat"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -491,8 +491,8 @@
 	}
 	"item_neutral_19"
 	{
-		"ID"	"9019"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_flicker"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -513,8 +513,8 @@
 	}
 	"item_neutral_20"
 	{
-		"ID"	"9020"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_spy_gadget"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -535,8 +535,8 @@
 	}
 	"item_neutral_21"
 	{
-		"ID"	"9021"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_the_leveller"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -570,8 +570,8 @@
 	}
 	"item_neutral_22"
 	{
-		"ID"	"9022"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_desolator_2"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -592,8 +592,8 @@
 	}
 	"item_neutral_23"
 	{
-		"ID"	"9023"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_dragon_scale"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -627,8 +627,8 @@
 	}
 	"item_neutral_24"
 	{
-		"ID"	"9024"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_woodland_striders"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -662,8 +662,8 @@
 	}
 	"item_neutral_25"
 	{
-		"ID"	"9025"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_illusionsts_cape"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -684,8 +684,8 @@
 	}
 	"item_neutral_26"
 	{
-		"ID"	"9026"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_demonicon"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -721,8 +721,8 @@
 	}
 	"item_neutral_27"
 	{
-		"ID"	"9027"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_princes_knife"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -743,8 +743,8 @@
 	}
 	"item_neutral_28"
 	{
-		"ID"	"9028"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_orb_of_destruction"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -765,8 +765,8 @@
 	}
 	"item_neutral_29"
 	{
-		"ID"	"9029"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_fallen_sky"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -787,8 +787,8 @@
 	}
 	"item_neutral_30"
 	{
-		"ID"	"9030"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_mind_breaker"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -809,8 +809,8 @@
 	}
 	"item_neutral_31"
 	{
-		"ID"	"9031"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_trident"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -831,8 +831,8 @@
 	}
 	"item_neutral_32"
 	{
-		"ID"	"9032"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_philosophers_stone"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -853,8 +853,8 @@
 	}
 	"item_neutral_33"
 	{
-		"ID"	"9033"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_ocean_heart"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -889,8 +889,8 @@
 	}
 	"item_neutral_34"
 	{
-		"ID"	"9034"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_grove_bow"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -926,8 +926,8 @@
 	}
 	"item_neutral_35"
 	{
-		"ID"	"9035"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_imp_claw"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -963,8 +963,8 @@
 	}
 	"item_neutral_36"
 	{
-		"ID"	"9036"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_ninja_gear"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -1000,8 +1000,8 @@
 	}
 	"item_neutral_37"
 	{
-		"ID"	"9037"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_force_boots"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -1037,8 +1037,8 @@
 	}
 	"item_neutral_38"
 	{
-		"ID"	"9038"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_arcane_ring"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -1059,8 +1059,8 @@
 	}
 	"item_neutral_39"
 	{
-		"ID"	"9039"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_faded_broach"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
@@ -1081,8 +1081,8 @@
 	}
 	"item_neutral_40"
 	{
-		"ID"	"9040"
-		"BaseClass"	"item_datadriven"
+		"BaseClass"	"ability_lua"
+		"ScriptFile"	"items/item_neutral"
 		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
 		"AbilityTextureName"	"item_trusty_shovel"
 		"Model"	"models/props_gameplay/neutral_box.vmdl"
