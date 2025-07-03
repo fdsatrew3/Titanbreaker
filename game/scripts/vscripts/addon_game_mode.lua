@@ -2763,6 +2763,8 @@ function COverthrowGameMode:OnPlayerConnected(params)
     COverthrowGameMode:SendHeroStatsInfo(player, playerId)
     -- Restore auto sell stash
     COverthrowGameMode:SendAutoSoldStashItems(player, playerId)
+    -- Generates rune words list + values for them on next hero stats recalc
+    COverthrowGameMode:SetRuneWordsListRequired(playerId, true)
 
     -- Allows next reconnect requests spam
     COverthrowGameMode._ignoreReconnectRequestsFromPlayer[playerId] = nil
@@ -20690,6 +20692,71 @@ function COverthrowGameMode:PingHeroLevel(params)
   Timers:CreateTimer(2, function()
     COverthrowGameMode._pingHeroLevelCd[playerId] = nil
   end)
+end
+
+function COverthrowGameMode:SetRuneWordsListRequired(playerId, state)
+  _G._isRuneWordsListRequired = _G._isRuneWordsListRequired or {}
+  
+  if(state == true) then
+    _G._isRuneWordsListRequired[playerId] = true
+    return
+  end
+  
+  _G._isRuneWordsListRequired[playerId] = nil
+end
+
+function COverthrowGameMode:IsRuneWordsListRequired(playerId)
+  if(_G._isRuneWordsListRequired == nil or _G._isRuneWordsListRequired[playerId] == nil) then
+    return false
+  end
+  return true
+end
+
+function COverthrowGameMode:SendRuneWordsList(playerId)
+  local hero = PlayerResource:GetSelectedHeroEntity(playerId)
+  if(hero == nil) then
+    return
+  end
+
+  if(hero.runeword == nil) then
+    return
+  end
+
+  local player = PlayerResource:GetPlayer(playerId)
+  -- Disconnected player or broken request
+  if(player == nil) then
+    return
+  end
+
+  local runePowersToCheck = {}
+  local assumedMaxValue = GetAssumedMaxRuneWordValue()
+  -- 11 possible rune words values with assumedMaxValue = 75 (step = 9)
+  for i=3, assumedMaxValue, 9 do
+    if(i % 3 == 0) then
+      table.insert(runePowersToCheck, i);
+    end
+  end
+
+  local result = {}
+  for k, _ in pairs(hero.runeword) do
+    result[k] = {}
+
+    local previousRuneWordValue = -1000
+    for _, runePower in ipairs(runePowersToCheck) do
+      local eachRunePower = math.floor((runePower / 3)+0.5)
+      local newRuneWordValue = GetRuneWordValue(k, eachRunePower, eachRunePower, eachRunePower)
+      if(newRuneWordValue > previousRuneWordValue) then
+        result[k][runePower] = newRuneWordValue
+        previousRuneWordValue = newRuneWordValue
+      end
+    end
+
+    local eachRunePower = math.floor((assumedMaxValue / 3)+0.5)
+    -- Calc last value anyway
+    result[k][assumedMaxValue] = GetRuneWordValue(k, eachRunePower, eachRunePower, eachRunePower)
+  end
+
+  CustomGameEventManager:Send_ServerToPlayer(player, "setrunewordslist", result)
 end
 
 function SetupFlurryAbility(hero, heroName)

@@ -20186,11 +20186,79 @@ function TalentArmorMinus(event)
     end
 end
 
-function GetRuneWordValue(rune1, rune2, rune3, weight)
+function GetAssumedMaxRuneWordValue()
+    return 75 --pre ancient, now rather 75+, 350 abil4dmg is possible
+end
+
+function GetRuneWordValueWeight(index)
+    -- Cache table if its calculated once
+    if(_G._GetRuneWordValueWeight == nil) then
+        _G._GetRuneWordValueWeight = {
+            [1] =  500,
+            [2] =  500,
+            [3] =  50,
+            [4] =  50,
+            [5] =  500,
+            [6] =  1000,
+            [7] =  750,
+            [8] =  6,
+            [9] =  4,
+            [10] = 6,
+            [11] = 5,
+            [12] = 7,
+            [13] = 4,
+            [14] = 5,
+            [15] = 5,
+            [16] = 350,
+            [17] = 6,
+            [18] = 25,
+            [19] = 20,
+            [20] = 4,
+            [21] = 5,
+            [22] = 4,
+            [23] = 5,
+            [24] = 7,
+            [25] = 60,
+            [26] = 5,
+            [27] = 20,                
+            [28] =  5,
+            [29] =  3,
+            [30] =  4,
+            [31] = 6,
+            [32] = 5,
+            [33] = 5,
+            [34] = 6,
+            [35] = 3,
+            [36] = 4,                
+            [37] =  3,
+            [38] =  3,
+            [39] =  3,
+            [40] =  3,
+            [41] = 3,
+            [42] = 3,
+            [43] = 3,
+            [44] = 3,
+            [45] = 3,
+            [46] = 3,
+            [47] = 3,
+            [48] = 3
+        }
+
+        for k, v in pairs(_G._GetRuneWordValueWeight) do
+            _G._GetRuneWordValueWeight[k] = v / GetAssumedMaxRuneWordValue()
+        end
+    end
+
+    -- Default value is 0
+    return _G._GetRuneWordValueWeight[index] or 0
+end
+
+function GetRuneWordValue(index, rune1, rune2, rune3)
     if rune1 < 1 or rune2 < 1 or rune3 < 1 then
         return 0
     end
-    local number = (rune1 + rune2 + rune3) * weight
+
+    local number = (rune1 + rune2 + rune3) * GetRuneWordValueWeight(index)
 
     if number <= 0 then
         return 0
@@ -20198,6 +20266,11 @@ function GetRuneWordValue(rune1, rune2, rune3, weight)
     if number < 1.0 then
         return 1
     end
+    -- Spell resistance runeword cap
+    if index == 4 and number > 50 then
+        return 50
+    end
+
     return math.floor(number + 0.5)
 end
 
@@ -21194,63 +21267,60 @@ function PassiveStatCalculation(event)
     --nah = 10
     --kil = 10
 
-    local assumed_max_runeword_value = 75 --pre ancient, now rather 75+, 350 abil4dmg is possible
+    -- If you even change how runewords defined in code adjust panorama SendRuneWordsList too
     if not hero.runeword then
         hero.runeword = {}
     end
-    hero.runeword[1] = GetRuneWordValue(  loo , nah , time, 500 / assumed_max_runeword_value )
-    hero.runeword[2] = GetRuneWordValue(  wii , ser , time, 500/ assumed_max_runeword_value )
-    hero.runeword[3] = GetRuneWordValue(  wii , tal , time, 50/ assumed_max_runeword_value )
-    hero.runeword[4] = GetRuneWordValue(  wii , tal , tic, 50/ assumed_max_runeword_value )
-    if hero.runeword[4] > 50 then
-        hero.runeword[4] = 50
-    end
-    hero.runeword[5] = GetRuneWordValue(  fah , tal , time, 500 / assumed_max_runeword_value )
-    hero.runeword[6] = GetRuneWordValue(  fah , nah , tic, 1000 / assumed_max_runeword_value )
-    hero.runeword[7] = GetRuneWordValue(  fah , ser , time, 750 / assumed_max_runeword_value )
-    hero.runeword[8] = GetRuneWordValue(  fah , tal , kil, 6 / assumed_max_runeword_value )
-    hero.runeword[9] = GetRuneWordValue(  loo , nah , kil, 4 / assumed_max_runeword_value )
-    hero.runeword[10] = GetRuneWordValue(  wii , nah , kil, 6 / assumed_max_runeword_value )
-    hero.runeword[11] = GetRuneWordValue(  loo , ser , time, 5 / assumed_max_runeword_value )
-    hero.runeword[12] = GetRuneWordValue(  fah , tal , tic, 7 / assumed_max_runeword_value )
-    hero.runeword[13] = GetRuneWordValue(  wii , ser , tic, 4 / assumed_max_runeword_value )
-    hero.runeword[14] = GetRuneWordValue(  loo , nah , tic, 5 / assumed_max_runeword_value )
-    hero.runeword[15] = GetRuneWordValue(  wii , tal , kil, 5 / assumed_max_runeword_value )
-    hero.runeword[16] = GetRuneWordValue(  loo , tal , time, 350 / assumed_max_runeword_value )
-    hero.runeword[17] = GetRuneWordValue(  wii , nah , tic, 6 / assumed_max_runeword_value )
-    hero.runeword[18] = GetRuneWordValue(  loo , tal , tic, 25 / assumed_max_runeword_value )
-    hero.runeword[19] = GetRuneWordValue(  wii , ser , kil, 20 / assumed_max_runeword_value )
-    hero.runeword[20] = GetRuneWordValue(  fah , ser , kil, 4 / assumed_max_runeword_value )
-    hero.runeword[21] = GetRuneWordValue(  fah , ser , tic, 5 / assumed_max_runeword_value )
-    hero.runeword[22] = GetRuneWordValue(  fah , nah , time, 4 / assumed_max_runeword_value )
-    hero.runeword[23] = GetRuneWordValue(  wii , nah , time, 5 / assumed_max_runeword_value )
-    hero.runeword[24] = GetRuneWordValue(  fah , nah , kil, 7 / assumed_max_runeword_value )
-    hero.runeword[25] = GetRuneWordValue(  loo , tal , kil, 60 / assumed_max_runeword_value )
-    hero.runeword[26] = GetRuneWordValue(  loo , ser , tic, 5 / assumed_max_runeword_value )
-    hero.runeword[27] = GetRuneWordValue(  loo , ser , kil, 20 / assumed_max_runeword_value )
+    hero.runeword[1] = GetRuneWordValue(1,  loo , nah , time)
+    hero.runeword[2] = GetRuneWordValue(2,  wii , ser , time)
+    hero.runeword[3] = GetRuneWordValue(3,  wii , tal , time)
+    hero.runeword[4] = GetRuneWordValue(4,  wii , tal , tic)
+    hero.runeword[5] = GetRuneWordValue(5,  fah , tal , time)
+    hero.runeword[6] = GetRuneWordValue(6,  fah , nah , tic)
+    hero.runeword[7] = GetRuneWordValue(7,  fah , ser , time)
+    hero.runeword[8] = GetRuneWordValue(8,  fah , tal , kil)
+    hero.runeword[9] = GetRuneWordValue(9,  loo , nah , kil)
+    hero.runeword[10] = GetRuneWordValue(10, wii , nah , kil)
+    hero.runeword[11] = GetRuneWordValue(11, loo , ser , time)
+    hero.runeword[12] = GetRuneWordValue(12, fah , tal , tic)
+    hero.runeword[13] = GetRuneWordValue(13, wii , ser , tic)
+    hero.runeword[14] = GetRuneWordValue(14, loo , nah , tic)
+    hero.runeword[15] = GetRuneWordValue(15, wii , tal , kil)
+    hero.runeword[16] = GetRuneWordValue(16, loo , tal , time)
+    hero.runeword[17] = GetRuneWordValue(17, wii , nah , tic)
+    hero.runeword[18] = GetRuneWordValue(18, loo , tal , tic)
+    hero.runeword[19] = GetRuneWordValue(19, wii , ser , kil)
+    hero.runeword[20] = GetRuneWordValue(20, fah , ser , kil)
+    hero.runeword[21] = GetRuneWordValue(21, fah , ser , tic)
+    hero.runeword[22] = GetRuneWordValue(22, fah , nah , time)
+    hero.runeword[23] = GetRuneWordValue(23, wii , nah , time)
+    hero.runeword[24] = GetRuneWordValue(24, fah , nah , kil)
+    hero.runeword[25] = GetRuneWordValue(25, loo , tal , kil)
+    hero.runeword[26] = GetRuneWordValue(26, loo , ser , tic)
+    hero.runeword[27] = GetRuneWordValue(27, loo , ser , kil)
     --new
-    hero.runeword[28] = GetRuneWordValue(  wii , roh , time, 5 / assumed_max_runeword_value )
-    hero.runeword[29] = GetRuneWordValue(  fah , roh , time, 3 / assumed_max_runeword_value )
-    hero.runeword[30] = GetRuneWordValue(  loo , roh , time, 4 / assumed_max_runeword_value )
-    hero.runeword[31] = GetRuneWordValue(  wii , roh , kil, 6 / assumed_max_runeword_value )
-    hero.runeword[32] = GetRuneWordValue(  fah , roh , kil, 5 / assumed_max_runeword_value )
-    hero.runeword[33] = GetRuneWordValue(  loo , roh , kil, 5 / assumed_max_runeword_value )
-    hero.runeword[34] = GetRuneWordValue(  wii , roh , tic, 6 / assumed_max_runeword_value )
-    hero.runeword[35] = GetRuneWordValue(  fah , roh , tic, 3 / assumed_max_runeword_value )
-    hero.runeword[36] = GetRuneWordValue(  loo , roh , tic, 4 / assumed_max_runeword_value )
-
-    hero.runeword[37] = GetRuneWordValue(  sin , roh , time, 3 / assumed_max_runeword_value )
-    hero.runeword[38] = GetRuneWordValue(  sin , tal , time, 3 / assumed_max_runeword_value )
-    hero.runeword[39] = GetRuneWordValue(  sin , nah , time, 3 / assumed_max_runeword_value )
-    hero.runeword[40] = GetRuneWordValue(  sin , ser , time, 3 / assumed_max_runeword_value )
-    hero.runeword[41] = GetRuneWordValue(  sin , roh , kil, 3 / assumed_max_runeword_value )
-    hero.runeword[42] = GetRuneWordValue(  sin , tal , kil, 3 / assumed_max_runeword_value )
-    hero.runeword[43] = GetRuneWordValue(  sin , nah , kil, 3 / assumed_max_runeword_value )
-    hero.runeword[44] = GetRuneWordValue(  sin , ser , kil, 3 / assumed_max_runeword_value )
-    hero.runeword[45] = GetRuneWordValue(  sin , roh , tic, 3 / assumed_max_runeword_value )
-    hero.runeword[46] = GetRuneWordValue(  sin , tal , tic, 3 / assumed_max_runeword_value )
-    hero.runeword[47] = GetRuneWordValue(  sin , nah , tic, 3 / assumed_max_runeword_value )
-    hero.runeword[48] = GetRuneWordValue(  sin , ser , tic, 3 / assumed_max_runeword_value )
+    hero.runeword[28] = GetRuneWordValue(28,  wii , roh , time)
+    hero.runeword[29] = GetRuneWordValue(29,  fah , roh , time)
+    hero.runeword[30] = GetRuneWordValue(30,  loo , roh , time)
+    hero.runeword[31] = GetRuneWordValue(31,  wii , roh , kil)
+    hero.runeword[32] = GetRuneWordValue(32,  fah , roh , kil)
+    hero.runeword[33] = GetRuneWordValue(33,  loo , roh , kil)
+    hero.runeword[34] = GetRuneWordValue(34,  wii , roh , tic)
+    hero.runeword[35] = GetRuneWordValue(35,  fah , roh , tic)
+    hero.runeword[36] = GetRuneWordValue(36,  loo , roh , tic)
+										 
+    hero.runeword[37] = GetRuneWordValue(37,  sin , roh , time)
+    hero.runeword[38] = GetRuneWordValue(38,  sin , tal , time)
+    hero.runeword[39] = GetRuneWordValue(39,  sin , nah , time)
+    hero.runeword[40] = GetRuneWordValue(40,  sin , ser , time)
+    hero.runeword[41] = GetRuneWordValue(41,  sin , roh , kil)
+    hero.runeword[42] = GetRuneWordValue(42,  sin , tal , kil)
+    hero.runeword[43] = GetRuneWordValue(43,  sin , nah , kil)
+    hero.runeword[44] = GetRuneWordValue(44,  sin , ser , kil)
+    hero.runeword[45] = GetRuneWordValue(45,  sin , roh , tic)
+    hero.runeword[46] = GetRuneWordValue(46,  sin , tal , tic)
+    hero.runeword[47] = GetRuneWordValue(47,  sin , nah , tic)
+    hero.runeword[48] = GetRuneWordValue(48,  sin , ser , tic)
 
 
 
@@ -21266,6 +21336,20 @@ function PassiveStatCalculation(event)
     if runeword_id > 0 then
         runepower = hero.runeword[runeword_id]
         CustomGameEventManager:Send_ServerToAllClients("runewordequip", { word = runeword_id, power = runepower, playerid = hero:GetPlayerID() } )
+    end
+
+    -- Execute that in pcall so it will not break rest stats math if broken
+    local status, errorMessage = pcall(function ()
+        local runeWordPlayerId = hero:GetPlayerOwnerID()
+        if(COverthrowGameMode:IsRuneWordsListRequired(runeWordPlayerId)) then
+            COverthrowGameMode:SendRuneWordsList(runeWordPlayerId)
+        end
+
+        COverthrowGameMode:SetRuneWordsListRequired(runeWordPlayerId, false)
+    end)
+
+    if(status ~= true) then
+        print("SendRuneWordsList error: ", errorMessage)
     end
 
     --primary stat bonuses

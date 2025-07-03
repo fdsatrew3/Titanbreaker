@@ -22,7 +22,15 @@
         <snippet name="RuneWordContainer">
 			<Panel  class="TableRow" style="horizontal-align: left; margin-bottom: 5px;">	
 				<Image class="RunewordImage" id="RuneWordImage" style="border-radius: 5px;" src="" />
-				<Label class="WeaponStats" id="RuneWordText" html="true" text="" style="vertical-align: center; color: white;" />
+				<Panel style="flow-children: down; width: fit-children; height: fit-children; vertical-align: center;">
+					<Panel  class="TableRow" style="horizontal-align: left; margin-bottom: 5px;">	
+						<Label class="WeaponStats" id="RuneWordHeader" html="true" text="" style="vertical-align: center; color: gold;" />
+						<Label class="WeaponStats" id="RuneWordDetails" html="true" text="[Details]" style="vertical-align: center; color: white;" />
+					</Panel>
+					<Panel  class="TableRow" style="horizontal-align: left;">	
+						<Label class="WeaponStats" id="RuneWordDescription" html="true" text="" style="vertical-align: center; color: white;" />
+					</Panel>
+				</Panel>
 			</Panel>
 		</snippet>
 	</snippets>
