@@ -8081,11 +8081,8 @@ function PayWithLife( event)
 	if event.percent ~= nil then
 		reduce = caster:GetMaxHealth()*event.life/100
 	end
-	if caster:GetHealth() < reduce then
-		caster:SetHealth(1)
-	else
-		caster:SetHealth(caster:GetHealth()-reduce)
-	end
+	local newCasterHealth = math.max(1, caster:GetHealth()-reduce)
+	caster:SetHealth(newCasterHealth)
 end
 
 function GetSpellhaste( caster, event )
