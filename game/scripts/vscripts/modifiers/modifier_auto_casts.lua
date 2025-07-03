@@ -302,7 +302,8 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
     end
     -- Waiting for invisibility
     if(caster:IsInvisible()) then
-        if(caster:GetCurrentActiveAbility() ~= nil) then
+        local currentCastingAbility = caster:GetCurrentActiveAbility()
+        if(currentCastingAbility ~= nil and self.abilitiesWithAutoCasts[currentCastingAbility] ~= nil) then
             caster:Stop()
         end
         return
