@@ -4839,31 +4839,44 @@ function TrySendReconnectEvent()
     }
 }
 
-function FillRuneWords()
+function FillRuneWords(args)
 {
-    try
-    {
-        let container = $("#RuneWordsContainer");
-        container.RemoveAndDeleteChildren();
-    
-        for(let i = 1; i < 99999; i++) {
-            let runeWordImage = GetRunewordImageByID(i);
-            if(runeWordImage == undefined || runeWordImage.length < 1) {
-                break;
-            }
-    
-            let runeWordPanel = $.CreatePanel('Panel', container, '');
-            runeWordPanel.BLoadLayoutSnippet("RuneWordContainer");
-            runeWordPanel.FindChildTraverse("RuneWordImage").SetImage(runeWordImage + ".png");
-    
-            let runeText = $.Localize("#rune" + i).split("\n\n");
-            runeWordPanel.FindChildTraverse("RuneWordText").text = "<span class='RuneWordHeader'>" + runeText[1] + "</span><br>" + runeText[0];
+    let container = $("#RuneWordsContainer");
+    container.RemoveAndDeleteChildren();
+
+    for (const [runeWordIndex, runeWordData] of Object.entries(args)) {
+        let runeWordImage = GetRunewordImageByID(runeWordIndex);
+        if(runeWordImage == undefined || runeWordImage.length < 1) {
+            break;
         }
-    } catch (e)
-    {
-        $.Msg(e);
+
+        let runeWordPanel = $.CreatePanel('Panel', container, '');
+        runeWordPanel.BLoadLayoutSnippet("RuneWordContainer");
+        runeWordPanel.FindChildTraverse("RuneWordImage").SetImage(runeWordImage + ".png");
+
+        let runeText = $.Localize("#rune" + runeWordIndex).split("\n\n");
+        runeWordPanel.FindChildTraverse("RuneWordHeader").text = runeText[1]; 
+        runeWordPanel.FindChildTraverse("RuneWordDescription").text = runeText[0]; 
+
+        let runeWordDetails = runeWordPanel.FindChildTraverse("RuneWordDetails");
+        let runeWordDetailsText = "Possible bonuses from this Rune Word:\n";
+        let newLineSymbol = "<br>";
+
+        for (const [runePower, runePowerValue] of Object.entries(runeWordData)) {
+            runeWordDetailsText += "Rune Power " + runePower + " = " + runePowerValue + newLineSymbol;
+        }
+
+        runeWordDetailsText += newLineSymbol + "Values not specified here also provide bonus and this values just for reference"
+
+        runeWordDetails.SetPanelEvent("onmouseover", function() { 
+            $.DispatchEvent("DOTAShowTextTooltip", runeWordDetails, runeWordDetailsText);
+        });
+        runeWordDetails.SetPanelEvent("onmouseout", function() { 
+            $.DispatchEvent("DOTAHideTextTooltip", runeWordDetails);
+        });
     }
 }
+
 
 function ShowPossibleRuneWords()
 {
@@ -4932,6 +4945,7 @@ function OnHeroStatsValuesResponse(args)
     GameEvents.Subscribe("getherostatsvaluesresponse", OnHeroStatsValuesResponse);
     GameEvents.Subscribe("auto_sell_stash_item", OnAutoSellStashItem);
     GameEvents.Subscribe("buyautosellstashitemresponse", OnAutoSellStashItemBought);
+    GameEvents.Subscribe("setrunewordslist", FillRuneWords);
 
     //Game.AddCommand( "+UPressed", ToggleInventory, "", 0 );
     //Game.AddCommand( "+OPressed", ToggleTalentTree, "", 0 );
@@ -5066,8 +5080,6 @@ function OnHeroStatsValuesResponse(args)
     PeriodicUpdate();
     //ShowTempleDifficultyPanel(10000); //todo disable
     //DisableTalentTree();
-
-    FillRuneWords();
 
     GameEvents.Subscribe("playerconnectedresponse", OnPlayerConnectedResponse);
     // Tries inform server that some guy connected first time or reconnected (spams server until he finally processed request)...
