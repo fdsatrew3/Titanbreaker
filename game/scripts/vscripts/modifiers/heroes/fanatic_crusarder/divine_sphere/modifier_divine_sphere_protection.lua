@@ -90,6 +90,10 @@ function modifier_divine_sphere_protection:OnTakeDamage(kv)
     if(kv.unit ~= self.parent) then
         return
     end
+	
+    if(self:GetStackCount() == 0) then
+        return
+    end
     
     DivineSphereTakeDamage({
     	DamageTaken = kv.damage,

@@ -89,9 +89,15 @@
 		"DOTA_Tooltip_Ability_Retri5_def"    "Spell Resistance Duration:" 
 
 		"DOTA_Tooltip_Ability_Retri6"  "Divine Sphere"  
-		"DOTA_Tooltip_Ability_Retri6_Description"  "Protect yourself inside a Divine Sphere, rendering you imune to Damage and restoring 5%% of max Health and Mana whenever struck by an enemy.\nThe cooldown of this Ability can not be reduced below half of base cooldown.<font color=\"#FFBB00\">\n\nRank 2: Increased duration and passively gain the Divine Fury effect, causing Auto Attack Critical Strikes to increase your Attack Damage by 2.5%% for 8 secs, stacking up to 100 times. \nRank 3: While active, launch Holy Hammers at nearby heroes every sec, dealing Holy Damage based on your Attack Damage. Passively gain 5 Holy Damage for every Point of Agility and Intellect. \nRank 4: Decreased cooldown and also gain 100 Attack Speed and 100%% increased Holy Damage while active.\n\n</font>"
+		"DOTA_Tooltip_Ability_Retri6_Description"  "If Alt-Cast is activated or CTRL held protect yourself inside a Divine Sphere with an inner cooldown of %protection_inner_cd% secs, rendering you immune to Damage and restoring 5%% of max Health and Mana whenever struck by an enemy.<font color=\"#FFBB00\">\n\nRank 2: Increased duration and passively gain the Divine Fury effect, causing Auto Attack Critical Strikes to increase your Attack Damage by 2.5%% for 8 secs, stacking up to 100 times. \nRank 3: While active, launch Holy Hammers at nearby heroes every sec, dealing Holy Damage based on your Attack Damage. Passively gain 5 Holy Damage for every Point of Agility and Intellect. \nRank 4: Decreased cooldown and also gain 100 Attack Speed and 100%% increased Holy Damage while active.\n\n</font>"
 		"DOTA_Tooltip_Ability_Retri6_buffduration"    "Duration:" 
-
+		
+		"DOTA_Tooltip_modifier_divine_sphere_protection"					"Divine Sphere"
+		"DOTA_Tooltip_modifier_divine_sphere_protection_Description"		""
+		
+		"DOTA_Tooltip_modifier_divine_sphere_inner_cd"					"Divine Sphere - Inner Cooldown"
+		"DOTA_Tooltip_modifier_divine_sphere_inner_cd_Description"		""
+		
 		"DOTA_Tooltip_modifier_fanatism"					"Fanaticism"
 		"DOTA_Tooltip_modifier_fanatism_Description"		"Auto Attack Damage increased."
 

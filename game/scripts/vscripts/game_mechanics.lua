@@ -17293,12 +17293,7 @@ end
 
 function GetMinCooldownOfAbilityForCooldownReduction(ability)
 	local abilityName = ability:GetAbilityName()
-	
-	-- CD of Divine Sphere can't be reduced below half of base cooldown (legion commander)
-	if(abilityName == "Retri6") then
-		return ability:GetCooldown(-1) * 0.5
-	end
-	
+		
 	-- CD of Holy_Shield can't be reduced below 30 (omniknight)
 	if(abilityName == "Holy_Shield") then
 		return 30
@@ -22593,7 +22588,7 @@ function BloodwolfBuff(event)
 end
 
 function IsImmortal(hero)
-    if hero:HasModifier("modifier_godschosen") or hero:HasModifier("modifier_divine_sphere_protection") or hero:HasModifier("modifier_invul") or hero:HasModifier("modifier_shieldreflect") then
+    if hero:HasModifier("modifier_godschosen") or hero:GetModifierStackCount("modifier_divine_sphere_protection", nil) == 1 or hero:HasModifier("modifier_invul") or hero:HasModifier("modifier_shieldreflect") then
         return true
     end
     return false
@@ -30614,7 +30609,8 @@ function DivineSphereApplyProtection(event)
 		return
 	end
 	
-	event.ability:ApplyDataDrivenModifier(event.caster, event.caster, "modifier_divine_sphere_inner_cd", {duration = event.ability:GetSpecialValueFor("protection_inner_cd")})
+	local innerCd = event.ability:GetSpecialValueFor("protection_inner_cd") * GetInnerCooldownFactor(event.caster)
+	event.ability:ApplyDataDrivenModifier(event.caster, event.caster, "modifier_divine_sphere_inner_cd", {duration = innerCd})
 	modifier:SetStackCount(1)
 end
 
