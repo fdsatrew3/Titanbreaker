@@ -20770,7 +20770,6 @@ function SetupFlurryAbility(hero, heroName)
 end
 
 function SetupPanoramaHeroStats(hero)
-print("SetupPanoramaHeroStats")
 	local heroEntIndex = hero:entindex()
 	local interval = 0.1 -- interval here also controls how often data updated at panorama side
 	-- For some reasons valve decided store certain stats at client as short instead of int as at server side...
