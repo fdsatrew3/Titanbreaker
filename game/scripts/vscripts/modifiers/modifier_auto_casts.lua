@@ -846,9 +846,13 @@ function modifier_auto_casts:GetNextAbilityForCrystalMaidenAutoCasts(caster, abi
         self:DetermineAutoCastOrderForAbility(caster._autoCastCMFrostShatter)
     end
     
+    if(target == nil) then
+    	return nil
+    end
+	
     if(ability == caster._autoCastCMFrostShatter and self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)) then
         local winterChillStacks = caster:GetModifierStackCount("modifier_winterschill", nil)
-        if(winterChillStacks >= 2) then
+        if(winterChillStacks >= 2 or target:HasModifier("modifier_icenova") or target:HasModifier("modifier_deepfreeze")) then
             return caster._autoCastCMFrostShatter
         end
     end
