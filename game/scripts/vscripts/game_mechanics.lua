@@ -22593,7 +22593,7 @@ function BloodwolfBuff(event)
 end
 
 function IsImmortal(hero)
-    if hero:HasModifier("modifier_godschosen") or hero:HasModifier("modifier_invul") or hero:HasModifier("modifier_shieldreflect") then
+    if hero:HasModifier("modifier_godschosen") or hero:HasModifier("modifier_divine_sphere_protection") or hero:HasModifier("modifier_invul") or hero:HasModifier("modifier_shieldreflect") then
         return true
     end
     return false
@@ -30604,6 +30604,18 @@ function WarriorBerserkerRage(event)
             ApplyBuffStack(myevent)
         end
     end
+end
+
+function DivineSphereApplyProtection(event)
+	local modifier = event.caster:AddNewModifier(event.caster, event.ability, "modifier_divine_sphere_protection", {duration = event.ability:GetSpecialValueFor("buffduration")})
+	modifier:SetStackCount(0)
+	
+	if(event.ability:IsAltCasted() == false or event.caster:HasModifier("modifier_divine_sphere_inner_cd")) then
+		return
+	end
+	
+	event.ability:ApplyDataDrivenModifier(event.caster, event.caster, "modifier_divine_sphere_inner_cd", {duration = event.ability:GetSpecialValueFor("protection_inner_cd")})
+	modifier:SetStackCount(1)
 end
 
 function DivineSphereTakeDamage(event)

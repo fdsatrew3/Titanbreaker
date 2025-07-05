@@ -34032,11 +34032,10 @@
 		"AbilityCastRangeBuffer"	"250"
 		"OnSpellStart"
 		{
-			"ApplyModifier"
+			"RunScript"
 			{
-				"Target"	"CASTER"
-				"ModifierName"	"modifier_godschosen"
-				"Duration"	"%buffduration"
+				"ScriptFile"	"game_mechanics.lua"
+				"Function"	"DivineSphereApplyProtection"
 			}
 			"ApplyModifier"
 			{
@@ -34089,6 +34088,14 @@
 		}
 		"Modifiers"
 		{
+			"modifier_divine_sphere_inner_cd"
+			{
+				"Passive"	"0"
+				"IsDebuff"	"1"
+				"IsBuff"	"0"
+				"IsHidden"	"0"
+				"IsPurgable"	"0"
+			}
 			"modifier_godschosen2"
 			{
 				"Passive"	"0"
@@ -34108,100 +34115,6 @@
 				"IsBuff"	"1"
 				"IsHidden"	"0"
 			}
-			"modifier_godschosen"
-			{
-				"Passive"	"0"
-				"IsDebuff"	"0"
-				"IsBuff"	"1"
-				"IsHidden"	"0"
-				"IsPurgable"	"1"
-				"Properties"
-				{
-					"MODIFIER_PROPERTY_ABSOLUTE_NO_DAMAGE_PHYSICAL"	"1"
-					"MODIFIER_PROPERTY_ABSOLUTE_NO_DAMAGE_MAGICAL"	"1"
-					"MODIFIER_PROPERTY_ABSOLUTE_NO_DAMAGE_PURE"	"1"
-				}
-				"OnCreated"
-				{
-					"AttachEffect"
-					{
-						"EffectName"	"particles/units/heroes/hero_warlock/warlock_shadow_word_buff_c.vpcf"
-						"EffectAttachType"	"follow_overhead"
-						"Target"	"TARGET"
-						"ControlPointEntities"
-						{
-							"TARGET"	"attach_overhead"
-							"TARGET"	"attach_overhead"
-							"TARGET"	"attach_overhead"
-							"TARGET"	"attach_overhead"
-						}
-					}
-					"AttachEffect"
-					{
-						"EffectName"	"particles/econ/events/ti6/teleport_start_ti6_lvl3_rays.vpcf"
-						"EffectAttachType"	"attach_hitloc"
-						"Target"	"TARGET"
-						"ControlPointEntities"
-						{
-							"TARGET"	"attach_hitloc"
-							"TARGET"	"attach_hitloc"
-						}
-					}
-					"FireEffect"
-					{
-						"EffectName"	"particles/econ/items/omniknight/hammer_ti6_immortal/omniknight_pur_ti6_immortal_beams.vpcf"
-						"EffectAttachType"	"attach_hitloc"
-						"Target"	"TARGET"
-						"ControlPointEntities"
-						{
-							"TARGET"	"attach_hitloc"
-							"TARGET"	"attach_hitloc"
-							"TARGET"	"attach_hitloc"
-							"TARGET"	"attach_hitloc"
-						}
-					}
-				}
-				"ThinkInterval"	"%hammertime"
-				"OnIntervalThink"
-				{
-					"ActOnTargets"
-					{
-						"Target"
-						{
-							"Center"	"CASTER"
-							"Radius"	"%radius"
-							"Teams"	"DOTA_UNIT_TARGET_TEAM_ENEMY"
-							"Types"	"DOTA_UNIT_TARGET_HERO | DOTA_UNIT_TARGET_BASIC"
-						}
-						"Action"
-						{
-							"TrackingProjectile"
-							{
-								"Target"	"TARGET"
-								"EffectName"	"particles/hammer_throw_2.vpcf"
-								"Dodgeable"	"1"
-								"ProvidesVision"	"1"
-								"VisionRadius"	"300"
-								"MoveSpeed"	"750"
-								"SourceAttachment"	"DOTA_PROJECTILE_ATTACHMENT_HITLOCATION"
-							}
-							"FireSound"
-							{
-								"EffectName"	"Hero_LegionCommander.PreAttack"
-								"Target"	"CASTER"
-							}
-						}
-					}
-				}
-				"OnTakeDamage"
-				{
-					"RunScript"
-					{
-						"ScriptFile"	"game_mechanics.lua"
-						"Function"	"DivineSphereTakeDamage"
-					}
-				}
-			}
 		}
 		"AbilityValues"
 		{
@@ -34210,6 +34123,7 @@
 			"hammertime"	"3000 3000 1 1"
 			"radius"	"600"
 			"holydmgdur"	"0 0 0 7"
+			"protection_inner_cd"	"30"
 		}
 	}
 	"Retri1"
