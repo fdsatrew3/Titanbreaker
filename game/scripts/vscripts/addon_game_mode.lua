@@ -20770,21 +20770,24 @@ function SetupFlurryAbility(hero, heroName)
 end
 
 function SetupPanoramaHeroStats(hero)
+print("SetupPanoramaHeroStats")
 	local heroEntIndex = hero:entindex()
+	local interval = 0.1 -- interval here also controls how often data updated at panorama side
 	-- For some reasons valve decided store certain stats at client as short instead of int as at server side...
 	-- I hope that will not cause noticeable lags
-	Timers:CreateTimer(0.1, function()
+	Timers:CreateTimer(interval, function()
 		local status, errorMessage = pcall(function ()
 			CustomNetTables:SetTableValue("panorama_hero_stats", tostring(heroEntIndex), {
 				health_regeneration = hero:GetHealthRegen(), -- health regen capped at 1000 at client side...
 				current_mana = hero:GetMana(), -- current mana capped by 65536...
-				max_mana = hero:GetMaxMana() -- current max mana capped by 65536...
+				max_mana = hero:GetMaxMana(), -- current max mana capped by 65536...
+				mana_regen = hero:GetManaRegen() -- panorama GetManaRegen sometimes returns NaN...
 			});
         end)
         if(status ~= true) then
           print("SetupPanoramaHeroStats error: ", errorMessage)
         end
-		return 0.1
+		return interval
 	end)
 end
 

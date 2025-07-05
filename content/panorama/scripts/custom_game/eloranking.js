@@ -2743,8 +2743,14 @@ function PeriodicUpdateStart(args){
 function FixPanoramaStats(unitForUpdate, data)
 {
 	let selectedUnit = GetLocalPlayerSelectedUnit();
+	
+	if(selectedUnit != unitForUpdate)
+	{
+		return;
+	}
+	
 	let fixedPanoramaStats = data == undefined ? CustomNetTables.GetTableValue("panorama_hero_stats", selectedUnit.toString()) : data;
-		
+	
 	// Non hero or something broken
 	if(fixedPanoramaStats == undefined)
 	{
@@ -2767,12 +2773,7 @@ function FixPanoramaStats(unitForUpdate, data)
 	{
 		customManaContainer.style.visibility = "visible";
 	}
-	
-	if(selectedUnit != unitForUpdate)
-	{
-		return;
-	}
-	
+		
 	if(healthRegenLabel != undefined)
 	{
 		healthRegenLabel.text = "+" + fixedPanoramaStats["health_regeneration"].toFixed(1)
