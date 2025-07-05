@@ -10592,6 +10592,7 @@ function COverthrowGameMode:OnHeroInGame(hero)
 
   SetupFlurryAbility(hero, heroName)
 
+  SetupPanoramaHeroStats(hero)
   --jungle mode
   if self.junglemode then
     hero:SetCanSellItems(false)
@@ -20766,6 +20767,25 @@ function SetupFlurryAbility(hero, heroName)
   if heroName == "npc_dota_hero_beastmaster" then
     hero.flurryAbility = 3
   end
+end
+
+function SetupPanoramaHeroStats(hero)
+	local heroEntIndex = hero:entindex()
+	-- For some reasons valve decided store certain stats at client as short instead of int as at server side...
+	-- I hope that will not cause noticeable lags
+	Timers:CreateTimer(0.1, function()
+		local status, errorMessage = pcall(function ()
+			CustomNetTables:SetTableValue("panorama_hero_stats", tostring(heroEntIndex), {
+				health_regeneration = hero:GetHealthRegen(), -- health regen capped at 1000 at client side...
+				current_mana = hero:GetMana(), -- current mana capped by 65536...
+				max_mana = hero:GetMaxMana() -- current max mana capped by 65536...
+			});
+        end)
+        if(status ~= true) then
+          print("SetupPanoramaHeroStats error: ", errorMessage)
+        end
+		return 0.1
+	end)
 end
 
 function SpawnActTraps()
