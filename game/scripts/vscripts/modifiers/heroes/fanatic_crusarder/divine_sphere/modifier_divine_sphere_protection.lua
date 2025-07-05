@@ -5,9 +5,9 @@ modifier_divine_sphere_protection = class({
     IsPurgable = function()
         return false
     end,
-	IsDebuff = function()
-		return false
-	end,
+    IsDebuff = function()
+    	return false
+    end,
     DeclareFunctions = function()
         return 
         {
