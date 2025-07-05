@@ -2732,23 +2732,67 @@ function onUnitChanged(args)
 
     if(unit > -1) {
         UpdateMainStatsUI(unit);
+        FixPanoramaStats(unit)
     }
-}
-
-function GetSelectedUnit()
-{
-    var unit = Players.GetQueryUnit(Players.GetLocalPlayer());
-    if(unit == -1){
-        unit = Players.GetSelectedEntities(Players.GetLocalPlayer());
-        if(unit != null && unit[0] != null){
-            unit = unit[0];
-        }
-    }
-    return unit;
 }
 
 function PeriodicUpdateStart(args){
     playerheroingame = true;
+}
+
+function FixPanoramaStats(unitForUpdate, data)
+{
+	let selectedUnit = GetLocalPlayerSelectedUnit();
+	let fixedPanoramaStats = data == undefined ? CustomNetTables.GetTableValue("panorama_hero_stats", selectedUnit.toString()) : data;
+		
+	// Non hero or something broken
+	if(fixedPanoramaStats == undefined)
+	{
+		if(manaContainer != undefined)
+		{
+			manaContainer.style.visibility = "visible";
+		}
+		if(customManaContainer != undefined)
+		{
+			customManaContainer.style.visibility = "collapse";
+		}
+		return;
+	}
+	
+	if(manaContainer != undefined)
+	{
+		manaContainer.style.visibility = "collapse";
+	}
+	if(customManaContainer != undefined)
+	{
+		customManaContainer.style.visibility = "visible";
+	}
+	
+	if(selectedUnit != unitForUpdate)
+	{
+		return;
+	}
+	
+	if(healthRegenLabel != undefined)
+	{
+		healthRegenLabel.text = "+" + fixedPanoramaStats["health_regeneration"].toFixed(1)
+	}
+	
+	if(customManaLabel != undefined)
+	{
+		customManaLabel.text = fixedPanoramaStats["current_mana"].toFixed(0) + " / " + fixedPanoramaStats["max_mana"].toFixed(0)
+	}
+	
+	if(customManaRegenLabel != undefined)
+	{
+		let manaRegen = fixedPanoramaStats["mana_regen"];
+		customManaRegenLabel.text = manaRegen > 0 ? ("+" + manaRegen.toFixed(1)) : manaRegen.ToFixed(1);
+	}
+	
+	if(customManaProgressBar != undefined)
+	{
+		customManaProgressBar.value = fixedPanoramaStats["current_mana"] / fixedPanoramaStats["max_mana"];
+	}
 }
 
 function PeriodicUpdate(args)
@@ -4041,15 +4085,20 @@ let customIntPrimaryBonusLabel = undefined;
 let customSpellHasteLabel = undefined;
 let customDamageReductionLabel = undefined;
 let customBlockLabel = undefined;
-let manaRegenProgressBar = undefined;
-let manaRegenProgressBackgroundBar = undefined;
-let manaRegenProgressBarParticle = undefined;
-let manaRegenLabel = undefined;
+let customManaRegenProgressBar = undefined;
+let customManaRegenProgressBackgroundBar = undefined;
+let customManaRegenProgressBarParticle = undefined;
+let customManaRegenLabel = undefined;
+let customManaLabel = undefined;
+let customManaProgressBar = undefined;
 let customBuffsContainer = undefined;
 let customDebuffsContainer = undefined;
 let customGoldLabel = undefined;
 let customAttackSpeedLabel = undefined;
 let customAttackSpeedUnitStatsLabel = undefined;
+let healthRegenLabel = undefined;
+let manaContainer = undefined;
+let customManaContainer = undefined;
 
 function OnTooltipVisible(object) {
     if(object.paneltype == "DOTATooltipNeutralItem") {
@@ -4478,8 +4527,8 @@ function UpdateMainStatsUI(selectedPlayerUnit, isUnitStatsTooltip)
     }
 
     // Modify mana progress bar color to match resource type
-    if(manaRegenProgressBar != undefined && manaRegenProgressBarParticle != undefined 
-        && manaRegenLabel != undefined && manaRegenProgressBackgroundBar != undefined) {
+    if(customManaRegenProgressBar != undefined && customManaRegenProgressBarParticle != undefined 
+        && customManaRegenLabel != undefined && customManaRegenProgressBackgroundBar != undefined) {
         let resourceType = main_stats[selectedHeroPlayerID][13];
 
         let isEnergySupported = false;
@@ -4496,42 +4545,42 @@ function UpdateMainStatsUI(selectedPlayerUnit, isUnitStatsTooltip)
             5 - focus (orange)
         */
         if(resourceType == 1) {
-            manaRegenProgressBar.style.backgroundColor = "gradient( linear, 0% 0%, 100% 100%, from( #771919 ), color-stop( .43, #811717), to( #7d0707 ) )";
-            manaRegenProgressBackgroundBar.style.backgroundColor = "gradient( linear, 0% 0%, 0% 100%, from( #410404 ), color-stop( 0.43, #630c0c ), to( #5e0808 ) )";
-            manaRegenProgressBarParticle.style.hueRotation = "243deg";
-            manaRegenLabel.style.color = "#ff0000";
+            customManaRegenProgressBar.style.backgroundColor = "gradient( linear, 0% 0%, 100% 100%, from( #771919 ), color-stop( .43, #811717), to( #7d0707 ) )";
+            customManaRegenProgressBackgroundBar.style.backgroundColor = "gradient( linear, 0% 0%, 0% 100%, from( #410404 ), color-stop( 0.43, #630c0c ), to( #5e0808 ) )";
+            customManaRegenProgressBarParticle.style.hueRotation = "243deg";
+            customManaRegenLabel.style.color = "#ff0000";
             isEnergySupported = true;
         }
 
         if(resourceType == 2 || resourceType == 4) {
-            manaRegenProgressBar.style.backgroundColor = "gradient( linear, 0% 0%, 100% 100%, from( #ab44e6 ), color-stop( .43, #853baf), to( #5a1781 ) )";
-            manaRegenProgressBackgroundBar.style.backgroundColor = "gradient( linear, 0% 0%, 0% 100%, from( #402152 ), color-stop( 0.43, #38174b ), to( #340d4a ) )";
-            manaRegenProgressBarParticle.style.hueRotation = "190deg";
-            manaRegenLabel.style.color = "#ac5cda";
+            customManaRegenProgressBar.style.backgroundColor = "gradient( linear, 0% 0%, 100% 100%, from( #ab44e6 ), color-stop( .43, #853baf), to( #5a1781 ) )";
+            customManaRegenProgressBackgroundBar.style.backgroundColor = "gradient( linear, 0% 0%, 0% 100%, from( #402152 ), color-stop( 0.43, #38174b ), to( #340d4a ) )";
+            customManaRegenProgressBarParticle.style.hueRotation = "190deg";
+            customManaRegenLabel.style.color = "#ac5cda";
             isEnergySupported = true;
         }
 
         if(resourceType == 3) {
-            manaRegenProgressBar.style.backgroundColor = "gradient( linear, 0% 0%, 100% 100%, from( #1a3d1c ), color-stop( .43, #0b360d), to( #065c0b ) )";
-            manaRegenProgressBackgroundBar.style.backgroundColor = "gradient( linear, 0% 0%, 0% 100%, from( #132a14 ), color-stop( 0.43, #09160a ), to( #053008 ) )";
-            manaRegenProgressBarParticle.style.hueRotation = "20deg";
-            manaRegenLabel.style.color = "#10ff1e";
+            customManaRegenProgressBar.style.backgroundColor = "gradient( linear, 0% 0%, 100% 100%, from( #1a3d1c ), color-stop( .43, #0b360d), to( #065c0b ) )";
+            customManaRegenProgressBackgroundBar.style.backgroundColor = "gradient( linear, 0% 0%, 0% 100%, from( #132a14 ), color-stop( 0.43, #09160a ), to( #053008 ) )";
+            customManaRegenProgressBarParticle.style.hueRotation = "20deg";
+            customManaRegenLabel.style.color = "#10ff1e";
             isEnergySupported = true;
         }
 
         if(resourceType == 5) {
-            manaRegenProgressBar.style.backgroundColor = "gradient( linear, 0% 0%, 100% 100%, from( #f06509 ), color-stop( .43, #d77e43), to( #994a15 ) )";
-            manaRegenProgressBackgroundBar.style.backgroundColor = "gradient( linear, 0% 0%, 100% 100%, from( #5e2b09 ), color-stop( .43, #754626), to( #5e2e0e ) )";
-            manaRegenProgressBarParticle.style.hueRotation = "270deg";
-            manaRegenLabel.style.color = "#ff9500";
+            customManaRegenProgressBar.style.backgroundColor = "gradient( linear, 0% 0%, 100% 100%, from( #f06509 ), color-stop( .43, #d77e43), to( #994a15 ) )";
+            customManaRegenProgressBackgroundBar.style.backgroundColor = "gradient( linear, 0% 0%, 100% 100%, from( #5e2b09 ), color-stop( .43, #754626), to( #5e2e0e ) )";
+            customManaRegenProgressBarParticle.style.hueRotation = "270deg";
+            customManaRegenLabel.style.color = "#ff9500";
             isEnergySupported = true;
         }
 
         if(resourceType == undefined || !isEnergySupported) {
-            manaRegenProgressBar.style.backgroundColor = "gradient( linear, 0% 0%, 0% 100%, from( #2b4287 ), color-stop( 0.2, #4165ce ), color-stop( .5, #4a73ea), to( #2b4287 ) )";
-            manaRegenProgressBackgroundBar.style.backgroundColor = "gradient( linear, 0% 0%, 0% 100%, from( #101932 ), color-stop( 0.2, #172447 ), color-stop( .5, #162244), to( #101932 ) )";
-            manaRegenProgressBarParticle.style.hueRotation = "50deg";
-            manaRegenLabel.style.color = "#83C2FE";
+            customManaRegenProgressBar.style.backgroundColor = "gradient( linear, 0% 0%, 0% 100%, from( #2b4287 ), color-stop( 0.2, #4165ce ), color-stop( .5, #4a73ea), to( #2b4287 ) )";
+            customManaRegenProgressBackgroundBar.style.backgroundColor = "gradient( linear, 0% 0%, 0% 100%, from( #101932 ), color-stop( 0.2, #172447 ), color-stop( .5, #162244), to( #101932 ) )";
+            customManaRegenProgressBarParticle.style.hueRotation = "50deg";
+            customManaRegenLabel.style.color = "#83C2FE";
         }
     }
 
@@ -4663,32 +4712,55 @@ function InjectIntoDotaUI()
     {
         $.Msg("Valve break something or did major changes to UI (can't hide aghs/shard display).");
     }
+	
+    healthRegenLabel = dotaHudRoot.FindChildTraverse("HealthRegenLabel");
 
-    // Allowes to change mana bar color based on resource type (mana, rage, corruption, etc)
-    manaRegenProgressBar = dotaHudRoot.FindChildTraverse("ManaProgress_Left");
-
-    if(manaRegenProgressBar == undefined) {
-        $.Msg("Valve break something or did major changes to UI (can't find mana bar).");
+    if(healthRegenLabel == undefined) {
+        $.Msg("Valve break something or did major changes to UI (can't find health regen label).");
     }
 
-    manaRegenProgressBarParticle = dotaHudRoot.FindChildTraverse("ManaBurner");
+    // Replaces dota mana bar with custom that support values more than short (server side values stored in int)
+    manaContainer = dotaHudRoot.FindChildTraverse("ManaContainer");
 
-    if(manaRegenProgressBarParticle == undefined) {
-        $.Msg("Valve break something or did major changes to UI (can't find mana bar particle).");
+    if(manaContainer != undefined) {
+        if(manaContainer._customManaContainer == undefined) {
+            let manaContainerParent = manaContainer.GetParent();
+            
+            customManaContainer = $.CreatePanel('Panel', manaContainerParent, '');
+            customManaContainer.BLoadLayout('file://{resources}/layout/custom_game/dota_hud/dota_hud_mana.xml', false, false);
+            manaContainerParent.MoveChildAfter(customManaContainer, manaContainer);
+            
+            manaContainer._customManaLabel = customManaContainer.FindChildTraverse("ManaLabel");
+            manaContainer._customManaRegenProgressBar = customManaContainer.FindChildTraverse("ManaProgress_Left");
+            manaContainer._customManaRegenProgressBarParticle = customManaContainer.FindChildTraverse("ManaBurner");
+            manaContainer._customManaRegenProgressBackgroundBar = customManaContainer.FindChildTraverse("ManaProgress_Right");
+            manaContainer._customManaRegenLabel = customManaContainer.FindChildTraverse("ManaRegenLabel");
+            manaContainer._customManaProgressBar = customManaContainer.FindChildTraverse("ManaProgress");
+            
+            customManaLabel = manaContainer._customManaLabel;
+            customManaRegenProgressBar = manaContainer._customManaRegenProgressBar;
+            customManaRegenProgressBarParticle = manaContainer._customManaRegenProgressBarParticle;
+            customManaRegenProgressBackgroundBar = manaContainer._customManaRegenProgressBackgroundBar;
+            customManaRegenLabel = manaContainer._customManaRegenLabel;
+            customManaProgressBar = manaContainer._customManaProgressBar;
+            
+            manaContainer._customManaContainer = customManaContainer;
+        } 
+        else
+        {
+            customManaLabel = manaContainer._customManaLabel;
+            customManaRegenProgressBar = manaContainer._customManaRegenProgressBar;
+            customManaRegenProgressBarParticle = manaContainer._customManaRegenProgressBarParticle;
+            customManaRegenProgressBackgroundBar = manaContainer._customManaRegenProgressBackgroundBar;
+            customManaRegenLabel = manaContainer._customManaRegenLabel;
+            customManaProgressBar = manaContainer._customManaProgressBar;
+            
+            customManaContainer = manaContainer._customManaContainer;
+        }
+    } else {
+        $.Msg("Valve break something or did major changes to UI (can't find mana bar container).");
     }
-
-    manaRegenProgressBackgroundBar = dotaHudRoot.FindChildTraverse("ManaProgress_Right");
-    
-    if(manaRegenProgressBackgroundBar == undefined) {
-        $.Msg("Valve break something or did major changes to UI (can't find mana bar background).");
-    }
-
-    manaRegenLabel = dotaHudRoot.FindChildTraverse("ManaRegenLabel");
-
-    if(manaRegenLabel == undefined) {
-        $.Msg("Valve break something or did major changes to UI (can't find mana regen label).");
-    }
-
+	
     // Replaces dota buffs container with custom one that support multiple rows
     let buffsContainer = dotaHudRoot.FindChildTraverse("buffs");
 
@@ -5078,6 +5150,12 @@ function OnHeroStatsValuesResponse(args)
         playerheroingame = true;
     }
     PeriodicUpdate();
+	
+    CustomNetTables.SubscribeNetTableListener( "panorama_hero_stats", function (tableName, key, data) 
+    {
+    	FixPanoramaStats(key, data);
+    });
+	
     //ShowTempleDifficultyPanel(10000); //todo disable
     //DisableTalentTree();
 
