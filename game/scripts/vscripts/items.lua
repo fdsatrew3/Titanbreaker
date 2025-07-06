@@ -5404,13 +5404,9 @@ function COverthrowGameMode:CreateMythicWeapon( hero, weapon, fromserver, a1, a2
 	weapondrop[10] = self:GetMythicWeaponAttributeName(weapon, 3)
 	if not fromserver then
 		local stats = self:GenerateMythicWeaponStats( totalstats, number_attributes )
-		local minimum_roll = 0.0
-		--if string.sub(weapondrop[8], 1, 6) == " Path:" then
-		--	minimum_roll = 0
-		--end
-		weapondrop[5] = math.floor(stats[1] * self:MythicWeaponAttributeValue( weapondrop[8] ) + minimum_roll)
-		weapondrop[6] = math.floor(stats[2] * self:MythicWeaponAttributeValue( weapondrop[9] ) + minimum_roll)
-		weapondrop[7] = math.floor(stats[3] * self:MythicWeaponAttributeValue( weapondrop[10] ) + minimum_roll)
+		weapondrop[5] = math.floor(stats[1] * self:MythicWeaponAttributeValue( weapondrop[8] ))
+		weapondrop[6] = math.floor(stats[2] * self:MythicWeaponAttributeValue( weapondrop[9] ))
+		weapondrop[7] = math.floor(stats[3] * self:MythicWeaponAttributeValue( weapondrop[10] ))
 		if weapondrop[5] < 1.0 then -- and not (string.sub(weapondrop[8], 1, 6) == " Path:") then
 			weapondrop[5] = 1
 		end
