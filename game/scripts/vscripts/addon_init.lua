@@ -84,6 +84,9 @@ LinkLuaModifier("modifier_cobra_poison", "modifiers/heroes/cruel_shadowstalker/s
 -- pa: shadow blend
 LinkLuaModifier("modifier_shadowblend", "modifiers/heroes/cruel_shadowstalker/shadow_blend/modifier_shadowblend", LUA_MODIFIER_MOTION_NONE)
 
+-- lc: divine sphere protection
+LinkLuaModifier("modifier_divine_sphere_protection", "modifiers/heroes/fanatic_crusarder/divine_sphere/modifier_divine_sphere_protection", LUA_MODIFIER_MOTION_NONE)
+
 -- animation.lua modifiers
 LinkLuaModifier( "modifier_animation", "libraries/modifiers/modifier_animation.lua", LUA_MODIFIER_MOTION_NONE )
 LinkLuaModifier( "modifier_animation_translate", "libraries/modifiers/modifier_animation_translate.lua", LUA_MODIFIER_MOTION_NONE )
