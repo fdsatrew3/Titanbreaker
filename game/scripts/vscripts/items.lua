@@ -5210,18 +5210,18 @@ function COverthrowGameMode:GetMythicWeaponAttributeCount(weapon)
 	end
 end
 
-function COverthrowGameMode:GenerateMythicWeaponStats( totalstats, attributes )
+function COverthrowGameMode:GenerateMythicWeaponStats( totalstats, attributes, preRollV1, preRollV2, preRollV3)
 	if attributes == 1 then
 		local ret = {}
-		ret[1] = totalstats
+		ret[1] = preRollV1 or totalstats
 		ret[2] = 0
 		ret[3] = 0
 		return ret
 	end
 	if attributes == 2 then
 		local ret = {}
-		local v1 = math.random(11,100)
-		local v2 = math.random(11,100)
+		local v1 = preRollV1 or math.random(11,100)
+		local v2 = preRollV2 or math.random(11,100)
 		local total = v1+v2
 		v1 = v1 / total
 		v2 = v2 / total
@@ -5234,9 +5234,9 @@ function COverthrowGameMode:GenerateMythicWeaponStats( totalstats, attributes )
 	end
 	if attributes == 3 then
 		local ret = {}
-		local v1 = math.random(4,100) --22
-		local v2 = math.random(4,100)
-		local v3 = math.random(4,100)
+		local v1 = preRollV1 or math.random(4,100) --22
+		local v2 = preRollV2 or math.random(4,100)
+		local v3 = preRollV3 or math.random(4,100)
 		local total = v1+v2+v3
 		v1 = v1 / total
 		v2 = v2 / total
