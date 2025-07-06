@@ -1220,7 +1220,7 @@ function modifier_auto_casts:GetNextAbilityForDrowRangerAutoCasts(caster, abilit
     return nil
 end
 
--- Dazzle: Q W E spam
+-- Dazzle: W Q E spam
 function modifier_auto_casts:GetNextAbilityForDazzleAutoCasts(caster, ability, target)
     if(caster._autoCastDazzleQ == nil) then
         caster._autoCastDazzleQ = caster:FindAbilityByName("Feral2")
@@ -1234,29 +1234,29 @@ function modifier_auto_casts:GetNextAbilityForDazzleAutoCasts(caster, ability, t
         caster._autoCastDazzleE = caster:FindAbilityByName("Feral4")
         self:DetermineAutoCastOrderForAbility(caster._autoCastDazzleE)
     end
-
+    
     local focusPoints = caster:GetModifierStackCount("modifier_combopoint", nil)
     local tigerFuryBuffModifier = caster:FindModifierByName("modifier_tigerfury")
     local isTigerFuryBuffModifierAlmostEnded = tigerFuryBuffModifier and tigerFuryBuffModifier:GetRemainingTime() / tigerFuryBuffModifier:GetDuration() < 0.5 or false  
-
-    if(tigerFuryBuffModifier == nil) then
-        if(ability == caster._autoCastDazzleW and self:IsAbilityReadyForAutoCast(caster._autoCastDazzleW) and focusPoints >= 4) then
-            return caster._autoCastDazzleW
-        end
-    else
-        if(ability == caster._autoCastDazzleW and self:IsAbilityReadyForAutoCast(caster._autoCastDazzleW) and isTigerFuryBuffModifierAlmostEnded and focusPoints >= 4) then
-            return caster._autoCastDazzleW
-        end
-    end
-
-    if(ability == caster._autoCastDazzleE and self:IsAbilityReadyForAutoCast(caster._autoCastDazzleE) and focusPoints >= 4) then
-        return caster._autoCastDazzleE
-    end
-
+    
     if(ability == caster._autoCastDazzleQ and self:IsAbilityReadyForAutoCast(caster._autoCastDazzleQ) and focusPoints < 4) then
         return caster._autoCastDazzleQ
     end
-
+    
+    if(ability == caster._autoCastDazzleW and self:IsAbilityReadyForAutoCast(caster._autoCastDazzleW) and focusPoints >= 4) then
+        if(tigerFuryBuffModifier == nil) then
+            return caster._autoCastDazzleW
+        else
+            if(isTigerFuryBuffModifierAlmostEnded) then
+                return caster._autoCastDazzleW
+            end
+        end
+    end
+    	
+    if(ability == caster._autoCastDazzleE and self:IsAbilityReadyForAutoCast(caster._autoCastDazzleE) and focusPoints >= 4) then
+        return caster._autoCastDazzleE
+    end
+    
     return nil
 end
 
