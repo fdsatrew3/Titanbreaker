@@ -20732,7 +20732,7 @@ function COverthrowGameMode:SendRuneWordsList(playerId)
   local assumedMinValue = 3
   local assumedMaxValue = GetAssumedMaxRuneWordValue()
   -- 11 possible rune words values with assumedMaxValue = 75 (step = 9)
-  for i=3, assumedMaxValue do
+  for i=assumedMinValue, assumedMaxValue, 1 do
     if(i % 3 == 0) then
       table.insert(runePowersToCheck, i);
     end
