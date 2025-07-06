@@ -5349,12 +5349,16 @@ function IsGeneratedItem( weapon )
 	return false
 end
 
+function COverthrowGameMode:CalculateMythicWeaponStatsValue(rollValue, attribute)
+	return math.floor(rollValue * COverthrowGameMode:MythicWeaponAttributeValue( attribute ))
+end
+
 function COverthrowGameMode:GetMythicWeaponTotalStats(minValue, maxValue)
 	return math.floor(math.random(minValue, maxValue))
 end
 
 function COverthrowGameMode:GetMythicWeaponTotalStatsLimits(quality,number_attributes,weaponslot)
-	return COverthrowGameMode:GetMythicWeaponMinLevel(quality,number_attributes,weaponslot), self:GetMythicWeaponMaxLevel(quality,number_attributes,weaponslot)
+	return COverthrowGameMode:GetMythicWeaponMinLevel(quality,number_attributes,weaponslot), COverthrowGameMode:GetMythicWeaponMaxLevel(quality,number_attributes,weaponslot)
 end
 
 function COverthrowGameMode:CreateMythicWeapon( hero, weapon, fromserver, a1, a2, a3, dropped_from_boss )
@@ -5404,9 +5408,9 @@ function COverthrowGameMode:CreateMythicWeapon( hero, weapon, fromserver, a1, a2
 	weapondrop[10] = self:GetMythicWeaponAttributeName(weapon, 3)
 	if not fromserver then
 		local stats = self:GenerateMythicWeaponStats( totalstats, number_attributes )
-		weapondrop[5] = math.floor(stats[1] * self:MythicWeaponAttributeValue( weapondrop[8] ))
-		weapondrop[6] = math.floor(stats[2] * self:MythicWeaponAttributeValue( weapondrop[9] ))
-		weapondrop[7] = math.floor(stats[3] * self:MythicWeaponAttributeValue( weapondrop[10] ))
+		weapondrop[5] = COverthrowGameMode:CalculateMythicWeaponStatsValue(stats[1], weapondrop[8]) --math.floor(stats[1] * self:MythicWeaponAttributeValue( weapondrop[8] ))
+		weapondrop[6] = COverthrowGameMode:CalculateMythicWeaponStatsValue(stats[2], weapondrop[9]) --math.floor(stats[2] * self:MythicWeaponAttributeValue( weapondrop[9] ))
+		weapondrop[7] = COverthrowGameMode:CalculateMythicWeaponStatsValue(stats[3], weapondrop[10]) --math.floor(stats[3] * self:MythicWeaponAttributeValue( weapondrop[10] ))
 		if weapondrop[5] < 1.0 then -- and not (string.sub(weapondrop[8], 1, 6) == " Path:") then
 			weapondrop[5] = 1
 		end
