@@ -20737,23 +20737,29 @@ function COverthrowGameMode:SendRuneWordsList(playerId)
     end
   end
 
-  local result = {}
+  local result = 
+  {
+	scalings = {},
+	bonusPerRunePower = {}
+  }
   for k, _ in pairs(hero.runeword) do
-    result[k] = {}
+    result["scalings"][k] = {}
 
     local previousRuneWordValue = -1000
     for _, runePower in ipairs(runePowersToCheck) do
       local eachRunePower = math.floor((runePower / 3)+0.5)
       local newRuneWordValue = GetRuneWordValue(k, eachRunePower, eachRunePower, eachRunePower)
       if(newRuneWordValue > previousRuneWordValue) then
-        result[k][runePower] = newRuneWordValue
+        result["scalings"][k][runePower] = newRuneWordValue
         previousRuneWordValue = newRuneWordValue
       end
     end
-
-    local eachRunePower = math.floor((assumedMaxValue / 3)+0.5)
+	
+	result["bonusPerRunePower"][k] = GetRuneWordValueWeight(k)
+	
     -- Calc last value anyway
-    result[k][assumedMaxValue] = GetRuneWordValue(k, eachRunePower, eachRunePower, eachRunePower)
+    local eachRunePower = math.floor((assumedMaxValue / 3)+0.5)
+    result["scalings"][k][assumedMaxValue] = GetRuneWordValue(k, eachRunePower, eachRunePower, eachRunePower)
   end
 
   CustomGameEventManager:Send_ServerToPlayer(player, "setrunewordslist", result)
