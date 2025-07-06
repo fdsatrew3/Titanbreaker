@@ -5349,6 +5349,10 @@ function IsGeneratedItem( weapon )
 	return false
 end
 
+function COverthrowGameMode:GetMythicWeaponTotalStatsLimits(quality,number_attributes,weaponslot)
+	return COverthrowGameMode:GetMythicWeaponMinLevel(quality,number_attributes,weaponslot), self:GetMythicWeaponMaxLevel(quality,number_attributes,weaponslot)
+end
+
 function COverthrowGameMode:CreateMythicWeapon( hero, weapon, fromserver, a1, a2, a3, dropped_from_boss )
 	--local average_stats = 25 --epic trifecta
 	--print("create my thic weapon")
@@ -5366,7 +5370,8 @@ function COverthrowGameMode:CreateMythicWeapon( hero, weapon, fromserver, a1, a2
 	local number_attributes = COverthrowGameMode:GetMythicWeaponAttributeCount(weapon)
 	local quality = COverthrowGameMode:GetMythicWeaponQuality(weapon)
 	if not fromserver then
-		totalstats = math.floor(math.random(self:GetMythicWeaponMinLevel(quality,number_attributes,weaponslot), self:GetMythicWeaponMaxLevel(quality,number_attributes,weaponslot)))
+		local totalStatsLeftLimit, totalStatsRightLimit = COverthrowGameMode:GetMythicWeaponTotalStatsLimits(quality,number_attributes,weaponslot))
+		totalstats = math.floor(math.random(totalStatsLeftLimit, totalStatsRightLimit))
 		--if dropped_from_boss and quality == "im" and self.jungledifficulty >= 100.0 and (weaponslot == 1 or weaponslot == 2) then
 			--print("double value artifact chance")
 			--if math.random(1,100) <= 0 then
