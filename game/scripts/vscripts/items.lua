@@ -5349,6 +5349,10 @@ function IsGeneratedItem( weapon )
 	return false
 end
 
+function COverthrowGameMode:GetMythicWeaponTotalStats(minValue, maxValue)
+	return math.floor(math.random(minValue, maxValue))
+end
+
 function COverthrowGameMode:GetMythicWeaponTotalStatsLimits(quality,number_attributes,weaponslot)
 	return COverthrowGameMode:GetMythicWeaponMinLevel(quality,number_attributes,weaponslot), self:GetMythicWeaponMaxLevel(quality,number_attributes,weaponslot)
 end
@@ -5371,7 +5375,7 @@ function COverthrowGameMode:CreateMythicWeapon( hero, weapon, fromserver, a1, a2
 	local quality = COverthrowGameMode:GetMythicWeaponQuality(weapon)
 	if not fromserver then
 		local totalStatsLeftLimit, totalStatsRightLimit = COverthrowGameMode:GetMythicWeaponTotalStatsLimits(quality,number_attributes,weaponslot))
-		totalstats = math.floor(math.random(totalStatsLeftLimit, totalStatsRightLimit))
+		totalstats = COverthrowGameMode:GetMythicWeaponTotalStats(totalStatsLeftLimit, totalStatsRightLimit)
 		--if dropped_from_boss and quality == "im" and self.jungledifficulty >= 100.0 and (weaponslot == 1 or weaponslot == 2) then
 			--print("double value artifact chance")
 			--if math.random(1,100) <= 0 then
