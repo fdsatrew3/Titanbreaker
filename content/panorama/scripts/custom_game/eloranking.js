@@ -4842,7 +4842,8 @@ function TrySendReconnectEvent()
 
 function FillRuneWords(args)
 {
-	if(args["scalings"] == undefined || args["bonusPerRunePower"] == undefined)
+	if(args["scalings"] == undefined || args["bonusPerRunePower"] == undefined
+	|| args["minRunePower"] == undefined || args["maxRunePower"] == undefined)
 	{
 		throw new Error("Invalid rune words list message");
 		return;
@@ -4872,24 +4873,15 @@ function FillRuneWords(args)
 		let bonusPerRunePower = (Math.round(args["bonusPerRunePower"][runeWordIndex]*100)/100);
 		runeWordDetailsText += "Bonus per Rune Power = " + bonusPerRunePower + newLineSymbol + newLineSymbol;
 		
-		let minValue = -1;
-		let maxValue = -1;
+		let minValue = args["minRunePower"];
+		let maxValue = args["maxRunePower"];
 		
 		let runeWordsExamplesText = "";
 		for (const [runePower, runePowerValue] of Object.entries(runeWordData)) {
 			runeWordsExamplesText += "Rune Power " + runePower + " = " + runePowerValue + newLineSymbol;
-			
-			if(minValue == -1 || minValue > runePower) 
-			{
-				minValue = runePower;
-			}
-			
-			if(runePower > maxValue) 
-			{
-				maxValue = runePower;
-			}
 		}
 		
+		// Update formula here for example math...
 		let randomPossibleRunePowerValue = Math.floor(Math.random() * (maxValue - minValue + 1) + minValue);
 		let randomPossibleRunePowerValueForDisplay = Math.round(randomPossibleRunePowerValue * 100) / 100;
 		let randomPossibleRunePowerActualBonus = randomPossibleRunePowerValue * bonusPerRunePower;
@@ -4897,8 +4889,8 @@ function FillRuneWords(args)
 		
 		runeWordDetailsText += "Example for Rune Power " + randomPossibleRunePowerValueForDisplay + ": " + newLineSymbol;
 		runeWordDetailsText += randomPossibleRunePowerValueForDisplay + " * " + bonusPerRunePower + " = " + randomPossibleRunePowerActualBonusForDisplay + newLineSymbol;
-		runeWordDetailsText += "Final value rounded up:" + newLineSymbol;
-		runeWordDetailsText += randomPossibleRunePowerActualBonusForDisplay + " = " + Math.floor(randomPossibleRunePowerActualBonus + 0.5) + newLineSymbol;
+		runeWordDetailsText += "Final value rounded up (min value is 1):" + newLineSymbol;
+		runeWordDetailsText += randomPossibleRunePowerActualBonusForDisplay + " = " + Math.max(1, Math.floor(randomPossibleRunePowerActualBonus + 0.5)) + newLineSymbol;
 		
 		runeWordDetailsText += newLineSymbol + "Possible bonuses from this Rune Word:";
 		runeWordDetailsText += newLineSymbol + runeWordsExamplesText;
@@ -4912,7 +4904,6 @@ function FillRuneWords(args)
 		});
 	}
 }
-
 
 function ShowPossibleRuneWords()
 {

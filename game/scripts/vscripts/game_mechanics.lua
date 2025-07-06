@@ -20258,6 +20258,7 @@ function GetRuneWordValue(index, rune1, rune2, rune3)
         return 0
     end
 
+    -- If you ever change this formula update FillRuneWords at panorama side too
     local number = (rune1 + rune2 + rune3) * GetRuneWordValueWeight(index)
 
     if number <= 0 then

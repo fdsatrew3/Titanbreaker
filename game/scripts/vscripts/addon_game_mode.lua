@@ -20729,9 +20729,10 @@ function COverthrowGameMode:SendRuneWordsList(playerId)
   end
 
   local runePowersToCheck = {}
+  local assumedMinValue = 3
   local assumedMaxValue = GetAssumedMaxRuneWordValue()
   -- 11 possible rune words values with assumedMaxValue = 75 (step = 9)
-  for i=3, assumedMaxValue, 9 do
+  for i=3, assumedMaxValue do
     if(i % 3 == 0) then
       table.insert(runePowersToCheck, i);
     end
@@ -20740,7 +20741,9 @@ function COverthrowGameMode:SendRuneWordsList(playerId)
   local result = 
   {
 	scalings = {},
-	bonusPerRunePower = {}
+	bonusPerRunePower = {},
+	minRunePower = assumedMinValue,
+	maxRunePower = assumedMaxValue
   }
   for k, _ in pairs(hero.runeword) do
     result["scalings"][k] = {}
