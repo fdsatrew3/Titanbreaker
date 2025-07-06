@@ -1,0 +1,19 @@
+<root>
+	<styles>
+		<include src="s2r://panorama/styles/dotastyles.vcss_c" />
+		<include src="s2r://panorama/styles/hudstyles.vcss_c" />
+		<include src="s2r://panorama/styles/hud/dota_hud_health_mana.vcss_c" />
+	</styles>
+	<Panel hittest="false" style="width: 100%; height: 26px;">
+		<Label id="ManaLabel" class="MonoNumbersFont" hittest="false" />
+		<ProgressBar id="ManaProgress" onactivate="DOTAHUDHealthManaClick();">
+			<Panel id="ManaProgress_Left" class="ProgressBarLeft">
+				<Panel class="DotaSceneContainer">
+					<DOTAScenePanel id="ManaBurner" map="scenes/hud/healthbarburner" renderdeferred="false" rendershadows="false" camera="camera_1" hittest="false" particleonly="true" />
+				</Panel>
+			</Panel>
+		</ProgressBar>
+		<!--<DOTAHealthManaTicks id="ManaTicks" hittest="false" />-->
+		<Label id="ManaRegenLabel" class="MonoNumbersFont" text="" hittest="false" />
+	</Panel>
+</root>
