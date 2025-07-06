@@ -4912,44 +4912,71 @@ function TrySendReconnectEvent()
     }
 }
 
+
 function FillRuneWords(args)
 {
-    let container = $("#RuneWordsContainer");
-    container.RemoveAndDeleteChildren();
-
-    for (const [runeWordIndex, runeWordData] of Object.entries(args)) {
-        let runeWordImage = GetRunewordImageByID(runeWordIndex);
-        if(runeWordImage == undefined || runeWordImage.length < 1) {
-            break;
-        }
-
-        let runeWordPanel = $.CreatePanel('Panel', container, '');
-        runeWordPanel.BLoadLayoutSnippet("RuneWordContainer");
-        runeWordPanel.FindChildTraverse("RuneWordImage").SetImage(runeWordImage + ".png");
-
-        let runeText = $.Localize("#rune" + runeWordIndex).split("\n\n");
-        runeWordPanel.FindChildTraverse("RuneWordHeader").text = runeText[1]; 
-        runeWordPanel.FindChildTraverse("RuneWordDescription").text = runeText[0]; 
-
-        let runeWordDetails = runeWordPanel.FindChildTraverse("RuneWordDetails");
-        let runeWordDetailsText = "Possible bonuses from this Rune Word:\n";
-        let newLineSymbol = "<br>";
-
-        for (const [runePower, runePowerValue] of Object.entries(runeWordData)) {
-            runeWordDetailsText += "Rune Power " + runePower + " = " + runePowerValue + newLineSymbol;
-        }
-
-        runeWordDetailsText += newLineSymbol + "Values not specified here also provide bonus and this values just for reference"
-
-        runeWordDetails.SetPanelEvent("onmouseover", function() { 
-            $.DispatchEvent("DOTAShowTextTooltip", runeWordDetails, runeWordDetailsText);
-        });
-        runeWordDetails.SetPanelEvent("onmouseout", function() { 
-            $.DispatchEvent("DOTAHideTextTooltip", runeWordDetails);
-        });
-    }
+	if(args["scalings"] == undefined || args["bonusPerRunePower"] == undefined
+	|| args["minRunePower"] == undefined || args["maxRunePower"] == undefined)
+	{
+		throw new Error("Invalid rune words list message");
+		return;
+	}
+	
+	let container = $("#RuneWordsContainer");
+	container.RemoveAndDeleteChildren();
+	
+	for (const [runeWordIndex, runeWordData] of Object.entries(args["scalings"])) {
+		let runeWordImage = GetRunewordImageByID(runeWordIndex);
+		if(runeWordImage == undefined || runeWordImage.length < 1) {
+		    break;
+		}
+		
+		let runeWordPanel = $.CreatePanel('Panel', container, '');
+		runeWordPanel.BLoadLayoutSnippet("RuneWordContainer");
+		runeWordPanel.FindChildTraverse("RuneWordImage").SetImage(runeWordImage + ".png");
+		
+		let runeText = $.Localize("#rune" + runeWordIndex).split("\n\n");
+		runeWordPanel.FindChildTraverse("RuneWordHeader").text = runeText[1]; 
+		runeWordPanel.FindChildTraverse("RuneWordDescription").text = runeText[0]; 
+		
+		let runeWordDetails = runeWordPanel.FindChildTraverse("RuneWordDetails");
+		let runeWordDetailsText = "";
+		let newLineSymbol = "<br>";
+		
+		let bonusPerRunePower = (Math.round(args["bonusPerRunePower"][runeWordIndex]*100)/100);
+		runeWordDetailsText += "Bonus per Rune Power = " + bonusPerRunePower + newLineSymbol + newLineSymbol;
+		
+		let minValue = args["minRunePower"];
+		let maxValue = args["maxRunePower"];
+		
+		let runeWordsExamplesText = "";
+		for (const [runePower, runePowerValue] of Object.entries(runeWordData)) {
+			runeWordsExamplesText += "Rune Power " + runePower + " = " + runePowerValue + newLineSymbol;
+		}
+		
+		// Update formula here for example math...
+		let randomPossibleRunePowerValue = Math.floor(Math.random() * (maxValue - minValue + 1) + minValue);
+		let randomPossibleRunePowerValueForDisplay = Math.round(randomPossibleRunePowerValue * 100) / 100;
+		let randomPossibleRunePowerActualBonus = randomPossibleRunePowerValue * bonusPerRunePower;
+		let randomPossibleRunePowerActualBonusForDisplay = Math.round(randomPossibleRunePowerActualBonus * 100) / 100;
+		
+		runeWordDetailsText += "Example for Rune Power " + randomPossibleRunePowerValueForDisplay + ": " + newLineSymbol;
+		runeWordDetailsText += randomPossibleRunePowerValueForDisplay + " * " + bonusPerRunePower + " = " + randomPossibleRunePowerActualBonusForDisplay + newLineSymbol;
+		runeWordDetailsText += "Final value rounded up (min value is 1):" + newLineSymbol;
+		runeWordDetailsText += randomPossibleRunePowerActualBonusForDisplay + " = " + Math.max(1, Math.floor(randomPossibleRunePowerActualBonus + 0.5)) + newLineSymbol;
+		
+		runeWordDetailsText += newLineSymbol + "Possible bonuses from this Rune Word:";
+		runeWordDetailsText += newLineSymbol + runeWordsExamplesText;
+		runeWordDetailsText = runeWordDetailsText.substring(0, runeWordDetailsText.length - newLineSymbol.length);
+		
+		runeWordDetails.SetPanelEvent("onmouseover", function() { 
+		    $.DispatchEvent("DOTAShowTextTooltip", runeWordDetails, runeWordDetailsText);
+		});
+		runeWordDetails.SetPanelEvent("onmouseout", function() { 
+		    $.DispatchEvent("DOTAHideTextTooltip", runeWordDetails);
+		});
+	}
 }
-
 
 function ShowPossibleRuneWords()
 {

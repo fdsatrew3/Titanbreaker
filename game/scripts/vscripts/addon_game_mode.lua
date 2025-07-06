@@ -20730,31 +20730,40 @@ function COverthrowGameMode:SendRuneWordsList(playerId)
   end
 
   local runePowersToCheck = {}
+  local assumedMinValue = 3
   local assumedMaxValue = GetAssumedMaxRuneWordValue()
   -- 11 possible rune words values with assumedMaxValue = 75 (step = 9)
-  for i=3, assumedMaxValue, 9 do
+  for i=assumedMinValue, assumedMaxValue, 1 do
     if(i % 3 == 0) then
       table.insert(runePowersToCheck, i);
     end
   end
 
-  local result = {}
+  local result = 
+  {
+	scalings = {},
+	bonusPerRunePower = {},
+	minRunePower = assumedMinValue,
+	maxRunePower = assumedMaxValue
+  }
   for k, _ in pairs(hero.runeword) do
-    result[k] = {}
+    result["scalings"][k] = {}
 
     local previousRuneWordValue = -1000
     for _, runePower in ipairs(runePowersToCheck) do
       local eachRunePower = math.floor((runePower / 3)+0.5)
       local newRuneWordValue = GetRuneWordValue(k, eachRunePower, eachRunePower, eachRunePower)
       if(newRuneWordValue > previousRuneWordValue) then
-        result[k][runePower] = newRuneWordValue
+        result["scalings"][k][runePower] = newRuneWordValue
         previousRuneWordValue = newRuneWordValue
       end
     end
-
-    local eachRunePower = math.floor((assumedMaxValue / 3)+0.5)
+	
+	result["bonusPerRunePower"][k] = GetRuneWordValueWeight(k)
+	
     -- Calc last value anyway
-    result[k][assumedMaxValue] = GetRuneWordValue(k, eachRunePower, eachRunePower, eachRunePower)
+    local eachRunePower = math.floor((assumedMaxValue / 3)+0.5)
+    result["scalings"][k][assumedMaxValue] = GetRuneWordValue(k, eachRunePower, eachRunePower, eachRunePower)
   end
 
   CustomGameEventManager:Send_ServerToPlayer(player, "setrunewordslist", result)
