@@ -5380,6 +5380,16 @@ function COverthrowGameMode:GetMythicWeaponTotalStatsLimits(quality,number_attri
 	return COverthrowGameMode:GetMythicWeaponMinLevel(quality,number_attributes,weaponslot), COverthrowGameMode:GetMythicWeaponMaxLevel(quality,number_attributes,weaponslot)
 end
 
+function COverthrowGameMode:GenerateAttributesTooltipInfo(quality, number_attributes, weaponslot)
+	local totalStatsLeftLimit, totalStatsRightLimit = COverthrowGameMode:GetMythicWeaponTotalStatsLimits(quality,number_attributes,weaponslot)
+	local minTotalStats = COverthrowGameMode:GetMythicWeaponTotalStats(totalStatsLeftLimit, totalStatsLeftLimit)
+	local maxTotalStats = COverthrowGameMode:GetMythicWeaponTotalStats(totalStatsRightLimit, totalStatsRightLimit)
+	
+	print("totalStatsLeftLimit", totalStatsLeftLimit, "totalStatsRightLimit", totalStatsRightLimit)
+	print("minTotalStats", minTotalStats)
+	print("maxTotalStats", maxTotalStats)
+end
+
 function COverthrowGameMode:CreateMythicWeapon( hero, weapon, fromserver, a1, a2, a3, dropped_from_boss )
 	--local average_stats = 25 --epic trifecta
 	--print("create my thic weapon")
@@ -5397,7 +5407,7 @@ function COverthrowGameMode:CreateMythicWeapon( hero, weapon, fromserver, a1, a2
 	local number_attributes = COverthrowGameMode:GetMythicWeaponAttributeCount(weapon)
 	local quality = COverthrowGameMode:GetMythicWeaponQuality(weapon)
 	if not fromserver then
-		local totalStatsLeftLimit, totalStatsRightLimit = COverthrowGameMode:GetMythicWeaponTotalStatsLimits(quality,number_attributes,weaponslot))
+		local totalStatsLeftLimit, totalStatsRightLimit = COverthrowGameMode:GetMythicWeaponTotalStatsLimits(quality,number_attributes,weaponslot)
 		totalstats = COverthrowGameMode:GetMythicWeaponTotalStats(totalStatsLeftLimit, totalStatsRightLimit)
 		--if dropped_from_boss and quality == "im" and self.jungledifficulty >= 100.0 and (weaponslot == 1 or weaponslot == 2) then
 			--print("double value artifact chance")
@@ -5456,7 +5466,10 @@ function COverthrowGameMode:CreateMythicWeapon( hero, weapon, fromserver, a1, a2
 		weapondrop[6] = a2
 		weapondrop[7] = a3
 	end
-
+	
+	-- weapon attributes tooltip
+	weapondrop[99] = COverthrowGameMode:GenerateAttributesTooltipInfo(quality, number_attributes, weaponslot)
+	
 	--send data to display weapon in panorama
 	local player = PlayerResource:GetPlayer(hero:GetPlayerID())
 	if not fromserver then
