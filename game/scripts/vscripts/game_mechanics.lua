@@ -16960,7 +16960,7 @@ function FindClosestEnemy( event )
     local closesttarget = nil
     if #enemies > 0 then
         for _,enemy in pairs(enemies) do
-            if enemy and not enemy:IsNull() and enemy:IsAlive() and (enemy:HasModifier("modifier_pvebosssystem") or enemy:HasModifier("dummy_unit_tutorial")) then
+            if enemy and not enemy:IsNull() and enemy:IsAlive() then
                 local tempdistance = (enemy:GetAbsOrigin()-pos):Length()
                 if tempdistance < distance then
                     closesttarget = enemy
