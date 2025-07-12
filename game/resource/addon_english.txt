@@ -10761,7 +10761,7 @@
 		"DOTA_Tooltip_ability_item_neutral_28"                                              "<font color=\"#e0b86c\">[Singularity] Rotting Titanheart"
 		"DOTA_Tooltip_ability_item_neutral_28_Description"                                  "When you land a Critical Strike with a Damage over Time Ability, the Ability Damage is increased by 100%%."
 		"DOTA_Tooltip_ability_item_neutral_29"                                              "<font color=\"#e0b86c\">[Singularity] Titanbreaker"
-		"DOTA_Tooltip_ability_item_neutral_29_Description"                                  "Ability Damage with a scaling of 500%% or higher deals 250%% increased Damage when it is not a Critical Strike."
+		"DOTA_Tooltip_ability_item_neutral_29_Description"                                  "Ability Damage with a scaling of 500%% or higher deals 350%% increased Damage when it is not a Critical Strike."
 		"DOTA_Tooltip_ability_item_neutral_30"                                              "<font color=\"#e0b86c\">[Singularity] Valkyrie"
 		"DOTA_Tooltip_ability_item_neutral_30_Description"                                  "Abilities with Charges have a 50%% chance to not consume a Charge when cast."
 		"DOTA_Tooltip_ability_item_neutral_31"                                              "<font color=\"#e0b86c\">[Singularity] Triumph"
