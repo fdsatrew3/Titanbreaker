@@ -3168,6 +3168,15 @@
 					"MODIFIER_PROPERTY_ATTACK_RANGE_BONUS"	"100"
 				}
 			}
+			"modifier_pathbuff_107_proc"
+			{
+				"Passive"	"0"
+				"IsHidden"	"0"
+				"Properties"
+				{
+					"MODIFIER_PROPERTY_ATTACKSPEED_BONUS_CONSTANT"	"250"
+				}
+			}
 		}
 		"AbilityValues"
 		{

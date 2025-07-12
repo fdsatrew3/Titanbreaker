@@ -10393,6 +10393,8 @@
 
 		"DOTA_Tooltip_modifier_lonedruid"                                                 "Lone Druid"
 		"DOTA_Tooltip_modifier_lonedruid_Description"                                     ""
+		"DOTA_Tooltip_modifier_pathbuff_107_proc"                                                 "Kilt of the Lonely Hunter"
+		"DOTA_Tooltip_modifier_pathbuff_107_proc_Description"                                     "Attack speed increased by %dMODIFIER_PROPERTY_ATTACKSPEED_BONUS_CONSTANT%."
 
 		"DOTA_Tooltip_modifier_stoneskin"                                                 "Stone Skin"
 		"DOTA_Tooltip_modifier_stoneskin_Description"                                     ""

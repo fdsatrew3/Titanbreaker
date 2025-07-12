@@ -7860,6 +7860,13 @@ function HealUnit( event )
         if GetDivineShieldStat(caster) >= 1 and (not isaoe) and (not event.isdot) then
             DivineShieldProc(caster, target, event.heal)
         end
+        -- Lone druid divine heal proc
+        if(event.lonedruidproc) then
+            local divineItem = caster:FindItemInInventory("item_pathbuff_107")
+            if(divineItem ~= nil) then
+                divineItem:ApplyDataDrivenModifier(caster, caster, "modifier_pathbuff_107_proc", {duration = 5})
+            end
+        end
         --aggro from heal in 900 area
         if caster ~= target then
             local aggro_caused = event.heal-overhealing
@@ -22335,7 +22342,7 @@ function PassiveStatCalculation(event)
         if enemies <= 0 or GetHeroesCount() == 1 then
             ability:ApplyDataDrivenModifier(hero, hero, "modifier_lonedruid", {Duration = 60})
             if isUpdateTickEvery5secs then
-                local myevent = {caster = hero, target = hero, attributefactor = 50 * level, heal = 0, ability = ability}
+                local myevent = {caster = hero, target = hero, attributefactor = 50 * level, heal = 0, ability = ability, lonedruidproc = 1}
                 Timers:CreateTimer(0.25, function()
                     HealUnit(myevent)
                     --AddAttackSpeed(hero, 250, 5)
