@@ -5200,6 +5200,22 @@ function COverthrowGameMode:GetMythicWeaponQualityNumber(weapon)
 	return 1
 end
 
+function COverthrowGameMode:GetMythicWeaponStatsLimits(totalstats, attributes)
+	if(attributes == 1) then
+		return totalstats, totalstats
+	end
+	
+	if(attributes == 2) then
+		return 11, 100
+	end
+	
+	if(attributes == 3) then
+		return 4, 100
+	end
+	
+	return 0,0
+end
+
 function COverthrowGameMode:GetMythicWeaponAttributeCount(weapon)
 	if string.len(COverthrowGameMode:GetMythicWeaponAttributeName(weapon, 3)) > 4 then
 		return 3
@@ -5212,16 +5228,18 @@ end
 
 function COverthrowGameMode:GenerateMythicWeaponStats( totalstats, attributes, preRollV1, preRollV2, preRollV3)
 	if attributes == 1 then
+		local leftLimit, rightLimit = COverthrowGameMode:GetMythicWeaponStatsLimits(totalstats, 1)
 		local ret = {}
-		ret[1] = preRollV1 or totalstats
+		ret[1] = preRollV1 or leftLimit
 		ret[2] = 0
 		ret[3] = 0
 		return ret
 	end
 	if attributes == 2 then
+		local leftLimit, rightLimit = COverthrowGameMode:GetMythicWeaponStatsLimits(totalstats, 2)
 		local ret = {}
-		local v1 = preRollV1 or math.random(11,100)
-		local v2 = preRollV2 or math.random(11,100)
+		local v1 = preRollV1 or math.random(leftLimit,rightLimit)
+		local v2 = preRollV2 or math.random(leftLimit,rightLimit)
 		local total = v1+v2
 		v1 = v1 / total
 		v2 = v2 / total
@@ -5233,10 +5251,11 @@ function COverthrowGameMode:GenerateMythicWeaponStats( totalstats, attributes, p
 		return ret
 	end
 	if attributes == 3 then
+		local leftLimit, rightLimit = COverthrowGameMode:GetMythicWeaponStatsLimits(totalstats, 2)
 		local ret = {}
-		local v1 = preRollV1 or math.random(4,100) --22
-		local v2 = preRollV2 or math.random(4,100)
-		local v3 = preRollV3 or math.random(4,100)
+		local v1 = preRollV1 or math.random(leftLimit,rightLimit) --22
+		local v2 = preRollV2 or math.random(leftLimit,rightLimit)
+		local v3 = preRollV3 or math.random(leftLimit,rightLimit)
 		local total = v1+v2+v3
 		v1 = v1 / total
 		v2 = v2 / total
