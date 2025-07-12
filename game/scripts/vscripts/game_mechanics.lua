@@ -5874,8 +5874,8 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
     if caster:HasModifier("item_mother_of_dragons") then
         multiplicative_bonus = multiplicative_bonus * 1.15
     end
-
-    local arcane_barrage_stacks = caster:GetModifierStackCount("modifier_arcane_barrage_bonus", nil)
+    -- Looks like not intended 5% ab dmg per W buff stack for Q damage instances. TODO: Remove or change tooltip?
+    local arcane_barrage_stacks = caster:GetModifierStackCount("modifier_arcane_barrage_bonus", nil) + caster:GetModifierStackCount("modifier_fire_barrage_bonus", nil)
     if event.isarcanebarrage and arcane_barrage_stacks > 0 then
         multiplicative_bonus = multiplicative_bonus * (1 + 0.05 * arcane_barrage_stacks)
     end
