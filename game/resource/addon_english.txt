@@ -10719,7 +10719,7 @@
 		"DOTA_Tooltip_ability_item_neutral_7"                                              "<font color=\"#e0b86c\">[Singularity] Annihilator"
 		"DOTA_Tooltip_ability_item_neutral_7_Description"                                  "All Damaging Ability and Auto Attack Critical Strike Chances you have are increased by a flat additive 10%%."
 		"DOTA_Tooltip_ability_item_neutral_8"                                              "<font color=\"#e0b86c\">[Singularity] Havoc Hammer"
-		"DOTA_Tooltip_ability_item_neutral_8_Description"                                  "+2 for the Path Talent Cataclysm"
+		"DOTA_Tooltip_ability_item_neutral_8_Description"                                  "+4 for the Path Talent Cataclysm"
 		"DOTA_Tooltip_ability_item_neutral_9"                                              "<font color=\"#e0b86c\">[Singularity] Quiver of Artemis"
 		"DOTA_Tooltip_ability_item_neutral_9_Description"                                  "Hysteria fires a total of 3 Auto Attacks."
 		"DOTA_Tooltip_ability_item_neutral_10"                                              "<font color=\"#e0b86c\">[Singularity] Butterfly Cape"

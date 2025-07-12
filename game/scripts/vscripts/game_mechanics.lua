@@ -30913,10 +30913,7 @@ function GetPathBonuses(hero, isUpdateTickEvery5secs)
         bonuses[127] = 1
     end
     if HeroHasNeutralItem(hero, "item_neutral_8") then
-        bonuses[128] = 2
-    end
-    if HeroHasNeutralItem(hero, "item_neutral_8") then
-        bonuses[128] = bonuses[128] + 2
+        bonuses[128] = 4
     end
     if HeroHasNeutralItem(hero, "item_neutral_13") then
         bonuses[131] = 1
