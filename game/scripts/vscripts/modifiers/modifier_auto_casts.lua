@@ -177,7 +177,7 @@ function modifier_auto_casts:OnOrder(kv)
             self.abilitiesWithAutoCastsCount = self.abilitiesWithAutoCastsCount + 1
         else
             self.abilitiesWithAutoCasts[kv.ability] = nil
-            self.abilitiesWithAutoCastsCount = self.abilitiesWithAutoCastsCount - 1
+            self.abilitiesWithAutoCastsCount = math.max(self.abilitiesWithAutoCastsCount - 1, 0)
         end
 
         if(self.abilitiesWithAutoCastsCount < 1) then
@@ -266,6 +266,14 @@ function modifier_auto_casts:IsMustAutoAttackAfterAutoCast()
     return self._isAutoAttackAfterAutoCasts
 end
 
+function modifier_auto_casts:IsAutocastsAbility(ability)
+    if(ability == nil) then
+        return false
+    end
+
+    return self.abilitiesWithAutoCasts[ability] ~= nil
+end
+
 -- Target can be nil
 function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
     -- Caster dead...
@@ -303,7 +311,8 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
     -- Waiting for invisibility
     if(caster:IsInvisible()) then
         local currentCastingAbility = caster:GetCurrentActiveAbility()
-        if(currentCastingAbility ~= nil and self.abilitiesWithAutoCasts[currentCastingAbility] ~= nil) then
+        -- If autocasts trying to cast ability or casting already while caster got invisibility effect stops this attempt (to preserve invisibility effect)
+        if(self:IsAutocastsAbility(currentCastingAbility)) then
             caster:Stop()
         end
         return
