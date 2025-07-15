@@ -16444,7 +16444,7 @@ function ApplyBuff(event)
             end
         end
         if GetLevelOfAbility(caster, "mars2") >= 3 then
-            HealUnit({caster = caster, target = caster, heal = caster:GetMaxHealth() * 0.025, ability = event.ability})
+            HealUnit({caster = caster, target = caster, heal = caster:GetMaxHealth() * 0.05, ability = event.ability})
         end
         if caster.talents and caster.talents[58] and caster.talents[58] > 0 and caster:HasModifier("modifier_pathbuff_058") then
             if not caster.true_blood_from_stun then
