@@ -2787,7 +2787,7 @@ function FixPanoramaStats(unitForUpdate, data)
 	if(customManaRegenLabel != undefined)
 	{
 		let manaRegen = fixedPanoramaStats["mana_regen"];
-		customManaRegenLabel.text = manaRegen > 0 ? ("+" + manaRegen.toFixed(1)) : manaRegen.ToFixed(1);
+		customManaRegenLabel.text = manaRegen > 0 ? ("+" + manaRegen.toFixed(1)) : manaRegen.toFixed(1);
 	}
 	
 	if(customManaProgressBar != undefined)
