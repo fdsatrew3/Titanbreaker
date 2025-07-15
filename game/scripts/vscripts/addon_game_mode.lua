@@ -9525,6 +9525,9 @@ function PVEAggroAdd(event)
     if GetLevelOfAbility(source, "pala6") >= 5 then
         bonus_aggro = bonus_aggro * (1 + 0.0025 * GetStrengthCustom(source))
     end
+    if GetLevelOfAbility(source, "Protect5") >= 2 then
+        bonus_aggro = bonus_aggro * (1 + 0.0025 * GetStrengthCustom(source))
+    end
 
    if source:IsHero() then
     if source.super_aggro_tank and not event.ignore_super_aggro_tank then
@@ -9604,6 +9607,7 @@ end
 if source:HasModifier("modifier_mythic_aggro") then
  bonus_aggro = bonus_aggro + source:GetModifierStackCount("modifier_mythic_aggro", nil) / 100
 end
+
 if caster:HasModifier("modifier_rotdk") and GetLevelOfAbility(source, "Rot") >= 3  then
  bonus_aggro = bonus_aggro * 1.25
 end
