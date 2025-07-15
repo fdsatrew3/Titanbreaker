@@ -1116,7 +1116,7 @@
 		"LevelsBetweenUpgrades"	"0"
 		"AbilityDamage"	"0"
 		"AbilityManaCost"	"25"
-		"AbilityCooldown"	"0.l"
+		"AbilityCooldown"	"0.1"
 		"AbilityCastRange"	"750"
 		"AbilityCastRangeBuffer"	"250"
 		"AbilityDuration"	"0.0 0.0 0.0 0.0"
@@ -1245,7 +1245,7 @@
 			"cd"	"1"
 			"evasion"	"0 0 100 100"
 			"weaken"	"0 0 0 100"
-			"aggro"	"0 0 100 100"
+			"aggro"	"0 0 30 30"
 		}
 	}
 	"mars2"

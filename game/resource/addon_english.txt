@@ -10553,7 +10553,7 @@
 		"npc_dota_hero_mars"                                                          "[Tank] Iron Shaolin"
 
 		"DOTA_Tooltip_ability_mars1"                                                        "Crushing Spear"
-		"DOTA_Tooltip_ability_mars1_Description"                                            "Deal Physical Damage and reduce the cooldown of Shield Strike by 1 sec per enemy hit.\nCauses 250 Aggro.\n\nCan be set to Auto Cast for continuous casting of Crushing Spear against the last Crushing Spear target<font color=\"#FFBB00\">\nRank 2: Passively gain the Primal Tank buff, increasing all Aggro caused by 5%% per Armor, by 10%% per Spell Resistance and by 100%% per 5000 Health, with all 3 sources stacking multiplicatively. \nRank 3: Gain 15% Evasion for 1.5 secs after landing an Auto Attack and instantly cause Aggro equal to 100%% of your max Health when casting Crushing Spear. \nRank 4: Enemies hit by the Spear take 5%% increased Damage from all sources for 3 secs and passively increase all Aggro caused by 25%% per 100 Strength.\nRank 5: Iron Dance - Passively gain 1%% Damage Reduction for every 3%% of Evasion.\n\n</font>"
+		"DOTA_Tooltip_ability_mars1_Description"                                            "Deal Physical Damage and reduce the cooldown of Shield Strike by 1 sec per enemy hit.\nCauses 250 Aggro.\n\nCan be set to Auto Cast for continuous casting of Crushing Spear against the last Crushing Spear target<font color=\"#FFBB00\">\nRank 2: Passively gain the Primal Tank buff, increasing all Aggro caused by 5%% per Armor, by 10%% per Spell Resistance and by 100%% per 5000 Health, with all 3 sources stacking multiplicatively. \nRank 3: Gain 15% Evasion for 1.5 secs after landing an Auto Attack and instantly cause Aggro equal to 30%% of your max Health when casting Crushing Spear. \nRank 4: Enemies hit by the Spear take 5%% increased Damage from all sources for 3 secs and passively increase all Aggro caused by 25%% per 100 Strength.\nRank 5: Iron Dance - Passively gain 1%% Damage Reduction for every 3%% of Evasion.\n\n</font>"
 		"DOTA_Tooltip_ability_mars1_dmgfromstat"                                            "%Primary Attribute to Damage:"
 
 		"DOTA_Tooltip_ability_mars2"                                                        "Shield Strike"
@@ -10610,6 +10610,7 @@
 		"DOTA_Tooltip_modifier_brute_force"                                               "Brute Force"
 		"DOTA_Tooltip_modifier_brute_force_Description"                                   ""
 
+		
 		"DOTA_Tooltip_Ability_item_crit1"  "Sharpened Axe"  
 		"DOTA_Tooltip_Ability_item_crit1_Description"  "Abilities have a 10%% chance to Critical Strike for 130%%.\n<font color=\"#FF6600\">Uniquely Equipped.</font>\n"
 
