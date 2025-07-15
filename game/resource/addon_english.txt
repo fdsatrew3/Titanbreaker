@@ -10557,7 +10557,7 @@
 		"DOTA_Tooltip_ability_mars1_dmgfromstat"                                            "%Primary Attribute to Damage:"
 
 		"DOTA_Tooltip_ability_mars2"                                                        "Shield Strike"
-		"DOTA_Tooltip_ability_mars2_Description"                                            "Deal Physical Damage, stun for 1 sec and Block 50%% of the next Damage instance you suffer.\n<font color=\"#FFBB00\">\nRank 2: Next Damage Block increased to 75%% and passively increase the effectiveness of all Damage Block effects by 25%%. \nRank 3: Whenever you stun an enemy, heal for 5%% of max Health. \nRank 4: Passively gain Damage Block equal to your Armor plus 10%% of your Strength.\n\n</font>"
+		"DOTA_Tooltip_ability_mars2_Description"                                            "Deal Physical Damage, stun for 1 sec and Block 50%% of the next Damage instance you suffer.\n<font color=\"#FFBB00\">\nRank 2: Next Damage Block increased to 75%% and passively increase the effectiveness of all Damage Block effects by 25%%. \nRank 3: Whenever you stun an enemy, heal for 2.5%% of max Health. \nRank 4: Passively gain Damage Block equal to your Armor plus 10%% of your Strength.\n\n</font>"
 		"DOTA_Tooltip_ability_mars2_dmgfromstat"                                            "%Primary Attribute to Damage:"
 		"DOTA_Tooltip_ability_mars2_runic"                                                  "Felpower:"
 
