@@ -9575,7 +9575,7 @@ function PVEAggroAdd(event)
         local aggro_bonus_hp = 1 + source:GetMaxHealth() / 5000
         bonus_aggro = bonus_aggro * aggro_bonus_armor * aggro_bonus_resist * aggro_bonus_hp
         if source.super_aggro_tank_monk and level_tank_ability >= 4 then
-         bonus_aggro = bonus_aggro * (1 + 0.01 * GetStrengthCustom(source))
+         bonus_aggro = bonus_aggro * (1 + 0.0025 * GetStrengthCustom(source))
        end
 
        --print("aggro factors")

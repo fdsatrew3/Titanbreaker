@@ -1116,7 +1116,7 @@
 		"LevelsBetweenUpgrades"	"0"
 		"AbilityDamage"	"0"
 		"AbilityManaCost"	"25"
-		"AbilityCooldown"	"0"
+		"AbilityCooldown"	"0.l"
 		"AbilityCastRange"	"750"
 		"AbilityCastRangeBuffer"	"250"
 		"AbilityDuration"	"0.0 0.0 0.0 0.0"
@@ -1127,6 +1127,12 @@
 				"ScriptFile"	"addon_game_mode.lua"
 				"Function"	"AggroOnEnemy"
 				"health"	"%aggro"
+			}
+			"RunScript"
+			{
+				"ScriptFile"	"addon_game_mode.lua"
+				"Function"	"AggroOnEnemy"
+				"damagetaken"	"250"
 			}
 			"RunScript"
 			{
