@@ -9521,18 +9521,6 @@ function PVEAggroAdd(event)
    local bonus_aggro = 1
    local aggro_reduce = 0
    local setHeroStatsAggroPercent = not event.ignore_super_aggro_tank
-
-	-- Aggro per str passive effects
-    if GetLevelOfAbility(source, "pala6") >= 5 then -- pl
-        bonus_aggro = bonus_aggro * (1 + 0.0010 * GetStrengthCustom(source))
-    end
-    if GetLevelOfAbility(source, "Protect5") >= 2 then -- dk
-        bonus_aggro = bonus_aggro * (1 + 0.0010 * GetStrengthCustom(source))
-    end
-	
-    if source.super_aggro_tank_monk and level_tank_ability >= 4 then -- mars
-        bonus_aggro = bonus_aggro * (1 + 0.0010 * GetStrengthCustom(source))
-    end
 	   
    if source:IsHero() then
     if source.super_aggro_tank and not event.ignore_super_aggro_tank then
@@ -9583,6 +9571,9 @@ function PVEAggroAdd(event)
         local aggro_bonus_hp = 1 + source:GetMaxHealth() / 5000
         bonus_aggro = bonus_aggro * aggro_bonus_armor * aggro_bonus_resist * aggro_bonus_hp
 
+        -- New bonus aggro per str
+        bonus_aggro = bonus_aggro * (1 + 0.0010 * GetStrengthCustom(source))
+	
        --print("aggro factors")
        --print(aggro_bonus_armor)
        --print(aggro_bonus_resist)
