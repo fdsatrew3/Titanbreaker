@@ -8288,6 +8288,12 @@
 			}
 			"RunScript"
 			{
+				"ScriptFile"	"addon_game_mode.lua"
+				"Function"	"AggroOnEnemy"
+				"health"	"%aggro"
+			}
+			"RunScript"
+			{
 				"ScriptFile"	"game_mechanics.lua"
 				"Function"	"ApplyBuffStack"
 				"max"	"25"
@@ -8337,6 +8343,7 @@
 		"AbilityValues"
 		{
 			"dmg"	"200 250 250 250"
+			"aggro"	"0 170 170 170"
 		}
 	}
 	"brew2"
