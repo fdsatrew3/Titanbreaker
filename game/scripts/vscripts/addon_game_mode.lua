@@ -9608,9 +9608,6 @@ if source:HasModifier("modifier_mythic_aggro") then
  bonus_aggro = bonus_aggro + source:GetModifierStackCount("modifier_mythic_aggro", nil) / 100
 end
 
-if caster:HasModifier("modifier_rotdk") and GetLevelOfAbility(source, "Rot") >= 3  then
- bonus_aggro = bonus_aggro * 1.25
-end
 if source:HasModifier("modifier_mythic_aggro_reduce") then
  aggro_reduce = aggro_reduce + source:GetModifierStackCount("modifier_mythic_aggro_reduce", nil) / 100
 end
