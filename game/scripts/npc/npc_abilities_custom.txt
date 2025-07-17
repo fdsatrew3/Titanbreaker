@@ -55228,7 +55228,7 @@
 			"dmgfromstat"	"4 5 5 5"
 			"bleeddmg"	"1 2 2 2"
 			"tick"	"2 1.5 1.5 1.5"
-			"aggro"	"0 0 0 15"
+			"aggro"	"0 0 0 200"
 			"stun"	"0 5 5 5"
 		}
 	}
