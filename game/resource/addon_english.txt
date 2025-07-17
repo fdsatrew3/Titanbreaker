@@ -162,7 +162,7 @@
 		
 
 		"DOTA_Tooltip_Ability_Protect4"  "Heavy Counterblow"  
-		"DOTA_Tooltip_Ability_Protect4_Description"  "Deal Physical Damage based on your current Health and silence for 1 sec.<font color=\"#FFBB00\">\n\nRank 2: Increased Damage and also evade all incoming Auto Attacks for 2 secs. \nRank 3: Reduced cooldown and also gain 75 Spell Resistance for 2 secs. \nRank 4: Damage is now based on max health instead of current health, also stun the target and cause extra aggro based on 500%% of your max health.\n\n</font>"
+		"DOTA_Tooltip_Ability_Protect4_Description"  "Deal Physical Damage based on your current Health and silence for 1 sec.<font color=\"#FFBB00\">\n\nRank 2: Increased Damage and also evade all incoming Auto Attacks for 2 secs. \nRank 3: Reduced cooldown and also gain 75 Spell Resistance for 2 secs. \nRank 4: Damage is now based on max health instead of current health, also stun the target and cause extra aggro based on 175%% of your max health.\n\n</font>"
 		"DOTA_Tooltip_Ability_Protect4_hptodmg"    "%Health to Damage:"
 		"DOTA_Tooltip_Ability_Protect4_protstun"    "Stun Duration:"
 
