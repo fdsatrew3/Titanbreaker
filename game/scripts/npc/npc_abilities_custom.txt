@@ -8289,7 +8289,7 @@
 			"RunScript"
 			{
 				"ScriptFile"	"addon_game_mode.lua"
-				"Function"	"AggroOnEnemy"
+				"Function"	"Brew1AggroEnemy"
 				"health"	"%aggro"
 			}
 			"RunScript"

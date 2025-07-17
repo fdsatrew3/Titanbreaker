@@ -9430,6 +9430,10 @@ function IsHeroNear( caster, range )
   return near
 end
 
+function COverthrowGameMode:AggroOnEnemy(event)
+	AggroOnEnemy(event)
+end
+
 function AggroOnEnemy(event)
 	local caster = event.caster
 	local target = event.target
