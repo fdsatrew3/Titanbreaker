@@ -6034,7 +6034,7 @@
 		"DOTA_Tooltip_ability_terror1_runic"                                                  "Felpower:"
 
 		"DOTA_Tooltip_ability_terror2"                                                        "Tide of Darkness"
-		"DOTA_Tooltip_ability_terror2_Description"                                            "Send forth a Tide of Darkness, dealing Physical Chaos Damage and reducing all Damage caused by affected enemies by 20%% for 3 secs and interrupting Spellcasting.\n\n<font color=\"#00EE00\">Consumes Felpower (Mana).</font><font color=\"#FFBB00\">\n\nRank 2: Increased Damage and reduced resource cost. \nRank 3: The Damage reduction lasts longer and affected targets will also be slowed. Also cause Aggro equal to 100%% of your max Health. \nRank 4: While under Heart Ripper or standing inside a Sigil of Denial, Tide of Darkness will Taunt nearby enemies for 3 secs.\n\n</font>"
+		"DOTA_Tooltip_ability_terror2_Description"                                            "Send forth a Tide of Darkness, dealing Physical Chaos Damage and reducing all Damage caused by affected enemies by 20%% for 3 secs and interrupting Spellcasting.\n\n<font color=\"#00EE00\">Consumes Felpower (Mana).</font><font color=\"#FFBB00\">\n\nRank 2: Increased Damage and reduced resource cost. \nRank 3: The Damage reduction lasts longer and affected targets will also be slowed. Also cause Aggro equal to 200%% of your max Health. \nRank 4: While under Heart Ripper or standing inside a Sigil of Denial, Tide of Darkness will Taunt nearby enemies for 3 secs.\n\n</font>"
 		"DOTA_Tooltip_ability_terror2_dmgfromstat"                                            "%Primary Attribute to Damage:"
 		"DOTA_Tooltip_ability_terror2_runic"                                                  "Felpower:"
 
