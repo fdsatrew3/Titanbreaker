@@ -8282,6 +8282,12 @@
 			"DeleteOnHit"	"0"
 			"RunScript"
 			{
+				"ScriptFile"	"addon_game_mode.lua"
+				"Function"	"AggroOnEnemy"
+				"damagetaken"	"250"
+			}
+			"RunScript"
+			{
 				"ScriptFile"	"game_mechanics.lua"
 				"Function"	"ApplyBuffStack"
 				"max"	"25"
