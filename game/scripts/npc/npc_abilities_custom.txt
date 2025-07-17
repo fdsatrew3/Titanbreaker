@@ -36343,7 +36343,7 @@
 					{
 						"ScriptFile"	"addon_game_mode.lua"
 						"Function"	"AggroOnEnemy"
-						"health"	"500"
+						"health"	"175"
 					}
 				}
 			}
