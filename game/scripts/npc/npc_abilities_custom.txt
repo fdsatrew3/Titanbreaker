@@ -44553,12 +44553,6 @@
 			}
 			"RunScript"
 			{
-				"ScriptFile"	"addon_game_mode.lua"
-				"Function"	"AggroOnEnemy"
-				"health"	"%aggro"
-			}
-			"RunScript"
-			{
 				"ScriptFile"	"ragesystem.lua"
 				"Function"	"AddEnergy"
 				"energy"	"%runic"
@@ -44714,7 +44708,6 @@
 			"selfres"	"0 0 4 4"
 			"selfresdur"	"0 0 25 25"
 			"buffduration"	"10"
-			"aggro"	"0 0 125 125"
 		}
 	}
 	"teleporter_aura"
