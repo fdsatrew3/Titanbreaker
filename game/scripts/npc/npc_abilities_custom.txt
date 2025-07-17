@@ -1116,7 +1116,7 @@
 		"LevelsBetweenUpgrades"	"0"
 		"AbilityDamage"	"0"
 		"AbilityManaCost"	"25"
-		"AbilityCooldown"	"0"
+		"AbilityCooldown"	"0.1"
 		"AbilityCastRange"	"750"
 		"AbilityCastRangeBuffer"	"250"
 		"AbilityDuration"	"0.0 0.0 0.0 0.0"
@@ -1127,6 +1127,12 @@
 				"ScriptFile"	"addon_game_mode.lua"
 				"Function"	"AggroOnEnemy"
 				"health"	"%aggro"
+			}
+			"RunScript"
+			{
+				"ScriptFile"	"addon_game_mode.lua"
+				"Function"	"AggroOnEnemy"
+				"damagetaken"	"250"
 			}
 			"RunScript"
 			{
@@ -1239,7 +1245,7 @@
 			"cd"	"1"
 			"evasion"	"0 0 100 100"
 			"weaken"	"0 0 0 100"
-			"aggro"	"0 0 100 100"
+			"aggro"	"0 0 30 30"
 		}
 	}
 	"mars2"
@@ -8253,7 +8259,7 @@
 		"LevelsBetweenUpgrades"	"0"
 		"AbilityDamage"	"0"
 		"AbilityManaCost"	"45"
-		"AbilityCooldown"	"0"
+		"AbilityCooldown"	"0.1"
 		"AbilityCastRange"	"300"
 		"AbilityCastRangeBuffer"	"250"
 		"AoERadius"	"300"
@@ -8274,6 +8280,18 @@
 		"OnProjectileHitUnit"
 		{
 			"DeleteOnHit"	"0"
+			"RunScript"
+			{
+				"ScriptFile"	"addon_game_mode.lua"
+				"Function"	"AggroOnEnemy"
+				"damagetaken"	"250"
+			}
+			"RunScript"
+			{
+				"ScriptFile"	"addon_game_mode.lua"
+				"Function"	"Brew1AggroEnemy"
+				"health"	"%aggro"
+			}
 			"RunScript"
 			{
 				"ScriptFile"	"game_mechanics.lua"
@@ -8325,6 +8343,7 @@
 		"AbilityValues"
 		{
 			"dmg"	"200 250 250 250"
+			"aggro"	"0 170 170 170"
 		}
 	}
 	"brew2"
@@ -11626,7 +11645,7 @@
 			"dur"	"3 3 4 4"
 			"range"	"450 450 750 750"
 			"cost"	"75 60 60 60"
-			"aggro"	"0 0 100 100"
+			"aggro"	"0 0 200 200"
 		}
 	}
 	"terror3"
@@ -36337,7 +36356,7 @@
 					{
 						"ScriptFile"	"addon_game_mode.lua"
 						"Function"	"AggroOnEnemy"
-						"health"	"500"
+						"health"	"175"
 					}
 				}
 			}
@@ -55222,7 +55241,7 @@
 			"dmgfromstat"	"4 5 5 5"
 			"bleeddmg"	"1 2 2 2"
 			"tick"	"2 1.5 1.5 1.5"
-			"aggro"	"0 0 0 100"
+			"aggro"	"0 0 0 200"
 			"stun"	"0 5 5 5"
 		}
 	}

@@ -9430,6 +9430,10 @@ function IsHeroNear( caster, range )
   return near
 end
 
+function COverthrowGameMode:AggroOnEnemy(event)
+	AggroOnEnemy(event)
+end
+
 function AggroOnEnemy(event)
 	local caster = event.caster
 	local target = event.target
@@ -9521,11 +9525,7 @@ function PVEAggroAdd(event)
    local bonus_aggro = 1
    local aggro_reduce = 0
    local setHeroStatsAggroPercent = not event.ignore_super_aggro_tank
-
-    if GetLevelOfAbility(source, "pala6") >= 5 then
-        bonus_aggro = bonus_aggro * (1 + 0.0025 * GetStrengthCustom(source))
-    end
-
+	   
    if source:IsHero() then
     if source.super_aggro_tank and not event.ignore_super_aggro_tank then
       local levelThreshold = 2
@@ -9574,10 +9574,10 @@ function PVEAggroAdd(event)
         end
         local aggro_bonus_hp = 1 + source:GetMaxHealth() / 5000
         bonus_aggro = bonus_aggro * aggro_bonus_armor * aggro_bonus_resist * aggro_bonus_hp
-        if source.super_aggro_tank_monk and level_tank_ability >= 4 then
-         bonus_aggro = bonus_aggro * (1 + 0.01 * GetStrengthCustom(source))
-       end
 
+        -- New bonus aggro per str
+        bonus_aggro = bonus_aggro * (1 + 0.0010 * GetStrengthCustom(source))
+	
        --print("aggro factors")
        --print(aggro_bonus_armor)
        --print(aggro_bonus_resist)
@@ -9604,6 +9604,7 @@ end
 if source:HasModifier("modifier_mythic_aggro") then
  bonus_aggro = bonus_aggro + source:GetModifierStackCount("modifier_mythic_aggro", nil) / 100
 end
+
 if source:HasModifier("modifier_mythic_aggro_reduce") then
  aggro_reduce = aggro_reduce + source:GetModifierStackCount("modifier_mythic_aggro_reduce", nil) / 100
 end
