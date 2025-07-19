@@ -236,20 +236,32 @@ function modifier_auto_casts:OnAbilityFullyCast(kv)
         return
     end
 
-    if(kv.target == nil) then
-        return
+    if(kv.target ~= nil) then
+        self:SetLastAutoCastTarget(kv.target)
+        
+        if(self:IsMustAutoAttackAfterAutoCast()) then
+        	self.parent:MoveToTargetToAttack(kv.target)
+        end
     end
-
-    self:SetLastAutoCastTarget(kv.target)
-
-    if(self:IsMustAutoAttackAfterAutoCast()) then
-        self.parent:MoveToTargetToAttack(kv.target)
-    end
+	
+	-- In very rare cases this modifier timer can perfectly align with cast time of abilities and send auto casts orders while player casting cast time ability and this breaking queue
+	self:_OnIntervalThinkInternal(true)
 end
 
 function modifier_auto_casts:OnIntervalThink()
+    -- Use wrapper cuz valve might one day add args or consider return value from this function and silently break everything...
+    self:_OnIntervalThinkInternal()
+end
+
+function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility)
     for ability, _ in pairs(self.abilitiesWithAutoCasts) do
-        self:CheckAbilityAutoCast(self.parent, ability, self:GetLastAutoCastTarget())
+        if(self:IsAbilityCanBeAutoCastedWhileRunning(ability)) then
+            self:CheckAbilityAutoCast(self.parent, ability, self:GetLastAutoCastTarget(), ignoreCurrentActiveAbility)
+        else
+            if(ignoreCurrentActiveAbility == true) then
+                self:CheckAbilityAutoCast(self.parent, ability, self:GetLastAutoCastTarget(), ignoreCurrentActiveAbility)
+            end
+        end
     end
 end
 
@@ -275,7 +287,7 @@ function modifier_auto_casts:IsAutocastsAbility(ability)
 end
 
 -- Target can be nil
-function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
+function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target, ignoreCurrentActiveAbility)
     -- Caster dead...
     if(caster:IsAlive() == false) then
         return
@@ -283,7 +295,7 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
     if(target ~= nil) then
         -- Ignore dead guys
         if(target:IsNull() or target:IsAlive() == false) then
-            self.parent._autoCastLastAutoCastTarget = nil
+            self:SetLastAutoCastTarget(nil)
             return
         end
         -- Check for too far enemies (2500+)
@@ -308,9 +320,15 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
     if(caster:IsChanneling()) then
         return
     end
+    
+    local currentCastingAbility = nil
+    
+    if(ignoreCurrentActiveAbility ~= true) then
+        currentCastingAbility = caster:GetCurrentActiveAbility()
+    end
+    	
     -- Waiting for invisibility
     if(caster:IsInvisible()) then
-        local currentCastingAbility = caster:GetCurrentActiveAbility()
         -- If autocasts trying to cast ability or casting already while caster got invisibility effect stops this attempt (to preserve invisibility effect)
         if(self:IsAutocastsAbility(currentCastingAbility)) then
             caster:Stop()
@@ -318,7 +336,7 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
         return
     end
     -- Casting something else, waiting for that
-    if(caster:GetCurrentActiveAbility() ~= nil) then
+    if(currentCastingAbility ~= nil) then
         return
     end
 
