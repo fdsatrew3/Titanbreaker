@@ -215,7 +215,13 @@ function modifier_auto_casts:OnOrder(kv)
         return
     end
 
-    self:SetIsIgnoreCastTimeAbilities(self:IsOrderPreventAutoCastOfCastTimeAbilities(kv.order_type))
+	local isOrderStopAutoCasts = self:IsOrderPreventAutoCastOfCastTimeAbilities(kv.order_type)
+	
+	if(isOrderStopAutoCasts) then
+        self:SetLastAutoCastTarget(nil)
+	end
+	
+    self:SetIsIgnoreCastTimeAbilities(isOrderStopAutoCasts)
 end
 
 function modifier_auto_casts:IsOrderPreventAutoCastOfCastTimeAbilities(orderType)
@@ -250,6 +256,10 @@ end
 
 -- target can be nil
 function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target)
+	if(self:IsAbilityCanBeAutoCastedWhileRunning(ability)) then
+		return
+	end
+	
     if(target ~= nil) then
         self:SetLastAutoCastTarget(target)
         
@@ -257,7 +267,7 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target)
         	self.parent:MoveToTargetToAttack(target)
         end
     end
-	
+		
 	-- In very rare cases this modifier timer can perfectly align with cast time of abilities and send auto casts orders while player casting cast time ability and this breaking queue
 	print("OnAbilityFullyCast", ability:GetAbilityName())
 	if(ability:GetChannelTime() > 0) then
