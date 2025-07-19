@@ -588,7 +588,7 @@ function modifier_auto_casts:IsAbilityReadyForAutoCast(ability)
 
     -- IsFullyCastable() = caster have enough mana and ability coooldown ready
     -- IsActivated() = not hidden by stance/shapeshift/etc
-    return ability:GetAutoCastState() and ability:GetLevel() > 0 and ability:IsFullyCastable() and ability:IsActivated()
+    return ability:GetAutoCastState() and ability:GetLevel() > 0 and ability:IsFullyCastable() and ability:IsActivated() and ability:IsCooldownReady()
 end
 
 function modifier_auto_casts:IsIgnoreCastTimeAbilities()
@@ -717,31 +717,35 @@ function modifier_auto_casts:GetNextAbilityForWarlockAutoCasts(caster, ability, 
         caster._autoCastWarlockD = caster:FindAbilityByName("dark_ranger_life_drain")
         self:DetermineAutoCastOrderForAbility(caster._autoCastWarlockD)
     end
-
+	
+    if(target == nil) then
+        return nil
+    end
+	
     if(ability == caster._autoCastWarlockQ or ability == caster._autoCastWarlockW or ability == caster._autoCastWarlockD) then
         local isWarlockQReadyForAutocast = self:IsAbilityReadyForAutoCast(caster._autoCastWarlockQ)
         local isWarlockWReadyForAutocast = self:IsAbilityReadyForAutoCast(caster._autoCastWarlockW)
         local isWarlockDReadyForAutocast = self:IsAbilityReadyForAutoCast(caster._autoCastWarlockD)
 
-        if(target == nil) then
-            return nil
-        end
-
         if(isWarlockQReadyForAutocast) then
             local dotModifier = target:FindModifierByName("modifier_dot1")
-            -- Due to instant cast time trying prevent issues with low spell haste upkeep
-            local isDotAlmostEnded = dotModifier and dotModifier:GetRemainingTime() / dotModifier:GetDuration() < 0.8
-
-            if(isDotAlmostEnded or dotModifier == nil) then
+			
+            -- Due to instant cast time trying prevent issues with low spell haste upkeep		
+            if(dotModifier == nil or dotModifier:GetRemainingTime() / dotModifier:GetDuration() < 0.8) then
                 return caster._autoCastWarlockQ
             end
         end
 
         if(isWarlockWReadyForAutocast) then
             local dotModifier = target:FindModifierByName("modifier_dot2")
-            local stacksCount = dotModifier and dotModifier:GetStackCount() or 0
-            local isDotAlmostEnded = dotModifier and dotModifier:GetRemainingTime() / dotModifier:GetDuration() < 0.3
+            local stacksCount = 0
+            local isDotAlmostEnded = false
 
+			if(dotModifier) then
+				stacksCount = dotModifier:GetStackCount()
+				isDotAlmostEnded = dotModifier:GetRemainingTime() / dotModifier:GetDuration() < 0.5
+			end
+			
             if(isDotAlmostEnded) then
                 return caster._autoCastWarlockW
             end
@@ -945,7 +949,7 @@ function modifier_auto_casts:GetNextAbilityForCrystalMaidenAutoCasts(caster, abi
 	end
 		
 	if(isWinterChillStacksEnough) then
-		local isFrostShatterReady = self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter) and caster._autoCastCMFrostShatter:IsCooldownReady() == true 
+		local isFrostShatterReady = self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)
 		
 		if(ability == caster._autoCastCMFrostShatter and isFrostShatterReady) then
             return caster._autoCastCMFrostShatter
