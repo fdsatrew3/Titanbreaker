@@ -21,6 +21,7 @@ modifier_auto_casts = class({
         return 
         {
             MODIFIER_EVENT_ON_ABILITY_FULLY_CAST,
+			MODIFIER_EVENT_ON_ABILITY_END_CHANNEL,
             MODIFIER_EVENT_ON_ORDER
         }
     end,
@@ -236,16 +237,38 @@ function modifier_auto_casts:OnAbilityFullyCast(kv)
         return
     end
 
-    if(kv.target ~= nil) then
-        self:SetLastAutoCastTarget(kv.target)
+	self:_OnAbilityFinishedCasting(kv.ability, kv.target)
+end
+
+function modifier_auto_casts:OnAbilityEndChannel(kv)
+    if(kv.unit ~= self.parent) then
+        return
+    end
+	
+	self:_OnAbilityFinishedCasting(kv.ability, kv.target)
+end
+
+-- target can be nil
+function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target)
+    if(target ~= nil) then
+        self:SetLastAutoCastTarget(target)
         
         if(self:IsMustAutoAttackAfterAutoCast()) then
-        	self.parent:MoveToTargetToAttack(kv.target)
+        	self.parent:MoveToTargetToAttack(target)
         end
     end
 	
 	-- In very rare cases this modifier timer can perfectly align with cast time of abilities and send auto casts orders while player casting cast time ability and this breaking queue
-	self:_OnIntervalThinkInternal(true)
+	print("OnAbilityFullyCast", ability:GetAbilityName())
+	if(ability:GetChannelTime() > 0) then
+		-- If auto cast ability was channel one wait a bit for dota internals to do caster:SetChanneling(true)
+		local selfToPass = self
+		Timers:CreateTimer(0.01, function()
+			modifier_auto_casts._OnIntervalThinkInternal(selfToPass, true)
+		end)
+	else
+		self:_OnIntervalThinkInternal(true)
+	end
 end
 
 function modifier_auto_casts:OnIntervalThink()
@@ -330,8 +353,13 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target, ignor
     if(caster:IsStunned()) then
         return
     end
+	
+	print("ability", ability:GetAbilityName())
+	print("ignoreCurrentActiveAbility", ignoreCurrentActiveAbility)
+	print("caster:IsChanneling()", caster:IsChanneling())
+	
     -- Waiting for channel
-    if(caster:IsChanneling()) then
+    if(caster:IsChanneling() and ignoreCurrentActiveAbility) then
         return
     end
     
