@@ -181,9 +181,9 @@ function modifier_auto_casts:OnOrder(kv)
         end
 
         if(self.abilitiesWithAutoCastsCount < 1) then
-            self:StartIntervalThink(-1)
+            --self:StartIntervalThink(-1)
         else
-            self:StartIntervalThink(0.05)
+            --self:StartIntervalThink(0.05)
         end
     end
 
@@ -246,6 +246,7 @@ function modifier_auto_casts:OnAbilityFullyCast(kv)
 	
 	-- In very rare cases this modifier timer can perfectly align with cast time of abilities and send auto casts orders while player casting cast time ability and this breaking queue
 	self:_OnIntervalThinkInternal(true)
+	self.parent:AddNewModifier(self.parent, nil, "modifier_stunned", {duration = 1})
 end
 
 function modifier_auto_casts:OnIntervalThink()
@@ -925,7 +926,8 @@ function modifier_auto_casts:GetNextAbilityForCrystalMaidenAutoCasts(caster, abi
             return caster._autoCastCMFrostShatter
 		end
 		
-		if(ability == caster._autoCastCMIceBolt and self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt) and caster._autoCastCMFrostShatter:IsCooldownReady() == false) then
+		local isFrostShatterReady = caster._autoCastCMFrostShatter:GetLevel() > 0 and caster._autoCastCMFrostShatter:IsCooldownReady() == true 
+		if(ability == caster._autoCastCMIceBolt and self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt) and isFrostShatterReady == false) then
 			print("Return Q")
 			return caster._autoCastCMIceBolt
 		end
