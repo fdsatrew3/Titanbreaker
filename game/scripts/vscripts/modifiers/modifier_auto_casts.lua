@@ -246,7 +246,6 @@ function modifier_auto_casts:OnAbilityFullyCast(kv)
 	
 	-- In very rare cases this modifier timer can perfectly align with cast time of abilities and send auto casts orders while player casting cast time ability and this breaking queue
 	self:_OnIntervalThinkInternal(true)
-	self.parent:AddNewModifier(self.parent, nil, "modifier_stunned", {duration = 1})
 end
 
 function modifier_auto_casts:OnIntervalThink()
@@ -916,28 +915,22 @@ function modifier_auto_casts:GetNextAbilityForCrystalMaidenAutoCasts(caster, abi
 	if(target:HasModifier("modifier_icenova") or target:HasModifier("modifier_deepfreeze")) then
 		isWinterChillStacksEnough = true
 	end
-	
-	print("ability", ability:GetAbilityName())
-	print("self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)", self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter))
-	
+		
 	if(isWinterChillStacksEnough) then
-		if(ability == caster._autoCastCMFrostShatter and self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)) then
-			print("Return W")
+		local isFrostShatterReady = self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter) and caster._autoCastCMFrostShatter:IsCooldownReady() == true 
+		
+		if(ability == caster._autoCastCMFrostShatter and isFrostShatterReady) then
             return caster._autoCastCMFrostShatter
 		end
 		
-		local isFrostShatterReady = caster._autoCastCMFrostShatter:GetLevel() > 0 and caster._autoCastCMFrostShatter:IsCooldownReady() == true 
 		if(ability == caster._autoCastCMIceBolt and self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt) and isFrostShatterReady == false) then
-			print("Return Q")
 			return caster._autoCastCMIceBolt
 		end
 	else
 		if(ability == caster._autoCastCMIceBolt and self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt)) then
-			print("Return Q")
 			return caster._autoCastCMIceBolt
 		end
 		
-		print("Return Nothing")
 		return nil
 	end
 end
