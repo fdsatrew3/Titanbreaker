@@ -254,15 +254,29 @@ function modifier_auto_casts:OnIntervalThink()
 end
 
 function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility)
+    local isCompleteFailedContinueAutoCasting = true
+    
     for ability, _ in pairs(self.abilitiesWithAutoCasts) do
-        if(self:IsAbilityCanBeAutoCastedWhileRunning(ability)) then
-            self:CheckAbilityAutoCast(self.parent, ability, self:GetLastAutoCastTarget(), ignoreCurrentActiveAbility)
-        else
-            if(ignoreCurrentActiveAbility == true) then
-                self:CheckAbilityAutoCast(self.parent, ability, self:GetLastAutoCastTarget(), ignoreCurrentActiveAbility)
+        -- Always try abilities that support casting while running or when player just finished current auto cast
+        if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) or ignoreCurrentActiveAbility == true) then
+            local isAnyAbilityAutoCasted = self:CheckAbilityAutoCast(self.parent, ability, self:GetLastAutoCastTarget(), ignoreCurrentActiveAbility)
+
+            if(isAnyAbilityAutoCasted == true) then
+				self:SetIsAutoCastsQueueRequireForceAutoCasts(false)
+				
+				-- If any ability auto casted and this was after when player just finished current auto cast
+				if(ignoreCurrentActiveAbility == true) then
+					isCompleteFailedContinueAutoCasting = false
+					break
+				end
             end
         end
     end
+	
+	-- If after trying continue auto casting we failed completely (0 autocasts orders) using timer to await castable state and hope everything works
+	if(isCompleteFailedContinueAutoCasting == true and ignoreCurrentActiveAbility == true) then
+		self:SetIsAutoCastsQueueRequireForceAutoCasts(true)
+	end
 end
 
 function modifier_auto_casts:DetermineIfMustAutoAttackAfterAutoCast()
@@ -377,7 +391,8 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target, ignor
         })
 
         self:SetIsOrderFromAutoCast(false)
-        return
+		-- Always return true if there was auto cast for rare bug fix
+        return true
     end
 
     if(autoCastOrder == DOTA_UNIT_ORDER_CAST_TARGET and target) then
@@ -393,7 +408,8 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target, ignor
         })
 
         self:SetIsOrderFromAutoCast(false)
-        return
+		-- Always return true if there was auto cast for rare bug fix
+        return true
     end
 
     if(autoCastOrder == DOTA_UNIT_ORDER_CAST_POSITION) then
@@ -419,7 +435,8 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target, ignor
         })
 
         self:SetIsOrderFromAutoCast(false)
-        return
+		-- Always return true if there was auto cast for rare bug fix
+        return true
     end
 end
 
@@ -440,6 +457,18 @@ function modifier_auto_casts:GetNextAbilityForAutoCast(caster, ability, target)
     end
 
     return nil
+end
+
+function modifier_auto_casts:IsAutoCastsQueueRequireForceAutoCasts()
+    if(self._setIsAutoCastsQueueRequireForceAutoCasts ~= nil) then
+        return self._setIsAutoCastsQueueRequireForceAutoCasts
+    end
+
+    return false
+end
+
+function modifier_auto_casts:SetIsAutoCastsQueueRequireForceAutoCasts(state)
+    self._setIsAutoCastsQueueRequireForceAutoCasts = state
 end
 
 function modifier_auto_casts:SetLastAutoCastTarget(target)
@@ -877,18 +906,38 @@ function modifier_auto_casts:GetNextAbilityForCrystalMaidenAutoCasts(caster, abi
     	return nil
     end
 	
-    if(ability == caster._autoCastCMFrostShatter and self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)) then
-        local winterChillStacks = caster:GetModifierStackCount("modifier_winterschill", nil)
-        if(winterChillStacks >= 2 or target:HasModifier("modifier_icenova") or target:HasModifier("modifier_deepfreeze")) then
+	local isWinterChillStacksEnough = false
+	
+	if(caster:GetModifierStackCount("modifier_winterschill", nil) >= 2) then
+		isWinterChillStacksEnough = true
+	end
+	
+	if(target:HasModifier("modifier_icenova") or target:HasModifier("modifier_deepfreeze")) then
+		isWinterChillStacksEnough = true
+	end
+	
+	print("ability", ability:GetAbilityName())
+	print("self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)", self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter))
+	
+	if(isWinterChillStacksEnough) then
+		if(ability == caster._autoCastCMFrostShatter and self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)) then
+			print("Return W")
             return caster._autoCastCMFrostShatter
-        end
-    end
-
-    if(ability == caster._autoCastCMIceBolt and self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt)) then
-        return caster._autoCastCMIceBolt
-    end
-
-    return nil
+		end
+		
+		if(ability == caster._autoCastCMIceBolt and self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt) and caster._autoCastCMFrostShatter:IsCooldownReady() == false) then
+			print("Return Q")
+			return caster._autoCastCMIceBolt
+		end
+	else
+		if(ability == caster._autoCastCMIceBolt and self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt)) then
+			print("Return Q")
+			return caster._autoCastCMIceBolt
+		end
+		
+		print("Return Nothing")
+		return nil
+	end
 end
 
 -- Nature Phophet: Q spam if required
