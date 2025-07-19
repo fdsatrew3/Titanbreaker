@@ -889,7 +889,7 @@ function modifier_auto_casts:GetNextAbilityForInvokerAutoCasts(caster, ability, 
     return nil
 end
 
--- Dark Seer: Q W E spam
+-- Dark Seer: Q W D spam
 function modifier_auto_casts:GetNextAbilityForDarkSeerAutoCasts(caster, ability, target)
     if(caster._autoCastMindstorm == nil) then
         caster._autoCastMindstorm = caster:FindAbilityByName("shadow1")
@@ -904,16 +904,20 @@ function modifier_auto_casts:GetNextAbilityForDarkSeerAutoCasts(caster, ability,
         self:DetermineAutoCastOrderForAbility(caster._autoCastDreamFeast)
     end
 
-    if(ability == caster._autoCastDreamFeast and self:IsAbilityReadyForAutoCast(caster._autoCastDreamFeast)) then
-        return caster._autoCastDreamFeast
-    end
-
-    if(ability == caster._autoCastMindshatter and self:IsAbilityReadyForAutoCast(caster._autoCastMindshatter)) then
-        return caster._autoCastMindshatter
-    end
-
-    if(ability == caster._autoCastMindstorm and self:IsAbilityReadyForAutoCast(caster._autoCastMindstorm)) then
-        return caster._autoCastMindstorm
+	local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastMindstorm)
+	local isWReady = self:IsAbilityReadyForAutoCast(caster._autoCastMindshatter)
+	local isDReady = self:IsAbilityReadyForAutoCast(caster._autoCastDreamFeast)
+	
+    if(ability == caster._autoCastMindstorm or ability == caster._autoCastMindshatter or ability == caster._autoCastDreamFeast) then
+		if(isDReady) then
+			return caster._autoCastDreamFeast
+		end
+		if(isWReady) then
+			return caster._autoCastMindshatter
+		end
+		if(isQReady) then
+			return caster._autoCastMindstorm
+		end
     end
 
     return nil
