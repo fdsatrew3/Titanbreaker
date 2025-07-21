@@ -383,9 +383,8 @@ function modifier_auto_casts:PerformAutoCastOfAbility(abilityToAutoCast, target)
     
     --print("self:IsAutoCastsPaused()", self:IsAutoCastsPaused())
     --print("self._setIsAutoCastsPaused", self._setIsAutoCastsPaused)
-    if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) == false and self:IsAutoCastsPaused() == true) then
+    if(self:IsAbilityCanBeAutoCastedWhileRunning(abilityToAutoCast) == false and self:IsAutoCastsPaused() == true) then
     	self:SetIsAutoCastFailed(false)
-    	
     	return
     end
     
