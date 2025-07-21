@@ -191,7 +191,7 @@ function modifier_auto_casts:OnOrder(kv)
         if(self.abilitiesWithAutoCastsCount < 1) then
             self:StartIntervalThink(-1)
         else
-            self:StartIntervalThink(0.05)
+            self:StartIntervalThink(0.01)
         end
     end
     
@@ -607,6 +607,23 @@ function modifier_auto_casts:IsMovementAbility(ability)
     end
     
     return false
+end
+
+-- Internal timer that can be used as delay for perfomance reasons
+function modifier_auto_casts:IsInternalTimerReady(interval)
+    local currentTime = GameRules:GetGameTime()
+    if(self._autoCastsTimer == nil) then
+    	self._autoCastsTimer = currentTime
+    end
+    
+    local currentTime = GameRules:GetGameTime()
+    if(currentTime - self._autoCastsTimer < interval) then
+    	return false
+    end		
+	
+    self._autoCastsTimer = currentTime
+	
+	return true
 end
 
 function modifier_auto_casts:IsAbilityCanBeAutoCastedWhileRunning(ability)
@@ -1057,6 +1074,10 @@ function modifier_auto_casts:GetNextAbilityForNatureProphetAutoCasts(caster, abi
     end
             
     if(ability == caster._autoCastNatureProphetQ and self:IsAbilityReadyForAutoCast(caster._autoCastNatureProphetQ)) then
+		if(self:IsInternalTimerReady(0.05) == false) then
+			return nil
+		end
+		
         local position = caster:GetAbsOrigin()
         local allies = FindNearbyAllies(caster, caster:GetAbsOrigin(), ability:GetEffectiveCastRange(position, caster))
         local isCastRequired = false
@@ -1525,6 +1546,10 @@ function modifier_auto_casts:GetNextAbilityForAxeAutoCasts(caster, ability, targ
     end
 
     if(ability == caster._autoCastAxeW and self:IsAbilityReadyForAutoCast(caster._autoCastAxeW)) then
+        if(self:IsInternalTimerReady(0.05) == false) then
+        	return nil
+        end
+		
         local casterPosition = caster:GetAbsOrigin()
         local enemiesAround = FindNearbyEnemies(caster, casterPosition, caster._autoCastAxeW:GetSpecialValueFor("radius"))
 
@@ -1565,6 +1590,10 @@ function modifier_auto_casts:GetNextAbilityForLegionCommanderAutoCasts(caster, a
     else
         -- Spam only when enemies around
         if(ability == caster._autoCastLegionCommanderQ and self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ)) then
+            if(self:IsInternalTimerReady(0.05) == false) then
+            	return nil
+            end
+			
             local casterPosition = caster:GetAbsOrigin()
             local enemiesAround = FindNearbyEnemies(caster, casterPosition, caster._autoCastLegionCommanderQ:GetSpecialValueFor("range"))
             if(#enemiesAround > 0) then
