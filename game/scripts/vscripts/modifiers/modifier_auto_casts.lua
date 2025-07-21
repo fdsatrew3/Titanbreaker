@@ -140,7 +140,14 @@ function modifier_auto_casts:OnCreated()
         -- Eventually will kill player? (Terrorblade)
         ["terror1"] = true,
     }
-
+	
+    -- List of abilities that move hero and must ignore moving check
+    self.movementAbilities = 
+    {
+        -- Phantom Assassin E
+        ["Fatal_Throw"] = true,
+	}
+	
     -- List of heroes that must keep auto attacking last enemy after every auto cast
     self.mustAutoAttackAfterAutoCast = 
     {
@@ -184,7 +191,7 @@ function modifier_auto_casts:OnOrder(kv)
         if(self.abilitiesWithAutoCastsCount < 1) then
             self:StartIntervalThink(-1)
         else
-            self:StartIntervalThink(0.05)
+            self:StartIntervalThink(2)
         end
     end
 
@@ -215,14 +222,19 @@ function modifier_auto_casts:OnOrder(kv)
         return
     end
 
-	local isOrderStopAutoCasts = self:IsOrderPreventAutoCastOfCastTimeAbilities(kv.order_type)
-	
-	if(isOrderStopAutoCasts) then
+	if(self:IsOrderPreventAutoCastOfAbilities(kv.order_type)) then
+		print("PAUSE ANYMORE")
         self:SetLastAutoCastTarget(nil)
+		self:SetIsAutoCastsPaused(true)
+	else
+		print("NO PAUSE ANYMORE")
+		self:SetIsAutoCastsPaused(false)
 	end
+	
+	print("self._setIsAutoCastsPaused", self._setIsAutoCastsPaused)
 end
 
-function modifier_auto_casts:IsOrderPreventAutoCastOfCastTimeAbilities(orderType)
+function modifier_auto_casts:IsOrderPreventAutoCastOfAbilities(orderType)
     return orderType == DOTA_UNIT_ORDER_MOVE_TO_POSITION or orderType == DOTA_UNIT_ORDER_MOVE_TO_TARGET 
         or orderType == DOTA_UNIT_ORDER_ATTACK_MOVE or orderType == DOTA_UNIT_ORDER_ATTACK_TARGET
         or orderType == DOTA_UNIT_ORDER_EJECT_ITEM_FROM_STASH or orderType == DOTA_UNIT_ORDER_PING_ABILITY
@@ -296,8 +308,8 @@ function modifier_auto_casts:OnIntervalThink()
 end
 
 function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility)   
-	print("== _OnIntervalThinkInternal ===")
-	print("ignoreCurrentActiveAbility", ignoreCurrentActiveAbility)
+	--print("== _OnIntervalThinkInternal ===")
+	--print("ignoreCurrentActiveAbility", ignoreCurrentActiveAbility)
 	
 	local ignoreCurrentActiveAbilityInternal = false
 	if(ignoreCurrentActiveAbility == true or self:IsAutoCastFailed() == true) then
@@ -307,32 +319,44 @@ function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility
 	local lastAutoCastTarget = self:GetLastAutoCastTarget()
 	local abilityToAutoCast = nil
 	
-	print("START pairs(self.abilitiesWithAutoCasts)")
+	--print("START pairs(self.abilitiesWithAutoCasts)")
 	for ability, _ in pairs(self.abilitiesWithAutoCasts) do
-		print("= PAIR ITERATION: ability", ability, "name", ability:GetAbilityName())
+		--print("= PAIR ITERATION: ability", ability, "name", ability:GetAbilityName())
         -- Always try abilities that support casting while running or when player just finished current auto cast
         if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) or ignoreCurrentActiveAbilityInternal == true) then
 			abilityToAutoCast = self:GetNextAbilityForAutoCast(self.parent, ability, lastAutoCastTarget, ignoreCurrentActiveAbilityInternal)
-			print("Checking ", ability:GetAbilityName(), " result = ", abilityToAutoCast)
+			--print("Checking ", ability:GetAbilityName(), " result = ", abilityToAutoCast)
 			if(abilityToAutoCast and abilityToAutoCast.GetAbilityName) then
-				print("Checking -> GetAbilityName", abilityToAutoCast:GetAbilityName())
+				--print("Checking -> GetAbilityName", abilityToAutoCast:GetAbilityName())
 			end
 			if(abilityToAutoCast ~= nil) then
-				print("BREAK WITH", abilityToAutoCast:GetAbilityName())
+				--print("BREAK WITH", abilityToAutoCast:GetAbilityName())
 				break
 			end
         end
 	end
-	print("END pairs(self.abilitiesWithAutoCasts)")
+	--print("END pairs(self.abilitiesWithAutoCasts)")
 	
 	if(abilityToAutoCast == nil) then
 		if(ignoreCurrentActiveAbilityInternal == true) then
-			print("Failed autocast. Set flag")
+			--print("Failed autocast. Set flag")
 			self:SetIsAutoCastFailed(true)
 		end
 	else
 		self:PerformAutoCastOfAbility(abilityToAutoCast, lastAutoCastTarget)
 	end
+end
+
+function modifier_auto_casts:SetIsAutoCastsPaused(state)
+	self._setIsAutoCastsPaused = state
+end
+
+function modifier_auto_casts:IsAutoCastsPaused()
+	if(self._setIsAutoCastsPaused ~= nil) then
+		return self._setIsAutoCastsPaused
+	end
+	
+	return false
 end
 
 function modifier_auto_casts:SetIsAutoCastFailed(state)
@@ -356,6 +380,14 @@ function modifier_auto_casts:PerformAutoCastOfAbility(abilityToAutoCast, target)
     if(autoCastOrder == nil) then
         return nil
     end
+	
+	print("self:IsAutoCastsPaused()", self:IsAutoCastsPaused())
+	print("self._setIsAutoCastsPaused", self._setIsAutoCastsPaused)
+	if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) == false and self:IsAutoCastsPaused() == true) then
+		self:SetIsAutoCastFailed(false)
+		
+		return
+	end
 	
 	print("target", target)
 	
@@ -511,13 +543,12 @@ function modifier_auto_casts:GetNextAbilityForAutoCast(caster, ability, target, 
     end
 
     -- Abilities without cast time and instant cast should be castable while running (oracle E, np Q, etc)
-	--[[
     if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) == false) then
-        if(caster:IsMoving()) then
+        if(caster:IsMoving() and self:IsMovementAbility(ability)) then
 			print("IsAbilityCanBeAutoCastedWhileRunning and IsMoving return")
             return
         end
-    end --]]
+    end
 	
 	-- target can be nil
     -- Caster should be fine and ready to cast any ability now so no need to check for that (at least only manacosts and cooldowns for desired abilities needs checking)
@@ -567,6 +598,18 @@ function modifier_auto_casts:GetAutoCastOrderForAbility(ability)
     return nil
 end
 
+function modifier_auto_casts:IsMovementAbility(ability)
+    if(not ability) then
+        return false
+    end
+
+    if(ability._autoCastMovementAbility ~= nil) then
+        return ability._autoCastMovementAbility
+    end
+
+    return false
+end
+
 function modifier_auto_casts:IsAbilityCanBeAutoCastedWhileRunning(ability)
     if(not ability) then
         return false
@@ -583,7 +626,8 @@ function modifier_auto_casts:DetermineAutoCastOrderForAbility(ability)
     if(not ability or ability.GetAutoCastState == nil) then
         return
     end
-
+	
+	local abilityName = ability:GetAbilityName()
     local abilityBehavior = COverthrowGameMode:GetAbilityBehaviorSafe(ability)
 
     -- Special behaviors that allow abilities to be casted while running: DOTA_ABILITY_BEHAVIOR_DONT_CANCEL_MOVEMENT, DOTA_ABILITY_BEHAVIOR_IMMEDIATE?
@@ -594,11 +638,15 @@ function modifier_auto_casts:DetermineAutoCastOrderForAbility(ability)
         if(ability._autoCastWhileRunning == nil and bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_IMMEDIATE) == DOTA_ABILITY_BEHAVIOR_IMMEDIATE) then
             ability._autoCastWhileRunning = true
         end
-        if(self.cantBeCastedWhileRunning[ability:GetAbilityName()] == true) then
+        if(self.cantBeCastedWhileRunning[abilityName] == true) then
             ability._autoCastWhileRunning = false
         end
     end
-
+	
+	if(self.movementAbilities[abilityName] == true) then
+		ability._autoCastMovementAbility = true
+	end
+	
     -- Grimstroke Hellfire, maybe something else
     if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_NO_TARGET) == DOTA_ABILITY_BEHAVIOR_NO_TARGET) then
         ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_NO_TARGET
