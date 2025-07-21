@@ -191,7 +191,7 @@ function modifier_auto_casts:OnOrder(kv)
         if(self.abilitiesWithAutoCastsCount < 1) then
             self:StartIntervalThink(-1)
         else
-            self:StartIntervalThink(2)
+            self:StartIntervalThink(0.05)
         end
     end
     
