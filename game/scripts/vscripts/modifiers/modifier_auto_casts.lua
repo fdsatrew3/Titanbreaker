@@ -1074,9 +1074,9 @@ function modifier_auto_casts:GetNextAbilityForNatureProphetAutoCasts(caster, abi
     end
             
     if(ability == caster._autoCastNatureProphetQ and self:IsAbilityReadyForAutoCast(caster._autoCastNatureProphetQ)) then
-		if(self:IsInternalTimerReady(0.05) == false) then
-			return nil
-		end
+        if(self:IsInternalTimerReady(0.05) == false) then
+        	return nil
+        end
 		
         local position = caster:GetAbsOrigin()
         local allies = FindNearbyAllies(caster, caster:GetAbsOrigin(), ability:GetEffectiveCastRange(position, caster))
@@ -1549,7 +1549,7 @@ function modifier_auto_casts:GetNextAbilityForAxeAutoCasts(caster, ability, targ
         if(self:IsInternalTimerReady(0.05) == false) then
         	return nil
         end
-		
+        
         local casterPosition = caster:GetAbsOrigin()
         local enemiesAround = FindNearbyEnemies(caster, casterPosition, caster._autoCastAxeW:GetSpecialValueFor("radius"))
 
@@ -1593,13 +1593,13 @@ function modifier_auto_casts:GetNextAbilityForLegionCommanderAutoCasts(caster, a
             if(self:IsInternalTimerReady(0.05) == false) then
             	return nil
             end
-			
+            
             local casterPosition = caster:GetAbsOrigin()
             local enemiesAround = FindNearbyEnemies(caster, casterPosition, caster._autoCastLegionCommanderQ:GetSpecialValueFor("range"))
             if(#enemiesAround > 0) then
                 return caster._autoCastLegionCommanderQ
             end
-
+            
             return nil
         end
     end
