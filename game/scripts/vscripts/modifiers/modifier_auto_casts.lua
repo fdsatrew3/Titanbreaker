@@ -140,6 +140,8 @@ function modifier_auto_casts:OnCreated()
         ["pala1"] = true,
         -- Eventually will kill player? (Terrorblade)
         ["terror1"] = true,
+        -- Eventually will kill player? (Antimage)
+        ["dh1"] = true,
     }
 	
     -- List of abilities that move hero and must ignore moving check
@@ -168,7 +170,8 @@ function modifier_auto_casts:OnCreated()
         ["npc_dota_hero_phantom_lancer"] = true,
         ["npc_dota_hero_terrorblade"] = true,
         ["npc_dota_hero_bounty_hunter"] = true,
-        ["npc_dota_hero_bounty_sven"] = true
+        ["npc_dota_hero_sven"] = true,
+        ["npc_dota_hero_antimage"] = true
     }
 
     self:DetermineIfMustAutoAttackAfterAutoCast()
