@@ -1427,19 +1427,25 @@ function modifier_auto_casts:GetNextAbilityForDrowRangerAutoCasts(caster, abilit
         caster._autoCastDrowRangerD = caster:FindAbilityByName("Mindfreezing_Shot")
         self:DetermineAutoCastOrderForAbility(caster._autoCastDrowRangerD)
     end
-
-    if(ability == caster._autoCastDrowRangerD and self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerD)) then
-        return caster._autoCastDrowRangerD
+	
+    if(ability == caster._autoCastMindstorm or ability == caster._autoCastMindshatter or ability == caster._autoCastDreamFeast) then
+		local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerQ)
+		local isEReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerE)
+		local isDReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerD)
+		
+		if(isDReady) then
+			return caster._autoCastDrowRangerD
+		end
+		
+		if(isQReady) then
+			return caster._autoCastDrowRangerQ
+		end
+		
+		if(isEReady) then
+			return caster._autoCastDrowRangerE
+		end
     end
-
-    if(ability == caster._autoCastDrowRangerE and self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerE)) then
-        return caster._autoCastDrowRangerE
-    end
-
-    if(ability == caster._autoCastDrowRangerQ and self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerQ)) then
-        return caster._autoCastDrowRangerQ
-    end
-
+	
     return nil
 end
 
