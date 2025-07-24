@@ -1285,18 +1285,24 @@ function modifier_auto_casts:GetNextAbilityForBountyHunterAutoCasts(caster, abil
         caster._autoCastBountyHunterE = caster:FindAbilityByName("combat2")
         self:DetermineAutoCastOrderForAbility(caster._autoCastBountyHunterE)
     end
-
-    if(ability == caster._autoCastBountyHunterE and self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterE)) then
-        return caster._autoCastBountyHunterE
-    end
-
-    if(ability == caster._autoCastBountyHunterW and self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterW) and caster:GetModifierStackCount("modifier_combopoint", nil) >= 3) then
-        return caster._autoCastBountyHunterW
-    end
-    
-    if(ability == caster._autoCastBountyHunterQ and self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterQ)) then
-        return caster._autoCastBountyHunterQ
-    end
+	
+	if(ability == caster._autoCastBountyHunterQ or ability == caster._autoCastBountyHunterW or ability == caster._autoCastBountyHunterE) then
+        local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterQ)
+        local isWReady = self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterW)
+        local isEReady = self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterE)
+                
+        if(isWReady and caster:GetModifierStackCount("modifier_combopoint", nil) >= 3) then
+        	return caster._autoCastBountyHunterW
+        end
+		
+        if(isEReady) then
+        	return caster._autoCastBountyHunterE
+        end
+		
+        if(isQReady) then
+        	return caster._autoCastBountyHunterQ
+        end
+	end
 
     return nil
 end
