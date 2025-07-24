@@ -1040,33 +1040,37 @@ function modifier_auto_casts:GetNextAbilityForCrystalMaidenAutoCasts(caster, abi
     	return nil
     end
 	
-	local isWinterChillStacksEnough = false
-	
-	if(caster:GetModifierStackCount("modifier_winterschill", nil) >= 2) then
-		isWinterChillStacksEnough = true
+	if(ability == caster._autoCastCMIceBolt or ability == caster._autoCastCMFrostShatter) then
+    	local isWinterChillStacksEnough = false
+    	
+    	if(caster:GetModifierStackCount("modifier_winterschill", nil) >= 2) then
+    		isWinterChillStacksEnough = true
+    	end
+    	
+    	if(target:HasModifier("modifier_icenova") or target:HasModifier("modifier_deepfreeze")) then
+    		isWinterChillStacksEnough = true
+    	end
+    		
+    	if(isWinterChillStacksEnough) then
+    		local isFrostShatterReady = self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)
+    		
+    		if(isFrostShatterReady) then
+    	        return caster._autoCastCMFrostShatter
+    		end
+    		
+    		if(self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt) and isFrostShatterReady == false) then
+    			return caster._autoCastCMIceBolt
+    		end
+    	else
+    		if(self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt)) then
+    			return caster._autoCastCMIceBolt
+    		end
+    		
+    		return nil
+    	end
 	end
 	
-	if(target:HasModifier("modifier_icenova") or target:HasModifier("modifier_deepfreeze")) then
-		isWinterChillStacksEnough = true
-	end
-		
-	if(isWinterChillStacksEnough) then
-		local isFrostShatterReady = self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)
-		
-		if(ability == caster._autoCastCMFrostShatter and isFrostShatterReady) then
-            return caster._autoCastCMFrostShatter
-		end
-		
-		if(ability == caster._autoCastCMIceBolt and self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt) and isFrostShatterReady == false) then
-			return caster._autoCastCMIceBolt
-		end
-	else
-		if(ability == caster._autoCastCMIceBolt and self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt)) then
-			return caster._autoCastCMIceBolt
-		end
-		
-		return nil
-	end
+	return nil
 end
 
 -- Nature Phophet: Q spam if required
