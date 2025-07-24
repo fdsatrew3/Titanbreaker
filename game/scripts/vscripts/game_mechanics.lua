@@ -31372,6 +31372,15 @@ function Brew5Taunt(event)
     end
 end
 
+function Brew1AggroEnemy(event)
+    local caster = event.caster
+    local ability = event.ability
+
+    if ability:GetLevel() >= 2 and GetLevelOfAbility(caster, "brew2") >= 3 then
+		COverthrowGameMode:AggroOnEnemy(event)
+    end
+end
+
 function HasStaggerEffect(hero)
     if hero.canHaveStagger and GetLevelOfAbility(hero, "brew2") >= 4 then
         return true
