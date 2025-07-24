@@ -474,7 +474,7 @@
 		"DOTA_Tooltip_ability_Ice_Bolt_stacks"                                            "Max Winter's Chill stacks:"
 
 		"DOTA_Tooltip_Ability_Ice_Bolt_Pet"  "Ice Bolt"  
-		"DOTA_Tooltip_Ability_Ice_Bolt_Pet_Description"  "Launch 3 Ice Bolts, dealing Frost Damage based on the Master's Intellect and slow by 50%%. Will be automatically cast when you cast Ice Bolt on your Hero. 2 secs casttime."
+		"DOTA_Tooltip_Ability_Ice_Bolt_Pet_Description"  "Launch 3 Ice Bolts, dealing Frost Damage based on the Master's Intellect and slow by 50%%. 2 secs casttime.\nCan be set to Auto Cast for continuous casting of Ice Bolt against the last target of owner"
 		"DOTA_Tooltip_Ability_Ice_Bolt_Pet_buffduration"    "Slow Duration:" 
 		"DOTA_Tooltip_Ability_Ice_Bolt_Pet_dmgfromstat"    "%Intellect to Damage:" 
 		"DOTA_Tooltip_Ability_Ice_Bolt_Pet_spelldmg"    "%Spellpower Factor:"
