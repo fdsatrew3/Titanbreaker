@@ -76,7 +76,8 @@ function modifier_auto_casts:OnCreated()
         ["npc_dota_hero_mars"] = "GetNextAbilityForMarsAutoCasts",
         ["npc_dota_hero_dragon_knight"] = "GetNextAbilityForDragonKnightAutoCasts",
         ["npc_dota_hero_phantom_lancer"] = "GetNextAbilityForPhantomLancerAutoCasts",
-        ["npc_dota_hero_terrorblade"] = "GetNextAbilityForTerrorbladeAutoCasts"
+        ["npc_dota_hero_terrorblade"] = "GetNextAbilityForTerrorbladeAutoCasts",
+		["npc_dota_hero_antimage"] = "GetNextAbilityForAntimageAutoCasts"
     }
 
     -- List of abilities that can be casted while running, but actually will do more harm than good
@@ -1761,5 +1762,19 @@ function modifier_auto_casts:GetNextAbilityForTerrorbladeAutoCasts(caster, abili
         return caster._autoCastTerrorbladeQ
     end
 
+    return nil
+end
+
+-- Antimage: Q spam, TODO: Something smarter?
+function modifier_auto_casts:GetNextAbilityForAntimageAutoCasts(caster, ability, target)
+    if(caster._autoCastAntimageQ == nil) then
+        caster._autoCastAntimageQ = caster:FindAbilityByName("dh1")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastAntimageQ)
+    end
+	
+    if(ability == caster._autoCastAntimageQ and self:IsAbilityReadyForAutoCast(caster._autoCastAntimageQ)) then
+        return caster._autoCastAntimageQ
+    end
+	
     return nil
 end
