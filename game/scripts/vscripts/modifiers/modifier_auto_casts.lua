@@ -77,7 +77,8 @@ function modifier_auto_casts:OnCreated()
         ["npc_dota_hero_dragon_knight"] = "GetNextAbilityForDragonKnightAutoCasts",
         ["npc_dota_hero_phantom_lancer"] = "GetNextAbilityForPhantomLancerAutoCasts",
         ["npc_dota_hero_terrorblade"] = "GetNextAbilityForTerrorbladeAutoCasts",
-		["npc_dota_hero_antimage"] = "GetNextAbilityForAntimageAutoCasts"
+		["npc_dota_hero_antimage"] = "GetNextAbilityForAntimageAutoCasts",
+		["npc_dota_hero_brewmaster"] = "GetNextAbilityForBrewmasterAutoCasts",
     }
 
     -- List of abilities that can be casted while running, but actually will do more harm than good
@@ -1801,6 +1802,20 @@ function modifier_auto_casts:GetNextAbilityForAntimageAutoCasts(caster, ability,
 	
     if(ability == caster._autoCastAntimageQ and self:IsAbilityReadyForAutoCast(caster._autoCastAntimageQ)) then
         return caster._autoCastAntimageQ
+    end
+	
+    return nil
+end
+
+-- Brewmaster: Q spam, TODO: Something smarter?
+function modifier_auto_casts:GetNextAbilityForBrewmasterAutoCasts(caster, ability, target)
+    if(caster._autoCastBrewmasterQ == nil) then
+        caster._autoCastBrewmasterQ = caster:FindAbilityByName("brew1")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastBrewmasterQ)
+    end
+	
+    if(ability == caster._autoCastBrewmasterQ and self:IsAbilityReadyForAutoCast(caster._autoCastBrewmasterQ)) then
+        return caster._autoCastBrewmasterQ
     end
 	
     return nil
