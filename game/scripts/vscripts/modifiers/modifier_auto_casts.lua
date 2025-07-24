@@ -87,6 +87,7 @@ function modifier_auto_casts:OnCreated()
         ["npc_dota_hero_terrorblade"] = "GetNextAbilityForTerrorbladeAutoCasts",
 		["npc_dota_hero_antimage"] = "GetNextAbilityForAntimageAutoCasts",
 		["npc_dota_hero_brewmaster"] = "GetNextAbilityForBrewmasterAutoCasts",
+		["npc_dota_hero_sniper"] = "GetNextAbilityForSniperAutoCasts",
 		-- Summons
 		["npc_dota_creature_waterelemental"] = "GetNextAbilityForCrystalMaidenPetAutoCasts",
     }
@@ -153,6 +154,9 @@ function modifier_auto_casts:OnCreated()
         ["terror1"] = true,
         -- Eventually will kill player? (Antimage)
         ["dh1"] = true,
+        -- Eventually will kill player? (Antimage)
+        ["beast1"] = true,
+		["Hunter_Assassinate"] = true,
     }
 	
     -- List of abilities that move hero and must ignore moving check
@@ -182,7 +186,8 @@ function modifier_auto_casts:OnCreated()
         ["npc_dota_hero_terrorblade"] = true,
         ["npc_dota_hero_bounty_hunter"] = true,
         ["npc_dota_hero_sven"] = true,
-        ["npc_dota_hero_antimage"] = true
+        ["npc_dota_hero_antimage"] = true,
+        ["npc_dota_hero_sniper"] = true
     }
 	
     -- List of summon abilities that can be casted by timer
@@ -1942,6 +1947,29 @@ function modifier_auto_casts:GetNextAbilityForBrewmasterAutoCasts(caster, abilit
 	
     if(ability == caster._autoCastBrewmasterQ and self:IsAbilityReadyForAutoCast(caster._autoCastBrewmasterQ)) then
         return caster._autoCastBrewmasterQ
+    end
+	
+    return nil
+end
+
+-- Sniper: Q W spam
+function modifier_auto_casts:GetNextAbilityForSniperAutoCasts(caster, ability, target)
+    if(caster._autoCastSniperQ == nil) then
+        caster._autoCastSniperQ = caster:FindAbilityByName("beast1")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastSniperQ)
+    end
+	
+    if(caster._autoCastSniperW == nil) then
+        caster._autoCastSniperW = caster:FindAbilityByName("Hunter_Assassinate")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastSniperW)
+    end
+	
+    if(ability == caster._autoCastSniperQ and self:IsAbilityReadyForAutoCast(caster._autoCastSniperQ)) then
+        return caster._autoCastSniperQ
+    end
+	
+    if(ability == caster._autoCastSniperW and self:IsAbilityReadyForAutoCast(caster._autoCastSniperW)) then
+        return caster._autoCastSniperW
     end
 	
     return nil
