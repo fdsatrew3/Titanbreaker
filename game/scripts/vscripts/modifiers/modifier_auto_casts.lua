@@ -988,12 +988,12 @@ function modifier_auto_casts:GetNextAbilityForDarkSeerAutoCasts(caster, ability,
         caster._autoCastDreamFeast = caster:FindAbilityByName("shadow3")
         self:DetermineAutoCastOrderForAbility(caster._autoCastDreamFeast)
     end
-
-	local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastMindstorm)
-	local isWReady = self:IsAbilityReadyForAutoCast(caster._autoCastMindshatter)
-	local isDReady = self:IsAbilityReadyForAutoCast(caster._autoCastDreamFeast)
 	
     if(ability == caster._autoCastMindstorm or ability == caster._autoCastMindshatter or ability == caster._autoCastDreamFeast) then
+		local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastMindstorm)
+		local isWReady = self:IsAbilityReadyForAutoCast(caster._autoCastMindshatter)
+		local isDReady = self:IsAbilityReadyForAutoCast(caster._autoCastDreamFeast)
+		
 		if(isDReady) then
 			return caster._autoCastDreamFeast
 		end
@@ -1323,46 +1323,52 @@ function modifier_auto_casts:GetNextAbilityForWindRunnerAutoCasts(caster, abilit
         self:DetermineAutoCastOrderForAbility(caster._autoCastWindrunnerR)
     end
 
-    -- If fire arrow learned try smart use lock and reload stacks
-    local fireArrowLevel = caster._autoCastWindrunnerW:GetLevel()
-    if(fireArrowLevel > 0) then
-        if(ability == caster._autoCastWindrunnerR and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerR) and caster:GetModifierStackCount("modifier_lockreload", nil) >= 10) then
-            return caster._autoCastWindrunnerR
-        end
-
-        -- Try consider fire arrow buff
-        if(fireArrowLevel >= 3) then
-            local fireArrowBuffModifier = caster:FindModifierByName("modifier_fire_shots_jungle")
-            local isFireArrowBuffModifierAlmostEnded = fireArrowBuffModifier and fireArrowBuffModifier:GetRemainingTime() / fireArrowBuffModifier:GetDuration() < 0.5 or false
-
-            if(fireArrowBuffModifier == nil) then
-                if(ability == caster._autoCastWindrunnerW and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerW)) then
-                    return caster._autoCastWindrunnerW
-                end
-            else
-                if(ability == caster._autoCastWindrunnerW and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerW) and isFireArrowBuffModifierAlmostEnded) then
-                    return caster._autoCastWindrunnerW
-                end
-            end
-        else
-            if(ability == caster._autoCastWindrunnerW and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerW)) then
-                return caster._autoCastWindrunnerW
-            end
-        end
-    else
-        if(ability == caster._autoCastWindrunnerR and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerR)) then
-            return caster._autoCastWindrunnerR
-        end
-
-        if(ability == caster._autoCastWindrunnerW and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerW)) then
-            return caster._autoCastWindrunnerW
-        end
-    end
-
-    if(ability == caster._autoCastWindrunnerQ and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerQ)) then
-        return caster._autoCastWindrunnerQ
-    end
-    
+	if(ability == caster._autoCastWindrunnerQ or ability == caster._autoCastWindrunnerW or ability == caster._autoCastWindrunnerR) then
+		local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerQ)
+		local isWReady = self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerW)
+		local isRReady = self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerR)
+		
+		-- If fire arrow learned try smart use lock and reload stacks
+		local fireArrowLevel = caster._autoCastWindrunnerW:GetLevel()
+		if(fireArrowLevel > 0) then
+		    if(isRReady and caster:GetModifierStackCount("modifier_lockreload", nil) >= 10) then
+		        return caster._autoCastWindrunnerR
+		    end
+		
+		    -- Try consider fire arrow buff
+		    if(fireArrowLevel >= 3) then
+		        local fireArrowBuffModifier = caster:FindModifierByName("modifier_fire_shots_jungle")
+		        local isFireArrowBuffModifierAlmostEnded = fireArrowBuffModifier and fireArrowBuffModifier:GetRemainingTime() / fireArrowBuffModifier:GetDuration() < 0.5 or false
+		
+		        if(fireArrowBuffModifier == nil) then
+		            if(isWReady) then
+		                return caster._autoCastWindrunnerW
+		            end
+		        else
+		            if(isWReady and isFireArrowBuffModifierAlmostEnded) then
+		                return caster._autoCastWindrunnerW
+		            end
+		        end
+		    else
+		        if(isWReady) then
+		            return caster._autoCastWindrunnerW
+		        end
+		    end
+		else
+		    if(isRReady) then
+		        return caster._autoCastWindrunnerR
+		    end
+		
+		    if(isWReady) then
+		        return caster._autoCastWindrunnerW
+		    end
+		end
+		
+		if(isQReady) then
+		    return caster._autoCastWindrunnerQ
+		end
+	end
+	    
     return nil
 end
 
