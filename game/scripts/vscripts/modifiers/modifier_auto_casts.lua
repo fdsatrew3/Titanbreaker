@@ -188,8 +188,7 @@ function modifier_auto_casts:OnCreated()
     -- List of summon abilities that can be casted by timer
     self.summonAbilitiesForAutoCast = 
     {
-        ["Ice_Bolt_Pet"] = true,
-		["ringoffrost"] = true
+        ["Ice_Bolt_Pet"] = true
     }
 	
     self:DetermineIfMustAutoAttackAfterAutoCast()
