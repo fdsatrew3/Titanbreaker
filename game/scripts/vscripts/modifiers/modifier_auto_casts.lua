@@ -2,6 +2,14 @@
     HOW TO ADD SUPPORT FOR NEW HERO:
     1. Define and implement function that will return next ability for autocasts based on caster, ability, target (if exists)
     2. Setup tables entries in OnCreated for that hero and function from 1)
+	
+    HOW TO ADD SUPPORT FOR NEW HERO SUMMON:
+    1. Define and implement function that will return next ability for autocasts based on caster, ability, target (if exists)
+    2. Setup tables entries in OnCreated for that summon and function from 1)
+	
+	* Summon will try always cast his abilities on owner last attack/cast target
+	* Summon will don't care if he can die
+	* Summon will ignore enemies with damage reflection
 --]]
 
 modifier_auto_casts = class({
@@ -79,6 +87,8 @@ function modifier_auto_casts:OnCreated()
         ["npc_dota_hero_terrorblade"] = "GetNextAbilityForTerrorbladeAutoCasts",
 		["npc_dota_hero_antimage"] = "GetNextAbilityForAntimageAutoCasts",
 		["npc_dota_hero_brewmaster"] = "GetNextAbilityForBrewmasterAutoCasts",
+		-- Summons
+		["npc_dota_creature_waterelemental"] = "GetNextAbilityForCrystalMaidenPetAutoCasts",
     }
 
     -- List of abilities that can be casted while running, but actually will do more harm than good
@@ -174,8 +184,16 @@ function modifier_auto_casts:OnCreated()
         ["npc_dota_hero_sven"] = true,
         ["npc_dota_hero_antimage"] = true
     }
-
+	
+    -- List of summon abilities that can be casted by timer
+    self.summonAbilitiesForAutoCast = 
+    {
+        ["Ice_Bolt_Pet"] = true,
+		["ringoffrost"] = true
+    }
+	
     self:DetermineIfMustAutoAttackAfterAutoCast()
+	self:ToggleAllSummonAutoCasts()
 end
 
 function modifier_auto_casts:OnOrder(kv)
@@ -188,11 +206,14 @@ function modifier_auto_casts:OnOrder(kv)
         if(kv.ability:GetAutoCastState() == false) then
             self.abilitiesWithAutoCasts[kv.ability] = true
             self.abilitiesWithAutoCastsCount = self.abilitiesWithAutoCastsCount + 1
+			self:DetermineSummonsAutoCastsAbility(kv.ability)
         else
             self.abilitiesWithAutoCasts[kv.ability] = nil
             self.abilitiesWithAutoCastsCount = math.max(self.abilitiesWithAutoCastsCount - 1, 0)
         end
-    			
+		
+		--print("self.abilitiesWithAutoCastsCount", self.abilitiesWithAutoCastsCount)
+		
         if(self.abilitiesWithAutoCastsCount < 1) then
             self:StartIntervalThink(-1)
         else
@@ -315,7 +336,7 @@ end
 function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility)   
     --print("== _OnIntervalThinkInternal ===")
     --print("ignoreCurrentActiveAbility", ignoreCurrentActiveAbility)
-    
+		
     local ignoreCurrentActiveAbilityInternal = false
     if(ignoreCurrentActiveAbility == true or self:IsAutoCastFailed() == true) then
     	ignoreCurrentActiveAbilityInternal = true
@@ -324,16 +345,39 @@ function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility
     local lastAutoCastTarget = self:GetLastAutoCastTarget()
     local abilityToAutoCast = nil
     
+	-- Get last attack/cast target from summon owner (if parent is summon)
+	--print("self.parent.owner", self.parent.owner)
+	if self.parent.owner ~= nil and self:IsUnitSupportAutoCasts(self.parentName) then
+		if(self._autoCastsSummonOwnerModifier == nil) then
+			self._autoCastsSummonOwnerModifier = self.parent.owner:FindModifierByName("modifier_auto_casts")
+		end
+
+		if(self._autoCastsSummonOwnerModifier ~= nil) then
+			--print("self._autoCastsSummonOwnerModifier", self._autoCastsSummonOwnerModifier:GetParent())
+			--print("self._autoCastsSummonOwnerModifier:GetLastAutoCastTarget()", self._autoCastsSummonOwnerModifier:GetLastAutoCastTarget())
+			self:SetLastAutoCastTarget(self._autoCastsSummonOwnerModifier:GetLastAutoCastTarget())
+		end
+	end
+	
     --print("START pairs(self.abilitiesWithAutoCasts)")
     for ability, _ in pairs(self.abilitiesWithAutoCasts) do
+		--print("Checking", ability:GetAbilityName())
+		--print("self:IsAbilityCanBeAutoCastedWhileRunning(ability)", self:IsAbilityCanBeAutoCastedWhileRunning(ability))
+		--print("ignoreCurrentActiveAbilityInternal", ignoreCurrentActiveAbilityInternal)
+		--print("self:IsSummonsAutoCastsAbility(ability)", self:IsSummonsAutoCastsAbility(ability))
+		
     	--print("= PAIR ITERATION: ability", ability, "name", ability:GetAbilityName())
         -- Always try abilities that support casting while running or when player just finished current auto cast
-        if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) or ignoreCurrentActiveAbilityInternal == true) then
+        if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) or ignoreCurrentActiveAbilityInternal == true or self:IsSummonsAutoCastsAbility(ability) == true) then
+			--[[
+			if(self.parent:IsRealHero() == false) then
+				--print("Pet autocasts attempt for ", ability:GetAbilityName())
+			end
+			--]]
+			
     		abilityToAutoCast = self:GetNextAbilityForAutoCast(self.parent, ability, lastAutoCastTarget, ignoreCurrentActiveAbilityInternal)
     		--print("Checking ", ability:GetAbilityName(), " result = ", abilityToAutoCast)
-    		if(abilityToAutoCast and abilityToAutoCast.GetAbilityName) then
-    			--print("Checking -> GetAbilityName", abilityToAutoCast:GetAbilityName())
-    		end
+						
     		if(abilityToAutoCast ~= nil) then
     			--print("BREAK WITH", abilityToAutoCast:GetAbilityName())
     			break
@@ -342,6 +386,8 @@ function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility
     end
     --print("END pairs(self.abilitiesWithAutoCasts)")
     
+	--print("abilityToAutoCast", abilityToAutoCast)
+	
     if(abilityToAutoCast == nil) then
     	if(ignoreCurrentActiveAbilityInternal == true) then
     		--print("Failed autocast. Set flag")
@@ -377,24 +423,45 @@ function modifier_auto_casts:IsAutoCastFailed()
 end
 
 function modifier_auto_casts:PerformAutoCastOfAbility(abilityToAutoCast, target)
-    local caster = self.parent
-    local autoCastOrder = self:GetAutoCastOrderForAbility(abilityToAutoCast)
+	local caster = self.parent
+	local autoCastOrder = self:GetAutoCastOrderForAbility(abilityToAutoCast)
     
+--[[
+	if(self.parent:IsRealHero() == false) then
+		--print("caster", caster:GetUnitName())
+		--print("autoCastOrder", autoCastOrder)
+		--print("target", target)
+		--print("abilityToAutoCast", abilityToAutoCast:GetAbilityName())
+	end 
+--]]
+	
     --print("autoCastOrder", autoCastOrder)
+	
     -- Unsupported behavior or something wrong, too bad
     if(autoCastOrder == nil) then
         return nil
     end
-    
+		
     --print("self:IsAutoCastsPaused()", self:IsAutoCastsPaused())
     --print("self._setIsAutoCastsPaused", self._setIsAutoCastsPaused)
-    if(self:IsAbilityCanBeAutoCastedWhileRunning(abilityToAutoCast) == false and self:IsAutoCastsPaused() == true) then
-    	self:SetIsAutoCastFailed(false)
-    	return
-    end
-    
+	--print("self:IsSummonsAutoCastsAbility(abilityToAutoCast)", self:IsSummonsAutoCastsAbility(abilityToAutoCast))
+	
+	-- Summon don't care about his own death
+	if(self:IsSummonsAutoCastsAbility(abilityToAutoCast) == false) then
+		if(self:IsAbilityCanBeAutoCastedWhileRunning(abilityToAutoCast) == false and self:IsAutoCastsPaused() == true) then
+			self:SetIsAutoCastFailed(false)
+			return
+		end
+	else
+		-- Summon care about his owner death
+		if(target ~= nil and COverthrowGameMode:HasDamageReflect(target)) then
+			--print("Damage reflect?")
+			return
+		end
+	end
+	
     --print("target", target)
-    
+    	
     if(autoCastOrder == DOTA_UNIT_ORDER_CAST_NO_TARGET) then
     
         self:SetIsOrderFromAutoCast(true)
@@ -456,8 +523,28 @@ function modifier_auto_casts:PerformAutoCastOfAbility(abilityToAutoCast, target)
     end
 end
 
+function modifier_auto_casts:ToggleAllSummonAutoCasts()
+	if(self.parent:IsRealHero()) then
+		return
+	end
+
+	local summonEntIndex = self.parent:entindex()
+	
+	for i = 0, self.parent:GetAbilityCount() - 1 do
+		local ability = self.parent:GetAbilityByIndex(i)
+		if(ability ~= nil and bit.band(COverthrowGameMode:GetAbilityBehaviorSafe(ability), DOTA_ABILITY_BEHAVIOR_AUTOCAST) == DOTA_ABILITY_BEHAVIOR_AUTOCAST) then
+			ExecuteOrderFromTable({
+				UnitIndex = summonEntIndex,
+				OrderType = DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO,
+				AbilityIndex = ability:entindex(),
+				Queue = false
+			})
+		end
+	end
+end
+
 function modifier_auto_casts:DetermineIfMustAutoAttackAfterAutoCast()
-    if(self.mustAutoAttackAfterAutoCast[self.parent:GetUnitName()] == true) then
+    if(self.mustAutoAttackAfterAutoCast[self.parentName] == true) then
         self._isAutoAttackAfterAutoCasts = true
         return
     end
@@ -467,6 +554,24 @@ end
 
 function modifier_auto_casts:IsMustAutoAttackAfterAutoCast()
     return self._isAutoAttackAfterAutoCasts
+end
+
+function modifier_auto_casts:DetermineSummonsAutoCastsAbility(ability)
+	if(ability == nil) then
+		return
+	end
+	
+	if(self.summonAbilitiesForAutoCast[ability:GetAbilityName()] ~= nil) then
+		ability._autoCastsSummonsAutoCastsAbility = true
+	end
+end
+
+function modifier_auto_casts:IsSummonsAutoCastsAbility(ability)
+	if(ability._autoCastsSummonsAutoCastsAbility == nil) then
+		return false
+	end
+	
+	return ability._autoCastsSummonsAutoCastsAbility
 end
 
 function modifier_auto_casts:IsAutocastsAbility(ability)
@@ -555,18 +660,26 @@ function modifier_auto_casts:GetNextAbilityForAutoCast(caster, ability, target, 
     
     -- target can be nil
     -- Caster should be fine and ready to cast any ability now so no need to check for that (at least only manacosts and cooldowns for desired abilities needs checking)
-    if(self.autoCastsImplementations[self.parentName] ~= nil) then
+    if(self:IsUnitSupportAutoCasts(self.parentName)) then
         local status, result = pcall(function ()
             return self[self.autoCastsImplementations[self.parentName]](self, caster, ability, target)
         end)
     
         if(status ~= true) then
-            print("modifier_auto_casts:GetNextAbilityForAutoCast error: ", result)
+            --print("modifier_auto_casts:GetNextAbilityForAutoCast error: ", result)
             return nil
         end
     
         return result
     end
+end
+
+function modifier_auto_casts:IsUnitSupportAutoCasts(unitName)
+    if(self.autoCastsImplementations[unitName] ~= nil) then
+		return true
+	end
+	
+	return false
 end
 
 function modifier_auto_casts:SetLastAutoCastTarget(target)
@@ -1072,6 +1185,20 @@ function modifier_auto_casts:GetNextAbilityForCrystalMaidenAutoCasts(caster, abi
 	end
 	
 	return nil
+end
+
+-- Crystal Maiden Pet: Q spam, TODO: Something smarter?
+function modifier_auto_casts:GetNextAbilityForCrystalMaidenPetAutoCasts(caster, ability, target)
+    if(caster._autoCastWaterElementalQ == nil) then
+        caster._autoCastWaterElementalQ = caster:FindAbilityByName("Ice_Bolt_Pet")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastWaterElementalQ)
+    end
+	
+    if(ability == caster._autoCastWaterElementalQ and self:IsAbilityReadyForAutoCast(caster._autoCastWaterElementalQ)) then
+        return caster._autoCastWaterElementalQ
+    end
+	
+    return nil
 end
 
 -- Nature Phophet: Q spam if required
@@ -1820,3 +1947,4 @@ function modifier_auto_casts:GetNextAbilityForBrewmasterAutoCasts(caster, abilit
 	
     return nil
 end
+

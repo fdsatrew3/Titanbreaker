@@ -362,6 +362,10 @@ function GetSpellpower(event)
     return spelldamagefromitem
 end
 
+function COverthrowGameMode:HasDamageReflect(target)
+	return HasDamageReflect(target)
+end
+
 function HasDamageReflect(target)
     if target:HasModifier("modifier_shieldreflect") or target:HasModifier("modifier_shieldreflect_only_dmg") then
         return true
@@ -9794,10 +9798,10 @@ function Waterelemental (event)
 	if ability and event.ability then
 		ability:SetLevel(event.ability:GetLevel())
 	end
-
+		
  	event.ability:ApplyDataDrivenModifier(event.caster, caster.Pet, "modifier_phased", {Duration = -1})
  	event.ability:ApplyDataDrivenModifier(event.caster, caster.Pet, "modifier_wefx", nil)
-
+	
  	if caster.artifact_ring and caster.artifact_ring >= 7 then
 		local particle = ParticleManager:CreateParticle("particles/econ/courier/courier_wyvern_hatchling/courier_wyvern_hatchling_ice.vpcf", PATTACH_POINT_FOLLOW, caster.Pet)
 		--ParticleManager:SetParticleControlEnt(particle, 1, caster.Pet, PATTACH_POINT_FOLLOW, "attach_attack1", caster.Pet:GetAbsOrigin(), true)
@@ -9816,6 +9820,9 @@ function Waterelemental (event)
 		ability:SetLevel(event.ability:GetLevel())
 	end
     event.ability:ApplyDataDrivenModifier(caster, caster.Pet, "modifier_pet_system", nil)
+	
+	-- Must be after all things (pet autocasts)
+ 	caster.Pet:AddNewModifier(event.caster, nil, "modifier_auto_casts", {duration = -1})
 end
 
 -- Shaman --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -11441,7 +11448,7 @@ function SummonPet (event)
     if caster.PermanentPet ~= nil and not caster.PermanentPet:IsNull() then
         UTIL_Remove(caster.PermanentPet)
     end
-
+			
 	if event.pet == "bear" then
 		if caster:HasModifier("modifier_item_beastmaster") or caster:HasModifier("modifier_item_beastmaster2") then
 			caster.Pet = CreateUnitByName("npc_dota_creature_wolf", origin, true, owner, nil, teamid)
@@ -11451,8 +11458,7 @@ function SummonPet (event)
 			caster.Pet = CreateUnitByName("npc_dota_creature_bear", origin, true, owner, nil, teamid)
 			EmitSoundOn("Lycan_Wolf.PreAttack", caster)
 		end
-        
-        
+        		
 		caster.Pet:GetAbilityByIndex(0):SetLevel(event.ability:GetLevel())
 		caster.Pet:GetAbilityByIndex(1):SetLevel(event.ability:GetLevel())
 		caster.Pet:GetAbilityByIndex(3):SetLevel(event.ability:GetLevel())
@@ -15088,30 +15094,6 @@ function GlobalOnAbilityExecuted( event )
     if GetLevelOfAbility(caster, "frostdk3") >= 4 and ability and ability:GetName() == "frostdk3" then
         local myevent = {caster = caster, amount = 10, ability = ability, chooseability = 5 }
         ReduceCooldown(myevent)
-    end
-    if ability == caster:GetAbilityByIndex(0) then
-        caster.firstabilitytarget = target
-        if caster.Pet and (not caster.Pet:IsNull()) and caster.Pet:IsAlive() and not caster.Pet.IsCasting then
-            if caster.Pet.isWaterEle and caster.Pet:GetAbilityByIndex(0):GetCooldownTimeRemaining() <= 0 then
-                local order = 
-                {
-                     UnitIndex = caster.Pet:entindex(),
-                     OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
-                     AbilityIndex = caster.Pet:GetAbilityByIndex(0):GetEntityIndex(), 
-                     Queue = false,
-                    TargetIndex = target:entindex()
-                }
-                ExecuteOrderFromTable(order)
-            else
-                local order = 
-                {
-                    UnitIndex = caster.Pet:entindex(),
-                    OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
-                    TargetIndex = target:entindex()
-                }
-                ExecuteOrderFromTable(order)
-            end
-        end
     end
     if GetManaRefundAmount(caster) >= 1 and ability and ability:GetManaCost(-1) >= 1 then
         Timers:CreateTimer(0.05, function()
