@@ -1737,13 +1737,13 @@ function modifier_auto_casts:GetNextAbilityForLegionCommanderAutoCasts(caster, a
     if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderW)) then
         return caster._autoCastLegionCommanderW
     end
-
-    if(caster._autoCastLegionCommanderD:GetLevel() >= 4) then
+	
+	if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ)) then
         -- Always spam when possible and required for cdr
-        if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ) and caster._autoCastLegionCommanderD:GetCooldownTimeRemaining() > 1) then
+        if(caster._autoCastLegionCommanderD:GetCooldownTimeRemaining() > 1) then
             return caster._autoCastLegionCommanderQ
         end
-    else
+		
         -- Spam only when enemies around
         if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ)) then
             if(self:IsInternalTimerReady(0.05) == false) then
@@ -1758,7 +1758,7 @@ function modifier_auto_casts:GetNextAbilityForLegionCommanderAutoCasts(caster, a
             
             return nil
         end
-    end
+	end
 
     return nil
 end
