@@ -955,6 +955,7 @@ function modifier_auto_casts:GetNextAbilityForWarlockAutoCasts(caster, ability, 
         if(isWarlockWReadyForAutocast) then
             local dotModifier = target:FindModifierByName("modifier_dot2")
             local stacksCount = 0
+			local maxStacksCount = 2 + GetMaxDebuffStackBonus(caster)
             local isDotAlmostEnded = false
 
 			if(dotModifier) then
@@ -966,7 +967,7 @@ function modifier_auto_casts:GetNextAbilityForWarlockAutoCasts(caster, ability, 
                 return caster._autoCastWarlockW
             end
 
-            if(caster._autoCastWarlockW:GetLevel() >= 3 and stacksCount < 2) then
+            if(caster._autoCastWarlockW:GetLevel() >= 3 and stacksCount < maxStacksCount) then
                 return caster._autoCastWarlockW
             else
                 if(dotModifier == nil) then
