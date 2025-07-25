@@ -29,7 +29,7 @@ modifier_auto_casts = class({
         return 
         {
             MODIFIER_EVENT_ON_ABILITY_FULLY_CAST,
-			MODIFIER_EVENT_ON_ABILITY_END_CHANNEL,
+            MODIFIER_EVENT_ON_ABILITY_END_CHANNEL,
             MODIFIER_EVENT_ON_ORDER
         }
     end,
@@ -85,11 +85,11 @@ function modifier_auto_casts:OnCreated()
         ["npc_dota_hero_dragon_knight"] = "GetNextAbilityForDragonKnightAutoCasts",
         ["npc_dota_hero_phantom_lancer"] = "GetNextAbilityForPhantomLancerAutoCasts",
         ["npc_dota_hero_terrorblade"] = "GetNextAbilityForTerrorbladeAutoCasts",
-		["npc_dota_hero_antimage"] = "GetNextAbilityForAntimageAutoCasts",
-		["npc_dota_hero_brewmaster"] = "GetNextAbilityForBrewmasterAutoCasts",
-		["npc_dota_hero_sniper"] = "GetNextAbilityForSniperAutoCasts",
-		-- Summons
-		["npc_dota_creature_waterelemental"] = "GetNextAbilityForCrystalMaidenPetAutoCasts",
+        ["npc_dota_hero_antimage"] = "GetNextAbilityForAntimageAutoCasts",
+        ["npc_dota_hero_brewmaster"] = "GetNextAbilityForBrewmasterAutoCasts",
+        ["npc_dota_hero_sniper"] = "GetNextAbilityForSniperAutoCasts",
+        -- Summons
+        ["npc_dota_creature_waterelemental"] = "GetNextAbilityForCrystalMaidenPetAutoCasts",
     }
 
     -- List of abilities that can be casted while running, but actually will do more harm than good
@@ -156,7 +156,7 @@ function modifier_auto_casts:OnCreated()
         ["dh1"] = true,
         -- Eventually will kill player? (Antimage)
         ["beast1"] = true,
-		["Hunter_Assassinate"] = true,
+        ["Hunter_Assassinate"] = true,
     }
 	
     -- List of abilities that move hero and must ignore moving check
@@ -164,7 +164,7 @@ function modifier_auto_casts:OnCreated()
     {
         -- Phantom Assassin E
         ["Fatal_Throw"] = true,
-	}
+    }
 	
     -- List of heroes that must keep auto attacking last enemy after every auto cast
     self.mustAutoAttackAfterAutoCast = 
@@ -197,7 +197,7 @@ function modifier_auto_casts:OnCreated()
     }
 	
     self:DetermineIfMustAutoAttackAfterAutoCast()
-	self:ToggleAllSummonAutoCasts()
+    self:ToggleAllSummonAutoCasts()
 end
 
 function modifier_auto_casts:OnOrder(kv)
@@ -210,14 +210,14 @@ function modifier_auto_casts:OnOrder(kv)
         if(kv.ability:GetAutoCastState() == false) then
             self.abilitiesWithAutoCasts[kv.ability] = true
             self.abilitiesWithAutoCastsCount = self.abilitiesWithAutoCastsCount + 1
-			self:DetermineSummonsAutoCastsAbility(kv.ability)
+        	self:DetermineSummonsAutoCastsAbility(kv.ability)
         else
             self.abilitiesWithAutoCasts[kv.ability] = nil
             self.abilitiesWithAutoCastsCount = math.max(self.abilitiesWithAutoCastsCount - 1, 0)
         end
-		
-		--print("self.abilitiesWithAutoCastsCount", self.abilitiesWithAutoCastsCount)
-		
+        
+        --print("self.abilitiesWithAutoCastsCount", self.abilitiesWithAutoCastsCount)
+        
         if(self.abilitiesWithAutoCastsCount < 1) then
             self:StartIntervalThink(-1)
         else
