@@ -1398,16 +1398,18 @@ function modifier_auto_casts:GetNextAbilityForRikiAutoCasts(caster, ability, tar
         self:DetermineAutoCastOrderForAbility(caster._autoCastRikiW)
     end
     
-    local focusPoints = caster:GetModifierStackCount("modifier_combopoint", nil)
-
-    if(ability == caster._autoCastRikiW and self:IsAbilityReadyForAutoCast(caster._autoCastRikiW) and focusPoints >= 3) then
-        return caster._autoCastRikiW
-    end
-
-    if(ability == caster._autoCastRikiQ and self:IsAbilityReadyForAutoCast(caster._autoCastRikiQ)) then
-        return caster._autoCastRikiQ
-    end
-
+	if(ability == caster._autoCastRikiW or ability == caster._autoCastRikiW) then
+		local focusPoints = caster:GetModifierStackCount("modifier_combopoint", nil)
+		
+		if(self:IsAbilityReadyForAutoCast(caster._autoCastRikiW) and focusPoints >= 3) then
+		    return caster._autoCastRikiW
+		end
+		
+		if(self:IsAbilityReadyForAutoCast(caster._autoCastRikiQ)) then
+		    return caster._autoCastRikiQ
+		end
+	end
+		
     return nil
 end
 
@@ -1529,23 +1531,25 @@ function modifier_auto_casts:GetNextAbilityForBloodseekerAutoCasts(caster, abili
         caster._autoCastBloodseekerD = caster:FindAbilityByName("Ghost5")
         self:DetermineAutoCastOrderForAbility(caster._autoCastBloodseekerD)
     end
-
-    if(ability == caster._autoCastBloodseekerD and self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerD) and caster:GetModifierStackCount("modifier_elementalfury", nil) >= 10) then
-        return caster._autoCastBloodseekerD
-    end
-
-    if(ability == caster._autoCastBloodseekerQ and self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerQ)) then
-        return caster._autoCastBloodseekerQ
-    end
-
-    if(ability == caster._autoCastBloodseekerW and self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerW)) then
-        return caster._autoCastBloodseekerW
-    end
-
-    if(ability == caster._autoCastBloodseekerE and self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerE)) then
-        return caster._autoCastBloodseekerE
-    end
-
+	
+	if(ability == caster._autoCastBloodseekerQ or ability == caster._autoCastBloodseekerW or ability == caster._autoCastBloodseekerE or ability == caster._autoCastBloodseekerD) then
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerD) and caster:GetModifierStackCount("modifier_elementalfury", nil) >= 10) then
+            return caster._autoCastBloodseekerD
+        end
+        
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerQ)) then
+            return caster._autoCastBloodseekerQ
+        end
+        
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerW)) then
+            return caster._autoCastBloodseekerW
+        end
+        
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerE)) then
+            return caster._autoCastBloodseekerE
+        end
+	end
+	
     return nil
 end
 
@@ -1644,11 +1648,11 @@ function modifier_auto_casts:GetNextAbilityForVengefulSpiritAutoCasts(caster, ab
         self:DetermineAutoCastOrderForAbility(caster._autoCastVengefulSpiritSunQ)
     end
 
-    if(ability == caster._autoCastVengefulSpiritMoonQ and self:IsAbilityReadyForAutoCast(caster._autoCastVengefulSpiritMoonQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastVengefulSpiritMoonQ)) then
         return caster._autoCastVengefulSpiritMoonQ
     end
 
-    if(ability == caster._autoCastVengefulSpiritSunQ and self:IsAbilityReadyForAutoCast(caster._autoCastVengefulSpiritSunQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastVengefulSpiritSunQ)) then
         return caster._autoCastVengefulSpiritSunQ
     end
 
@@ -1666,18 +1670,18 @@ function modifier_auto_casts:GetNextAbilityForSvenAutoCasts(caster, ability, tar
         self:DetermineAutoCastOrderForAbility(caster._autoCastSvenW)
     end
 
-    if(ability == caster._autoCastSvenW and self:IsAbilityReadyForAutoCast(caster._autoCastSvenW)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastSvenW)) then
         return caster._autoCastSvenW
     end
 
-    if(ability == caster._autoCastSvenQ and self:IsAbilityReadyForAutoCast(caster._autoCastSvenQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastSvenQ)) then
         return caster._autoCastSvenQ
     end
 
     return nil
 end
 
--- Axe: Q W E D spam
+-- Axe: Q W spam
 function modifier_auto_casts:GetNextAbilityForAxeAutoCasts(caster, ability, target)
     if(caster._autoCastAxeQ == nil) then
         caster._autoCastAxeQ = caster:FindAbilityByName("Wounding_Strike")
@@ -1687,30 +1691,16 @@ function modifier_auto_casts:GetNextAbilityForAxeAutoCasts(caster, ability, targ
         caster._autoCastAxeW = caster:FindAbilityByName("Mortal_Swing")
         self:DetermineAutoCastOrderForAbility(caster._autoCastAxeW)
     end
-    if(caster._autoCastAxeE == nil) then
-        caster._autoCastAxeE = caster:FindAbilityByName("Concussive_Blow")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastAxeE)
-    end
-    if(caster._autoCastAxeD == nil) then
-        caster._autoCastAxeD = caster:FindAbilityByName("Knee_Breaker")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastAxeD)
-    end
 
-    if(target ~= nil) then
-        if(ability == caster._autoCastAxeQ and self:IsAbilityReadyForAutoCast(caster._autoCastAxeQ) and target:HasModifier("modifier_wounding_strike_bleed_debuff") == false) then
-            return caster._autoCastAxeQ
-        end
+    if(target == nil) then
+		return
     end
-    
-    if(ability == caster._autoCastAxeE and self:IsAbilityReadyForAutoCast(caster._autoCastAxeE)) then
-        return caster._autoCastAxeE
-    end
-
-    if(ability == caster._autoCastAxeD and self:IsAbilityReadyForAutoCast(caster._autoCastAxeD)) then
-        return caster._autoCastAxeD
-    end
-
-    if(ability == caster._autoCastAxeW and self:IsAbilityReadyForAutoCast(caster._autoCastAxeW)) then
+	
+	if(self:IsAbilityReadyForAutoCast(caster._autoCastAxeQ) and target:HasModifier("modifier_wounding_strike_bleed_debuff") == false) then
+		return caster._autoCastAxeQ
+	end
+		
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastAxeW)) then
         if(self:IsInternalTimerReady(0.05) == false) then
         	return nil
         end
@@ -1743,18 +1733,18 @@ function modifier_auto_casts:GetNextAbilityForLegionCommanderAutoCasts(caster, a
         --self:DetermineAutoCastOrderForAbility(caster._autoCastLegionCommanderD)
     end
 
-    if(ability == caster._autoCastLegionCommanderW and self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderW)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderW)) then
         return caster._autoCastLegionCommanderW
     end
 
     if(caster._autoCastLegionCommanderD:GetLevel() >= 4) then
         -- Always spam when possible and required for cdr
-        if(ability == caster._autoCastLegionCommanderQ and self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ) and caster._autoCastLegionCommanderD:GetCooldownTimeRemaining() > 1) then
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ) and caster._autoCastLegionCommanderD:GetCooldownTimeRemaining() > 1) then
             return caster._autoCastLegionCommanderQ
         end
     else
         -- Spam only when enemies around
-        if(ability == caster._autoCastLegionCommanderQ and self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ)) then
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ)) then
             if(self:IsInternalTimerReady(0.05) == false) then
             	return nil
             end
@@ -1792,7 +1782,7 @@ function modifier_auto_casts:GetNextAbilityForBeastmasterAutoCasts(caster, abili
     local minRageToMaintain = caster._autoCastBeastmasterQ:GetLevel() >= 5 and (caster:GetMaxMana() - slaughterRageCost) or 40
     local currentRage = caster:GetMana()
 
-    if(ability == caster._autoCastBeastmasterD and self:IsAbilityReadyForAutoCast(caster._autoCastBeastmasterD) and currentRage >= minRageToMaintain) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastBeastmasterD) and currentRage >= minRageToMaintain) then
         if(caster._autoCastBeastmasterD:GetLevel() >= 4) then
             if(target:GetHealth() / target:GetMaxHealth() > 0.5) then
                 if(caster:GetMana() >= 40 + slaughterRageCost) then
@@ -1811,7 +1801,7 @@ function modifier_auto_casts:GetNextAbilityForBeastmasterAutoCasts(caster, abili
         end
     end
 
-    if(ability == caster._autoCastBeastmasterQ and self:IsAbilityReadyForAutoCast(caster._autoCastBeastmasterQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastBeastmasterQ)) then
         return caster._autoCastBeastmasterQ
     end
 
@@ -1843,11 +1833,11 @@ function modifier_auto_casts:GetNextAbilityForPudgeAutoCasts(caster, ability, ta
         self:DetermineAutoCastOrderForAbility(caster._autoCastPudgeW)
     end
 
-    if(ability == caster._autoCastPudgeW and self:IsAbilityReadyForAutoCast(caster._autoCastPudgeW)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastPudgeW)) then
         return caster._autoCastPudgeW
     end
 
-    if(ability == caster._autoCastPudgeQ and self:IsAbilityReadyForAutoCast(caster._autoCastPudgeQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastPudgeQ)) then
         return caster._autoCastPudgeQ
     end
 
@@ -1964,11 +1954,11 @@ function modifier_auto_casts:GetNextAbilityForSniperAutoCasts(caster, ability, t
         self:DetermineAutoCastOrderForAbility(caster._autoCastSniperW)
     end
 	
-    if(ability == caster._autoCastSniperQ and self:IsAbilityReadyForAutoCast(caster._autoCastSniperQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastSniperQ)) then
         return caster._autoCastSniperQ
     end
 	
-    if(ability == caster._autoCastSniperW and self:IsAbilityReadyForAutoCast(caster._autoCastSniperW)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastSniperW)) then
         return caster._autoCastSniperW
     end
 	
