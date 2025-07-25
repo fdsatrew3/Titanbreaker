@@ -670,7 +670,7 @@ function modifier_auto_casts:GetNextAbilityForAutoCast(caster, ability, target, 
         end)
     
         if(status ~= true) then
-            --print("modifier_auto_casts:GetNextAbilityForAutoCast error: ", result)
+            print("modifier_auto_casts:GetNextAbilityForAutoCast error: ", result)
             return nil
         end
     
