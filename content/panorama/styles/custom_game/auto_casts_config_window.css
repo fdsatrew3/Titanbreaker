@@ -1,0 +1,47 @@
+.AutoCastsConfigWindowContainer
+{	
+	horizontal-align: center;
+	vertical-align: center;
+	background-color: gradient( linear, 0% 0%, 0% 100%, from( #111111 ), to( #000000 ) );
+	border: 3px solid gray;
+	flow-children: down;
+	padding: 10px;
+}
+
+.AutoCastsConfigWindowLabel
+{
+	color: LighterGrey;
+	letter-spacing: 0.3px;
+	line-height: 24px;
+	font-size: 18px;
+}
+
+.AutoCastsConfigWindowTextEntry
+{
+	width: 256px;
+}
+
+.SellPanel
+{
+	background-color: gradient( linear, 0% 0%, 0% 100%, from( #333333 ), to( #000000 ) );
+	box-shadow: inset white 1px 1px 1px 1px;
+	flow-children: down;
+	margin-top: 6px; 
+	horizontal-align: center;
+}
+
+.WeaponHeaderWhite{
+	horizontal-align: center;
+	font-size: 18;
+	color: #ffffff;
+	font-size: 16px; 
+	margin-left: 5px; 
+	margin-right: 5px;
+	margin-top: 5px;
+	margin-bottom: 5px;
+}
+
+.Hidden
+{
+	visibility: collapse;
+}

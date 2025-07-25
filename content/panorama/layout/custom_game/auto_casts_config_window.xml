@@ -1,0 +1,18 @@
+<root>
+	<styles>
+		<include src="s2r://panorama/styles/dotastyles.vcss_c" />
+        <include src="file://{resources}/styles/custom_game/auto_casts_config_window.css" />
+	</styles>
+	<scripts>
+        <include src="file://{resources}/scripts/custom_game/auto_casts_config_window.js" />
+	</scripts>
+	<Panel hittest="false" class="AutoCastsConfigWindowContainer Hidden">
+		<Label text="Amount of Resource to preserve" class="AutoCastsConfigWindowLabel"/>
+		<TextEntry multiline="false" textmode="normal" class="AutoCastsConfigWindowTextEntry"/>
+		<ToggleButton class="CheckBox" text="Priority for user input"/>
+		<ToggleButton class="CheckBox" text="Target things around cursor"/>
+		<Button class="SellPanel" onactivate="RecoverArtifact(4)">
+			<Label class="WeaponHeaderWhite"  text="Save changes"/>
+		</Button>
+	</Panel>
+</root>

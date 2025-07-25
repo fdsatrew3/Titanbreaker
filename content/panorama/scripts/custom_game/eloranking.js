@@ -4863,10 +4863,19 @@ function InjectIntoDotaUI()
         customAttackSpeedLabel = dotaHudRoot.FindChildTraverse("AttackSpeedLabelBase");
     }
 	
-    // Hides new neutral item buttons
+    // Replaces new neutral item button with auto casts config button
     let neutralItemContainer = dotaHudRoot.FindChildTraverse("inventory_neutral_craft_holder");
     if(neutralItemContainer != undefined) {
-        neutralItemContainer.style.visibility = "collapse";
+		let parent = neutralItemContainer.GetParent();
+		
+		neutralItemContainer.style.visibility = "collapse";
+				
+        if(neutralItemContainer._autoCastsConfigButton == undefined) {
+            let autoCastsConfigButtonContainer = $.CreatePanel('Panel', parent, '');
+            autoCastsConfigButtonContainer.BLoadLayout('file://{resources}/layout/custom_game/auto_casts_config_button.xml', false, false);
+			parent.MoveChildAfter(autoCastsConfigButtonContainer, neutralItemContainer);
+            neutralItemContainer._autoCastsConfigButton = autoCastsConfigButtonContainer;
+        }
     }
 }
 
