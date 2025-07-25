@@ -2,6 +2,14 @@
     HOW TO ADD SUPPORT FOR NEW HERO:
     1. Define and implement function that will return next ability for autocasts based on caster, ability, target (if exists)
     2. Setup tables entries in OnCreated for that hero and function from 1)
+	
+    HOW TO ADD SUPPORT FOR NEW HERO SUMMON:
+    1. Define and implement function that will return next ability for autocasts based on caster, ability, target (if exists)
+    2. Setup tables entries in OnCreated for that summon and function from 1)
+	
+	* Summon will try always cast his abilities on owner last attack/cast target
+	* Summon will don't care if he can die
+	* Summon will ignore enemies with damage reflection
 --]]
 
 modifier_auto_casts = class({
@@ -21,6 +29,7 @@ modifier_auto_casts = class({
         return 
         {
             MODIFIER_EVENT_ON_ABILITY_FULLY_CAST,
+            MODIFIER_EVENT_ON_ABILITY_END_CHANNEL,
             MODIFIER_EVENT_ON_ORDER
         }
     end,
@@ -75,7 +84,12 @@ function modifier_auto_casts:OnCreated()
         ["npc_dota_hero_mars"] = "GetNextAbilityForMarsAutoCasts",
         ["npc_dota_hero_dragon_knight"] = "GetNextAbilityForDragonKnightAutoCasts",
         ["npc_dota_hero_phantom_lancer"] = "GetNextAbilityForPhantomLancerAutoCasts",
-        ["npc_dota_hero_terrorblade"] = "GetNextAbilityForTerrorbladeAutoCasts"
+        ["npc_dota_hero_terrorblade"] = "GetNextAbilityForTerrorbladeAutoCasts",
+        ["npc_dota_hero_antimage"] = "GetNextAbilityForAntimageAutoCasts",
+        ["npc_dota_hero_brewmaster"] = "GetNextAbilityForBrewmasterAutoCasts",
+        ["npc_dota_hero_sniper"] = "GetNextAbilityForSniperAutoCasts",
+        -- Summons
+        ["npc_dota_creature_waterelemental"] = "GetNextAbilityForCrystalMaidenPetAutoCasts",
     }
 
     -- List of abilities that can be casted while running, but actually will do more harm than good
@@ -138,8 +152,20 @@ function modifier_auto_casts:OnCreated()
         ["pala1"] = true,
         -- Eventually will kill player? (Terrorblade)
         ["terror1"] = true,
+        -- Eventually will kill player? (Antimage)
+        ["dh1"] = true,
+        -- Eventually will kill player? (Antimage)
+        ["beast1"] = true,
+        ["Hunter_Assassinate"] = true,
     }
-
+	
+    -- List of abilities that move hero and must ignore moving check
+    self.movementAbilities = 
+    {
+        -- Phantom Assassin E
+        ["Fatal_Throw"] = true,
+    }
+	
     -- List of heroes that must keep auto attacking last enemy after every auto cast
     self.mustAutoAttackAfterAutoCast = 
     {
@@ -159,65 +185,86 @@ function modifier_auto_casts:OnCreated()
         ["npc_dota_hero_phantom_lancer"] = true,
         ["npc_dota_hero_terrorblade"] = true,
         ["npc_dota_hero_bounty_hunter"] = true,
-        ["npc_dota_hero_bounty_sven"] = true
+        ["npc_dota_hero_sven"] = true,
+        ["npc_dota_hero_antimage"] = true,
+        ["npc_dota_hero_sniper"] = true
     }
-
+	
+    -- List of summon abilities that can be casted by timer
+    self.summonAbilitiesForAutoCast = 
+    {
+        ["Ice_Bolt_Pet"] = true
+    }
+	
     self:DetermineIfMustAutoAttackAfterAutoCast()
+    self:ToggleAllSummonAutoCasts()
 end
 
 function modifier_auto_casts:OnOrder(kv)
     if(kv.unit ~= self.parent) then
         return
     end
-
+    
     if(kv.order_type == DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO and kv.ability ~= nil) then
         -- Inverted because called before state set
         if(kv.ability:GetAutoCastState() == false) then
             self.abilitiesWithAutoCasts[kv.ability] = true
             self.abilitiesWithAutoCastsCount = self.abilitiesWithAutoCastsCount + 1
+        	self:DetermineSummonsAutoCastsAbility(kv.ability)
         else
             self.abilitiesWithAutoCasts[kv.ability] = nil
-            self.abilitiesWithAutoCastsCount = self.abilitiesWithAutoCastsCount - 1
+            self.abilitiesWithAutoCastsCount = math.max(self.abilitiesWithAutoCastsCount - 1, 0)
         end
-
+        
+        --print("self.abilitiesWithAutoCastsCount", self.abilitiesWithAutoCastsCount)
+        
         if(self.abilitiesWithAutoCastsCount < 1) then
             self:StartIntervalThink(-1)
         else
-            self:StartIntervalThink(0.05)
+            self:StartIntervalThink(0.01)
         end
     end
-
+    
     if(self:IsOrderFromAutoCast()) then
         return
     end
-
+    
     -- This orders breaks queue...
     if(kv.order_type == DOTA_UNIT_ORDER_CONTINUE) then
         return
     end
-
+    
     if(kv.order_type == DOTA_UNIT_ORDER_CAST_TOGGLE) then
         return
     end
-
+    
     if(kv.order_type == DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO) then
         return
     end
-
+    
     if(kv.order_type == DOTA_UNIT_ORDER_CAST_TOGGLE_ALT) then
         return
     end
-
+    
     if(kv.order_type == DOTA_UNIT_ORDER_ATTACK_TARGET) then
         -- Special case. Some heroes must spam auto attacks too for their abilities to work. If player decide change target it breaks auto casting for that heroes
         self:SetLastAutoCastTarget(kv.target)
         return
     end
-
-    self:SetIsIgnoreCastTimeAbilities(self:IsOrderPreventAutoCastOfCastTimeAbilities(kv.order_type))
+    
+    if(self:IsOrderPreventAutoCastOfAbilities(kv.order_type)) then
+    	--print("PAUSE AUTOCASTS")
+        self:SetLastAutoCastTarget(nil)
+    	self:SetIsAutoCastsPaused(true)
+    else
+    	--print("NO PAUSE AUTOCASTS")
+    	self:SetIsAutoCastsPaused(false)
+    end
+    
+    --print("self._setIsAutoCastsPaused", self._setIsAutoCastsPaused)
 end
 
-function modifier_auto_casts:IsOrderPreventAutoCastOfCastTimeAbilities(orderType)
+function modifier_auto_casts:IsOrderPreventAutoCastOfAbilities(orderType)
     return orderType == DOTA_UNIT_ORDER_MOVE_TO_POSITION or orderType == DOTA_UNIT_ORDER_MOVE_TO_TARGET 
         or orderType == DOTA_UNIT_ORDER_ATTACK_MOVE or orderType == DOTA_UNIT_ORDER_ATTACK_TARGET
         or orderType == DOTA_UNIT_ORDER_EJECT_ITEM_FROM_STASH or orderType == DOTA_UNIT_ORDER_PING_ABILITY
@@ -235,128 +282,210 @@ function modifier_auto_casts:OnAbilityFullyCast(kv)
     if(kv.unit ~= self.parent) then
         return
     end
+    
+    self:_OnAbilityFinishedCasting(kv.ability, kv.target, false)
+end
 
-    if(kv.target == nil) then
+function modifier_auto_casts:OnAbilityEndChannel(kv)
+    if(kv.unit ~= self.parent) then
         return
     end
+    
+    self:_OnAbilityFinishedCasting(kv.ability, kv.target, true)
+end
 
-    self:SetLastAutoCastTarget(kv.target)
-
-    if(self:IsMustAutoAttackAfterAutoCast()) then
-        self.parent:MoveToTargetToAttack(kv.target)
+-- target can be nil
+function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChannel)
+    -- Must consider only auto casts ability that no castable while running for auto casts queue
+    -- Abilities that castable while running handled by OnIntervalThink
+    if(self:IsAbilityCanBeAutoCastedWhileRunning(ability)) then
+    	return
+    end
+    		
+    --print("== _OnAbilityFinishedCasting ===")
+    --print("Finished cast of ", ability:GetAbilityName(), " just now")
+    
+    if(target ~= nil) then
+        self:SetLastAutoCastTarget(target)
+        
+        if(self:IsMustAutoAttackAfterAutoCast()) then
+        	self.parent:MoveToTargetToAttack(target)
+        end
+    end
+    
+    -- In very rare cases this modifier timer can perfectly align with cast time of abilities and send auto casts orders while player casting cast time ability and this breaking queue
+    if(isChannel == true) then
+    	if(self:IsAutocastsAbility(ability)) then
+    		self:SetIsAutoCastFailed(false)
+    	end
+    	--print("Channel thing", "ability", ability:GetAbilityName())
+    	self:_OnIntervalThinkInternal(true)
+    else
+    	-- This called before dota internal do caster:SetChanneling(true) in MODIFIER_EVENT_ON_ABILITY_FULLY_CAST so ignore it for channel abilities
+    	if(ability:GetChannelTime() < 0.01) then
+    		if(self:IsAutocastsAbility(ability)) then
+    			self:SetIsAutoCastFailed(false)
+    		end
+    		--print("Non Channel thing", "ability", ability:GetAbilityName())
+    		self:_OnIntervalThinkInternal(true)
+    	end
     end
 end
 
 function modifier_auto_casts:OnIntervalThink()
+    -- Use wrapper cuz valve might one day add args or consider return value from this function and silently break everything...
+    self:_OnIntervalThinkInternal()
+end
+
+function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility)   
+    --print("== _OnIntervalThinkInternal ===")
+    --print("ignoreCurrentActiveAbility", ignoreCurrentActiveAbility)
+		
+    local ignoreCurrentActiveAbilityInternal = false
+    if(ignoreCurrentActiveAbility == true or self:IsAutoCastFailed() == true) then
+    	ignoreCurrentActiveAbilityInternal = true
+    end
+    
+    local lastAutoCastTarget = self:GetLastAutoCastTarget()
+    local abilityToAutoCast = nil
+    
+	-- Get last attack/cast target from summon owner (if parent is summon)
+	--print("self.parent.owner", self.parent.owner)
+	if self.parent.owner ~= nil and self:IsUnitSupportAutoCasts(self.parentName) then
+		if(self._autoCastsSummonOwnerModifier == nil) then
+			self._autoCastsSummonOwnerModifier = self.parent.owner:FindModifierByName("modifier_auto_casts")
+		end
+
+		if(self._autoCastsSummonOwnerModifier ~= nil) then
+			--print("self._autoCastsSummonOwnerModifier", self._autoCastsSummonOwnerModifier:GetParent())
+			--print("self._autoCastsSummonOwnerModifier:GetLastAutoCastTarget()", self._autoCastsSummonOwnerModifier:GetLastAutoCastTarget())
+			self:SetLastAutoCastTarget(self._autoCastsSummonOwnerModifier:GetLastAutoCastTarget())
+		end
+	end
+	
+    --print("START pairs(self.abilitiesWithAutoCasts)")
     for ability, _ in pairs(self.abilitiesWithAutoCasts) do
-        self:CheckAbilityAutoCast(self.parent, ability, self:GetLastAutoCastTarget())
-    end
-end
-
-function modifier_auto_casts:DetermineIfMustAutoAttackAfterAutoCast()
-    if(self.mustAutoAttackAfterAutoCast[self.parent:GetUnitName()] == true) then
-        self._isAutoAttackAfterAutoCasts = true
-        return
-    end
-
-    self._isAutoAttackAfterAutoCasts = false
-end
-
-function modifier_auto_casts:IsMustAutoAttackAfterAutoCast()
-    return self._isAutoAttackAfterAutoCasts
-end
-
--- Target can be nil
-function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
-    -- Caster dead...
-    if(caster:IsAlive() == false) then
-        return
-    end
-    if(target ~= nil) then
-        -- Ignore dead guys
-        if(target:IsNull() or target:IsAlive() == false) then
-            self.parent._autoCastLastAutoCastTarget = nil
-            return
-        end
-        -- Check for too far enemies (2500+)
-        local casterPosition = caster:GetAbsOrigin()
-        local targetPosition = target:GetAbsOrigin()
-        local dx = casterPosition.x - targetPosition.x
-        local dy = targetPosition.y - targetPosition.y
-        local distanceToTargetSqr = dx * dx + dy * dy
-        if(distanceToTargetSqr >= 6250000) then
-            return
+		--print("Checking", ability:GetAbilityName())
+		--print("self:IsAbilityCanBeAutoCastedWhileRunning(ability)", self:IsAbilityCanBeAutoCastedWhileRunning(ability))
+		--print("ignoreCurrentActiveAbilityInternal", ignoreCurrentActiveAbilityInternal)
+		--print("self:IsSummonsAutoCastsAbility(ability)", self:IsSummonsAutoCastsAbility(ability))
+		
+    	--print("= PAIR ITERATION: ability", ability, "name", ability:GetAbilityName())
+        -- Always try abilities that support casting while running or when player just finished current auto cast
+        if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) or ignoreCurrentActiveAbilityInternal == true or self:IsSummonsAutoCastsAbility(ability) == true) then
+			--[[
+			if(self.parent:IsRealHero() == false) then
+				--print("Pet autocasts attempt for ", ability:GetAbilityName())
+			end
+			--]]
+			
+    		abilityToAutoCast = self:GetNextAbilityForAutoCast(self.parent, ability, lastAutoCastTarget, ignoreCurrentActiveAbilityInternal)
+    		--print("Checking ", ability:GetAbilityName(), " result = ", abilityToAutoCast)
+						
+    		if(abilityToAutoCast ~= nil) then
+    			--print("BREAK WITH", abilityToAutoCast:GetAbilityName())
+    			break
+    		end
         end
     end
-    -- Waiting for silence
-    if(caster:IsSilenced()) then
-        return
-    end
-    -- Waiting for stun
-    if(caster:IsStunned()) then
-        return
-    end
-    -- Waiting for channel
-    if(caster:IsChanneling()) then
-        return
-    end
-    -- Waiting for invisibility
-    if(caster:IsInvisible()) then
-        local currentCastingAbility = caster:GetCurrentActiveAbility()
-        if(currentCastingAbility ~= nil and self.abilitiesWithAutoCasts[currentCastingAbility] ~= nil) then
-            caster:Stop()
-        end
-        return
-    end
-    -- Casting something else, waiting for that
-    if(caster:GetCurrentActiveAbility() ~= nil) then
-        return
-    end
-
-    -- Abilities without cast time and instant cast should be castable while running (oracle E, np Q, etc)
-    if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) == false) then
-        if(caster:IsMoving()) then
-            return
-        end
-
-        if(self:IsIgnoreCastTimeAbilities()) then
-            return
-        end
-    end
-
-    local abilityToAutoCast = self:GetNextAbilityForAutoCast(caster, ability, target)
-
-    -- Nothing worth casting, too bad...
+    --print("END pairs(self.abilitiesWithAutoCasts)")
+    
+	--print("abilityToAutoCast", abilityToAutoCast)
+	
     if(abilityToAutoCast == nil) then
-        return
+    	if(ignoreCurrentActiveAbilityInternal == true) then
+    		--print("Failed autocast. Set flag")
+    		self:SetIsAutoCastFailed(true)
+    	end
+    else
+    	self:PerformAutoCastOfAbility(abilityToAutoCast, lastAutoCastTarget)
     end
+end
 
-    local autoCastOrder = self:GetAutoCastOrderForAbility(abilityToAutoCast)
+function modifier_auto_casts:SetIsAutoCastsPaused(state)
+    self._setIsAutoCastsPaused = state
+end
 
+function modifier_auto_casts:IsAutoCastsPaused()
+    if(self._setIsAutoCastsPaused ~= nil) then
+    	return self._setIsAutoCastsPaused
+    end
+    
+    return false
+end
+
+function modifier_auto_casts:SetIsAutoCastFailed(state)
+    self._setIsAutoCastFailed = state
+end
+
+function modifier_auto_casts:IsAutoCastFailed()
+    if(self._setIsAutoCastFailed == nil) then
+    	return false
+    end
+    
+    return true
+end
+
+function modifier_auto_casts:PerformAutoCastOfAbility(abilityToAutoCast, target)
+	local caster = self.parent
+	local autoCastOrder = self:GetAutoCastOrderForAbility(abilityToAutoCast)
+    
+--[[
+	if(self.parent:IsRealHero() == false) then
+		--print("caster", caster:GetUnitName())
+		--print("autoCastOrder", autoCastOrder)
+		--print("target", target)
+		--print("abilityToAutoCast", abilityToAutoCast:GetAbilityName())
+	end 
+--]]
+	
+    --print("autoCastOrder", autoCastOrder)
+	
     -- Unsupported behavior or something wrong, too bad
     if(autoCastOrder == nil) then
-        return
+        return nil
     end
-
+		
+    --print("self:IsAutoCastsPaused()", self:IsAutoCastsPaused())
+    --print("self._setIsAutoCastsPaused", self._setIsAutoCastsPaused)
+	--print("self:IsSummonsAutoCastsAbility(abilityToAutoCast)", self:IsSummonsAutoCastsAbility(abilityToAutoCast))
+	
+	-- Summon don't care about his own death
+	if(self:IsSummonsAutoCastsAbility(abilityToAutoCast) == false) then
+		if(self:IsAbilityCanBeAutoCastedWhileRunning(abilityToAutoCast) == false and self:IsAutoCastsPaused() == true) then
+			self:SetIsAutoCastFailed(false)
+			return
+		end
+	else
+		-- Summon care about his owner death
+		if(target ~= nil and COverthrowGameMode:HasDamageReflect(target)) then
+			--print("Damage reflect?")
+			return
+		end
+	end
+	
+    --print("target", target)
+    	
     if(autoCastOrder == DOTA_UNIT_ORDER_CAST_NO_TARGET) then
-
+    
         self:SetIsOrderFromAutoCast(true)
-
+    
         ExecuteOrderFromTable({
             UnitIndex = caster:entindex(),
             OrderType = DOTA_UNIT_ORDER_CAST_NO_TARGET,
             AbilityIndex = abilityToAutoCast:GetEntityIndex(), 
             Queue = false
         })
-
+    
         self:SetIsOrderFromAutoCast(false)
-        return
+    	
+    	--print("Send no target order with ", abilityToAutoCast:GetAbilityName())
     end
-
+    
     if(autoCastOrder == DOTA_UNIT_ORDER_CAST_TARGET and target) then
-
+    
         self:SetIsOrderFromAutoCast(true)
-
+    
         ExecuteOrderFromTable({
             UnitIndex = caster:entindex(),
             OrderType = DOTA_UNIT_ORDER_CAST_TARGET,
@@ -364,11 +493,12 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
             Queue = false,
             TargetIndex = target:entindex()
         })
-
+    
         self:SetIsOrderFromAutoCast(false)
-        return
+    	
+    	--print("Send target order with ", abilityToAutoCast:GetAbilityName())
     end
-
+    
     if(autoCastOrder == DOTA_UNIT_ORDER_CAST_POSITION) then
         local position = abilityToAutoCast:GetCursorPosition()
         -- Hopefully this will be enough to detect default(Vector) == ability never casted
@@ -380,9 +510,9 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
                 return
             end
         end
-
+    
         self:SetIsOrderFromAutoCast(true)
-
+    
         ExecuteOrderFromTable({
             UnitIndex = caster:entindex(),
             OrderType = DOTA_UNIT_ORDER_CAST_POSITION,
@@ -390,44 +520,185 @@ function modifier_auto_casts:CheckAbilityAutoCast(caster, ability, target)
             Queue = false,
             Position = position
         })
-
+    
         self:SetIsOrderFromAutoCast(false)
-        return
+    	
+    	--print("Send position order with ", abilityToAutoCast:GetAbilityName())
     end
 end
 
--- target can be nil
-function modifier_auto_casts:GetNextAbilityForAutoCast(caster, ability, target)
+function modifier_auto_casts:ToggleAllSummonAutoCasts()
+	if(self.parent:IsRealHero()) then
+		return
+	end
+
+	local summonEntIndex = self.parent:entindex()
+	
+	for i = 0, self.parent:GetAbilityCount() - 1 do
+		local ability = self.parent:GetAbilityByIndex(i)
+		if(ability ~= nil and bit.band(COverthrowGameMode:GetAbilityBehaviorSafe(ability), DOTA_ABILITY_BEHAVIOR_AUTOCAST) == DOTA_ABILITY_BEHAVIOR_AUTOCAST) then
+			ExecuteOrderFromTable({
+				UnitIndex = summonEntIndex,
+				OrderType = DOTA_UNIT_ORDER_CAST_TOGGLE_AUTO,
+				AbilityIndex = ability:entindex(),
+				Queue = false
+			})
+		end
+	end
+end
+
+function modifier_auto_casts:DetermineIfMustAutoAttackAfterAutoCast()
+    if(self.mustAutoAttackAfterAutoCast[self.parentName] == true) then
+        self._isAutoAttackAfterAutoCasts = true
+        return
+    end
+    
+    self._isAutoAttackAfterAutoCasts = false
+end
+
+function modifier_auto_casts:IsMustAutoAttackAfterAutoCast()
+    return self._isAutoAttackAfterAutoCasts
+end
+
+function modifier_auto_casts:DetermineSummonsAutoCastsAbility(ability)
+	if(ability == nil) then
+		return
+	end
+	
+	if(self.summonAbilitiesForAutoCast[ability:GetAbilityName()] ~= nil) then
+		ability._autoCastsSummonsAutoCastsAbility = true
+	end
+end
+
+function modifier_auto_casts:IsSummonsAutoCastsAbility(ability)
+	if(ability._autoCastsSummonsAutoCastsAbility == nil) then
+		return false
+	end
+	
+	return ability._autoCastsSummonsAutoCastsAbility
+end
+
+function modifier_auto_casts:IsAutocastsAbility(ability)
+    if(ability == nil) then
+        return false
+    end
+    
+    return self.abilitiesWithAutoCasts[ability] ~= nil
+end
+
+-- Target can be nil
+function modifier_auto_casts:GetNextAbilityForAutoCast(caster, ability, target, ignoreCurrentActiveAbility)
+    --print("=== CheckAbilityAutoCast ===")
+    --print("ability", ability:GetAbilityName())
+    -- Caster dead...
+    if(caster:IsAlive() == false) then
+        return
+    end
+    if(target ~= nil) then
+        -- Ignore dead guys
+        if(target:IsNull() or target:IsAlive() == false) then
+    		--print("Dead target return")
+            self:SetLastAutoCastTarget(nil)
+            return
+        end
+        -- Check for too far enemies (2500+)
+        local casterPosition = caster:GetAbsOrigin()
+        local targetPosition = target:GetAbsOrigin()
+        local dx = casterPosition.x - targetPosition.x
+        local dy = targetPosition.y - targetPosition.y
+        local distanceToTargetSqr = dx * dx + dy * dy
+        if(distanceToTargetSqr >= 6250000) then
+    		--print("Distance return")
+            return
+        end
+    end
+    -- Waiting for silence
+    if(caster:IsSilenced()) then
+    		--print("Silenced return")
+        return
+    end
+    -- Waiting for stun
+    if(caster:IsStunned()) then
+    		--print("Stunned return")
+        return
+    end
+    
+    --print("ability", ability:GetAbilityName())
+    --print("ignoreCurrentActiveAbility", ignoreCurrentActiveAbility)
+    --print("caster:IsChanneling()", caster:IsChanneling())
+    
+    -- Waiting for channel
+    if(caster:IsChanneling() and ignoreCurrentActiveAbility) then
+    		--print("IsChanneling return")
+        return
+    end
+    
+    local currentCastingAbility = nil
+    
+    if(ignoreCurrentActiveAbility ~= true) then
+        currentCastingAbility = caster:GetCurrentActiveAbility()
+    end
+    	
+    -- Waiting for invisibility
+    if(caster:IsInvisible()) then
+        -- If autocasts trying to cast ability or casting already while caster got invisibility effect stops this attempt (to preserve invisibility effect)
+        if(self:IsAutocastsAbility(currentCastingAbility)) then
+            caster:Stop()
+        end
+    		--print("IsInvisible return")
+        return
+    end
+    -- Casting something else, waiting for that
+    if(currentCastingAbility ~= nil) then
+    		--print("currentCastingAbility return")
+        return
+    end
+    
+    -- Abilities without cast time and instant cast should be castable while running (oracle E, np Q, etc)
+    if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) == false) then
+        if(caster:IsMoving() and self:IsMovementAbility(ability) == false) then
+    		--print("IsAbilityCanBeAutoCastedWhileRunning and IsMoving return")
+            return
+        end
+    end
+    
+    -- target can be nil
     -- Caster should be fine and ready to cast any ability now so no need to check for that (at least only manacosts and cooldowns for desired abilities needs checking)
-    if(self.autoCastsImplementations[self.parentName] ~= nil) then
+    if(self:IsUnitSupportAutoCasts(self.parentName)) then
         local status, result = pcall(function ()
             return self[self.autoCastsImplementations[self.parentName]](self, caster, ability, target)
         end)
-
+    
         if(status ~= true) then
             print("modifier_auto_casts:GetNextAbilityForAutoCast error: ", result)
             return nil
         end
-
+    
         return result
     end
+end
 
-    return nil
+function modifier_auto_casts:IsUnitSupportAutoCasts(unitName)
+    if(self.autoCastsImplementations[unitName] ~= nil) then
+		return true
+	end
+	
+	return false
 end
 
 function modifier_auto_casts:SetLastAutoCastTarget(target)
-    self.parent._autoCastLastAutoCastTarget = target
+    self._autoCastLastAutoCastTarget = target
 end
 
 function modifier_auto_casts:GetLastAutoCastTarget()
-    return self.parent._autoCastLastAutoCastTarget
+    return self._autoCastLastAutoCastTarget
 end
 
 function modifier_auto_casts:IsOrderFromAutoCast()
     if(self._isOrderFromAutoCast ~= nil) then
         return self._isOrderFromAutoCast
     end
-
+    
     return false
 end
 
@@ -439,23 +710,52 @@ function modifier_auto_casts:GetAutoCastOrderForAbility(ability)
     if(not ability or ability.GetAutoCastState == nil) then
         return nil
     end
-
+    
     if(ability._autoCastOrder ~= nil) then
         return ability._autoCastOrder
     end
-
+    
     return nil
+end
+
+function modifier_auto_casts:IsMovementAbility(ability)
+    if(not ability) then
+        return false
+    end
+    
+    if(ability._autoCastMovementAbility ~= nil) then
+        return ability._autoCastMovementAbility
+    end
+    
+    return false
+end
+
+-- Internal timer that can be used as delay for perfomance reasons
+function modifier_auto_casts:IsInternalTimerReady(interval)
+    local currentTime = GameRules:GetGameTime()
+    if(self._autoCastsTimer == nil) then
+    	self._autoCastsTimer = currentTime
+    end
+    
+    local currentTime = GameRules:GetGameTime()
+    if(currentTime - self._autoCastsTimer < interval) then
+    	return false
+    end		
+	
+    self._autoCastsTimer = currentTime
+	
+	return true
 end
 
 function modifier_auto_casts:IsAbilityCanBeAutoCastedWhileRunning(ability)
     if(not ability) then
         return false
     end
-
+    
     if(ability._autoCastWhileRunning ~= nil) then
         return ability._autoCastWhileRunning
     end
-
+    
     return false
 end
 
@@ -463,9 +763,10 @@ function modifier_auto_casts:DetermineAutoCastOrderForAbility(ability)
     if(not ability or ability.GetAutoCastState == nil) then
         return
     end
-
+    
+    local abilityName = ability:GetAbilityName()
     local abilityBehavior = COverthrowGameMode:GetAbilityBehaviorSafe(ability)
-
+    
     -- Special behaviors that allow abilities to be casted while running: DOTA_ABILITY_BEHAVIOR_DONT_CANCEL_MOVEMENT, DOTA_ABILITY_BEHAVIOR_IMMEDIATE?
     if(ability._autoCastWhileRunning == nil) then
         if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_DONT_CANCEL_MOVEMENT) == DOTA_ABILITY_BEHAVIOR_DONT_CANCEL_MOVEMENT) then
@@ -474,22 +775,26 @@ function modifier_auto_casts:DetermineAutoCastOrderForAbility(ability)
         if(ability._autoCastWhileRunning == nil and bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_IMMEDIATE) == DOTA_ABILITY_BEHAVIOR_IMMEDIATE) then
             ability._autoCastWhileRunning = true
         end
-        if(self.cantBeCastedWhileRunning[ability:GetAbilityName()] == true) then
+        if(self.cantBeCastedWhileRunning[abilityName] == true) then
             ability._autoCastWhileRunning = false
         end
     end
-
+    
+    if(self.movementAbilities[abilityName] == true) then
+    	ability._autoCastMovementAbility = true
+    end
+    
     -- Grimstroke Hellfire, maybe something else
     if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_NO_TARGET) == DOTA_ABILITY_BEHAVIOR_NO_TARGET) then
         ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_NO_TARGET
         return
     end
-
+    
     if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) == DOTA_ABILITY_BEHAVIOR_UNIT_TARGET) then
         ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_TARGET
         return
     end
-
+    
     -- Lina abilities, maybe something else
     if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_POINT) == DOTA_ABILITY_BEHAVIOR_POINT) then
         ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_POSITION
@@ -501,22 +806,17 @@ function modifier_auto_casts:IsAbilityReadyForAutoCast(ability)
     if(not ability or ability.GetAutoCastState == nil) then
         return false
     end
-
-    -- IsFullyCastable() = caster have enough mana and ability coooldown ready
-    -- IsActivated() = not hidden by stance/shapeshift/etc
-    return ability:GetAutoCastState() and ability:GetLevel() > 0 and ability:IsFullyCastable() and ability:IsActivated()
-end
-
-function modifier_auto_casts:IsIgnoreCastTimeAbilities()
-    if(self._isIgnoreCastTimeAbilities ~= nil) then
-        return self._isIgnoreCastTimeAbilities
+    
+    local caster = nil
+    if(ability._autoCastCaster ~= nil) then
+    	caster = ability._autoCastCaster
+    else
+    	caster = ability:GetCaster()
+    	ability._autoCastCaster = caster
     end
-
-    return false
-end
-
-function modifier_auto_casts:SetIsIgnoreCastTimeAbilities(state)
-    self._isIgnoreCastTimeAbilities = state
+    
+    -- IsActivated() = not hidden by stance/shapeshift/etc
+    return ability:GetAutoCastState() and ability:GetLevel() > 0 and ability._autoCastCaster:GetMana() >= ability:GetManaCost(-1) and ability:IsActivated() and ability:GetCooldownTimeRemaining() < 0.01
 end
 
 -- Pugna: Q E combo with W sometimes for debuff
@@ -533,26 +833,26 @@ function modifier_auto_casts:GetNextAbilityForPugnaAutoCasts(caster, ability, ta
         caster._autoCastPugnaChaosBlast = caster:FindAbilityByName("destro3")
         self:DetermineAutoCastOrderForAbility(caster._autoCastPugnaChaosBlast)
     end
-
+    
     if(ability == caster._autoCastPugnaSoulFlame or ability == caster._autoCastPugnaIgnite or ability == caster._autoCastPugnaChaosBlast) then
         local isPugnaSoulFlameReadyForAutoCast = self:IsAbilityReadyForAutoCast(caster._autoCastPugnaSoulFlame)
         local isPugnaIgniteReadyForAutoCast = self:IsAbilityReadyForAutoCast(caster._autoCastPugnaIgnite)
         local isPugnaChaosBlastReadyForAutoCast = self:IsAbilityReadyForAutoCast(caster._autoCastPugnaChaosBlast)
-
+    
         -- If ignire refreshed spam it because dot stacks?
         if(isPugnaIgniteReadyForAutoCast) then
             return caster._autoCastPugnaIgnite
         end
-
+    
         if(isPugnaChaosBlastReadyForAutoCast and caster:GetModifierStackCount("modifier_souls", nil) >= 2) then
             return caster._autoCastPugnaChaosBlast
         end
-
+    
         if(isPugnaSoulFlameReadyForAutoCast) then
             return caster._autoCastPugnaSoulFlame
         end
     end
-
+    
     return nil
 end
 
@@ -633,36 +933,41 @@ function modifier_auto_casts:GetNextAbilityForWarlockAutoCasts(caster, ability, 
         caster._autoCastWarlockD = caster:FindAbilityByName("dark_ranger_life_drain")
         self:DetermineAutoCastOrderForAbility(caster._autoCastWarlockD)
     end
-
+	
+    if(target == nil) then
+        return nil
+    end
+	
     if(ability == caster._autoCastWarlockQ or ability == caster._autoCastWarlockW or ability == caster._autoCastWarlockD) then
         local isWarlockQReadyForAutocast = self:IsAbilityReadyForAutoCast(caster._autoCastWarlockQ)
         local isWarlockWReadyForAutocast = self:IsAbilityReadyForAutoCast(caster._autoCastWarlockW)
         local isWarlockDReadyForAutocast = self:IsAbilityReadyForAutoCast(caster._autoCastWarlockD)
 
-        if(target == nil) then
-            return nil
-        end
-
         if(isWarlockQReadyForAutocast) then
             local dotModifier = target:FindModifierByName("modifier_dot1")
-            -- Due to instant cast time trying prevent issues with low spell haste upkeep
-            local isDotAlmostEnded = dotModifier and dotModifier:GetRemainingTime() / dotModifier:GetDuration() < 0.8
-
-            if(isDotAlmostEnded or dotModifier == nil) then
+			
+            -- Due to instant cast time trying prevent issues with low spell haste upkeep		
+            if(dotModifier == nil or dotModifier:GetRemainingTime() / dotModifier:GetDuration() < 0.8) then
                 return caster._autoCastWarlockQ
             end
         end
 
         if(isWarlockWReadyForAutocast) then
             local dotModifier = target:FindModifierByName("modifier_dot2")
-            local stacksCount = dotModifier and dotModifier:GetStackCount() or 0
-            local isDotAlmostEnded = dotModifier and dotModifier:GetRemainingTime() / dotModifier:GetDuration() < 0.3
+            local stacksCount = 0
+			local maxStacksCount = 2 + GetMaxDebuffStackBonus(caster)
+            local isDotAlmostEnded = false
 
+			if(dotModifier) then
+				stacksCount = dotModifier:GetStackCount()
+				isDotAlmostEnded = dotModifier:GetRemainingTime() / dotModifier:GetDuration() < 0.5
+			end
+			
             if(isDotAlmostEnded) then
                 return caster._autoCastWarlockW
             end
 
-            if(caster._autoCastWarlockW:GetLevel() >= 3 and stacksCount < 2) then
+            if(caster._autoCastWarlockW:GetLevel() >= 3 and stacksCount < maxStacksCount) then
                 return caster._autoCastWarlockW
             else
                 if(dotModifier == nil) then
@@ -791,7 +1096,7 @@ function modifier_auto_casts:GetNextAbilityForInvokerAutoCasts(caster, ability, 
     return nil
 end
 
--- Dark Seer: Q W E spam
+-- Dark Seer: Q W D spam
 function modifier_auto_casts:GetNextAbilityForDarkSeerAutoCasts(caster, ability, target)
     if(caster._autoCastMindstorm == nil) then
         caster._autoCastMindstorm = caster:FindAbilityByName("shadow1")
@@ -805,17 +1110,21 @@ function modifier_auto_casts:GetNextAbilityForDarkSeerAutoCasts(caster, ability,
         caster._autoCastDreamFeast = caster:FindAbilityByName("shadow3")
         self:DetermineAutoCastOrderForAbility(caster._autoCastDreamFeast)
     end
-
-    if(ability == caster._autoCastDreamFeast and self:IsAbilityReadyForAutoCast(caster._autoCastDreamFeast)) then
-        return caster._autoCastDreamFeast
-    end
-
-    if(ability == caster._autoCastMindshatter and self:IsAbilityReadyForAutoCast(caster._autoCastMindshatter)) then
-        return caster._autoCastMindshatter
-    end
-
-    if(ability == caster._autoCastMindstorm and self:IsAbilityReadyForAutoCast(caster._autoCastMindstorm)) then
-        return caster._autoCastMindstorm
+	
+    if(ability == caster._autoCastMindstorm or ability == caster._autoCastMindshatter or ability == caster._autoCastDreamFeast) then
+		local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastMindstorm)
+		local isWReady = self:IsAbilityReadyForAutoCast(caster._autoCastMindshatter)
+		local isDReady = self:IsAbilityReadyForAutoCast(caster._autoCastDreamFeast)
+		
+		if(isDReady) then
+			return caster._autoCastDreamFeast
+		end
+		if(isWReady) then
+			return caster._autoCastMindshatter
+		end
+		if(isQReady) then
+			return caster._autoCastMindstorm
+		end
     end
 
     return nil
@@ -850,17 +1159,50 @@ function modifier_auto_casts:GetNextAbilityForCrystalMaidenAutoCasts(caster, abi
     	return nil
     end
 	
-    if(ability == caster._autoCastCMFrostShatter and self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)) then
-        local winterChillStacks = caster:GetModifierStackCount("modifier_winterschill", nil)
-        if(winterChillStacks >= 2 or target:HasModifier("modifier_icenova") or target:HasModifier("modifier_deepfreeze")) then
-            return caster._autoCastCMFrostShatter
-        end
-    end
+	if(ability == caster._autoCastCMIceBolt or ability == caster._autoCastCMFrostShatter) then
+    	local isWinterChillStacksEnough = false
+    	
+    	if(caster:GetModifierStackCount("modifier_winterschill", nil) >= 2) then
+    		isWinterChillStacksEnough = true
+    	end
+    	
+    	if(target:HasModifier("modifier_icenova") or target:HasModifier("modifier_deepfreeze")) then
+    		isWinterChillStacksEnough = true
+    	end
+    		
+    	if(isWinterChillStacksEnough) then
+    		local isFrostShatterReady = self:IsAbilityReadyForAutoCast(caster._autoCastCMFrostShatter)
+    		
+    		if(isFrostShatterReady) then
+    	        return caster._autoCastCMFrostShatter
+    		end
+    		
+    		if(self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt) and isFrostShatterReady == false) then
+    			return caster._autoCastCMIceBolt
+    		end
+    	else
+    		if(self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt)) then
+    			return caster._autoCastCMIceBolt
+    		end
+    		
+    		return nil
+    	end
+	end
+	
+	return nil
+end
 
-    if(ability == caster._autoCastCMIceBolt and self:IsAbilityReadyForAutoCast(caster._autoCastCMIceBolt)) then
-        return caster._autoCastCMIceBolt
+-- Crystal Maiden Pet: Q spam, TODO: Something smarter?
+function modifier_auto_casts:GetNextAbilityForCrystalMaidenPetAutoCasts(caster, ability, target)
+    if(caster._autoCastWaterElementalQ == nil) then
+        caster._autoCastWaterElementalQ = caster:FindAbilityByName("Ice_Bolt_Pet")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastWaterElementalQ)
     end
-
+	
+    if(ability == caster._autoCastWaterElementalQ and self:IsAbilityReadyForAutoCast(caster._autoCastWaterElementalQ)) then
+        return caster._autoCastWaterElementalQ
+    end
+	
     return nil
 end
 
@@ -872,6 +1214,10 @@ function modifier_auto_casts:GetNextAbilityForNatureProphetAutoCasts(caster, abi
     end
             
     if(ability == caster._autoCastNatureProphetQ and self:IsAbilityReadyForAutoCast(caster._autoCastNatureProphetQ)) then
+        if(self:IsInternalTimerReady(0.05) == false) then
+        	return nil
+        end
+		
         local position = caster:GetAbsOrigin()
         local allies = FindNearbyAllies(caster, caster:GetAbsOrigin(), ability:GetEffectiveCastRange(position, caster))
         local isCastRequired = false
@@ -950,15 +1296,17 @@ function modifier_auto_casts:GetNextAbilityForPhantomAssassinAutoCasts(caster, a
         caster._autoCastPhantomAssassinD = caster:FindAbilityByName("Ambush")
         self:DetermineAutoCastOrderForAbility(caster._autoCastPhantomAssassinD)
     end
-
-    if(ability == caster._autoCastPhantomAssassinD and self:IsAbilityReadyForAutoCast(caster._autoCastPhantomAssassinD)) then
-        return caster._autoCastPhantomAssassinD
-    end
-
-    if(ability == caster._autoCastPhantomAssassinE and self:IsAbilityReadyForAutoCast(caster._autoCastPhantomAssassinE) and caster:GetModifierStackCount("modifier_combopoint", nil) >= 3) then
-        return caster._autoCastPhantomAssassinE
-    end
-
+		
+	if(ability == caster._autoCastPhantomAssassinD or ability == caster._autoCastPhantomAssassinE) then
+		if(self:IsAbilityReadyForAutoCast(caster._autoCastPhantomAssassinE) and caster:GetModifierStackCount("modifier_combopoint", nil) >= 3) then
+			return caster._autoCastPhantomAssassinE
+		end
+		
+		if(self:IsAbilityReadyForAutoCast(caster._autoCastPhantomAssassinD)) then
+			return caster._autoCastPhantomAssassinD
+		end
+	end
+	
     return nil
 end
 
@@ -1051,16 +1399,18 @@ function modifier_auto_casts:GetNextAbilityForRikiAutoCasts(caster, ability, tar
         self:DetermineAutoCastOrderForAbility(caster._autoCastRikiW)
     end
     
-    local focusPoints = caster:GetModifierStackCount("modifier_combopoint", nil)
-
-    if(ability == caster._autoCastRikiW and self:IsAbilityReadyForAutoCast(caster._autoCastRikiW) and focusPoints >= 3) then
-        return caster._autoCastRikiW
-    end
-
-    if(ability == caster._autoCastRikiQ and self:IsAbilityReadyForAutoCast(caster._autoCastRikiQ)) then
-        return caster._autoCastRikiQ
-    end
-
+	if(ability == caster._autoCastRikiW or ability == caster._autoCastRikiW) then
+		local focusPoints = caster:GetModifierStackCount("modifier_combopoint", nil)
+		
+		if(self:IsAbilityReadyForAutoCast(caster._autoCastRikiW) and focusPoints >= 3) then
+		    return caster._autoCastRikiW
+		end
+		
+		if(self:IsAbilityReadyForAutoCast(caster._autoCastRikiQ)) then
+		    return caster._autoCastRikiQ
+		end
+	end
+		
     return nil
 end
 
@@ -1078,18 +1428,24 @@ function modifier_auto_casts:GetNextAbilityForBountyHunterAutoCasts(caster, abil
         caster._autoCastBountyHunterE = caster:FindAbilityByName("combat2")
         self:DetermineAutoCastOrderForAbility(caster._autoCastBountyHunterE)
     end
-
-    if(ability == caster._autoCastBountyHunterE and self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterE)) then
-        return caster._autoCastBountyHunterE
-    end
-
-    if(ability == caster._autoCastBountyHunterW and self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterW) and caster:GetModifierStackCount("modifier_combopoint", nil) >= 3) then
-        return caster._autoCastBountyHunterW
-    end
-    
-    if(ability == caster._autoCastBountyHunterQ and self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterQ)) then
-        return caster._autoCastBountyHunterQ
-    end
+	
+	if(ability == caster._autoCastBountyHunterQ or ability == caster._autoCastBountyHunterW or ability == caster._autoCastBountyHunterE) then
+        local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterQ)
+        local isWReady = self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterW)
+        local isEReady = self:IsAbilityReadyForAutoCast(caster._autoCastBountyHunterE)
+                
+        if(isWReady and caster:GetModifierStackCount("modifier_combopoint", nil) >= 3) then
+        	return caster._autoCastBountyHunterW
+        end
+		
+        if(isEReady) then
+        	return caster._autoCastBountyHunterE
+        end
+		
+        if(isQReady) then
+        	return caster._autoCastBountyHunterQ
+        end
+	end
 
     return nil
 end
@@ -1109,46 +1465,52 @@ function modifier_auto_casts:GetNextAbilityForWindRunnerAutoCasts(caster, abilit
         self:DetermineAutoCastOrderForAbility(caster._autoCastWindrunnerR)
     end
 
-    -- If fire arrow learned try smart use lock and reload stacks
-    local fireArrowLevel = caster._autoCastWindrunnerW:GetLevel()
-    if(fireArrowLevel > 0) then
-        if(ability == caster._autoCastWindrunnerR and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerR) and caster:GetModifierStackCount("modifier_lockreload", nil) >= 10) then
-            return caster._autoCastWindrunnerR
-        end
-
-        -- Try consider fire arrow buff
-        if(fireArrowLevel >= 3) then
-            local fireArrowBuffModifier = caster:FindModifierByName("modifier_fire_shots_jungle")
-            local isFireArrowBuffModifierAlmostEnded = fireArrowBuffModifier and fireArrowBuffModifier:GetRemainingTime() / fireArrowBuffModifier:GetDuration() < 0.5 or false
-
-            if(fireArrowBuffModifier == nil) then
-                if(ability == caster._autoCastWindrunnerW and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerW)) then
-                    return caster._autoCastWindrunnerW
-                end
-            else
-                if(ability == caster._autoCastWindrunnerW and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerW) and isFireArrowBuffModifierAlmostEnded) then
-                    return caster._autoCastWindrunnerW
-                end
-            end
-        else
-            if(ability == caster._autoCastWindrunnerW and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerW)) then
-                return caster._autoCastWindrunnerW
-            end
-        end
-    else
-        if(ability == caster._autoCastWindrunnerR and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerR)) then
-            return caster._autoCastWindrunnerR
-        end
-
-        if(ability == caster._autoCastWindrunnerW and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerW)) then
-            return caster._autoCastWindrunnerW
-        end
-    end
-
-    if(ability == caster._autoCastWindrunnerQ and self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerQ)) then
-        return caster._autoCastWindrunnerQ
-    end
-    
+	if(ability == caster._autoCastWindrunnerQ or ability == caster._autoCastWindrunnerW or ability == caster._autoCastWindrunnerR) then
+		local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerQ)
+		local isWReady = self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerW)
+		local isRReady = self:IsAbilityReadyForAutoCast(caster._autoCastWindrunnerR)
+		
+		-- If fire arrow learned try smart use lock and reload stacks
+		local fireArrowLevel = caster._autoCastWindrunnerW:GetLevel()
+		if(fireArrowLevel > 0) then
+		    if(isRReady and caster:GetModifierStackCount("modifier_lockreload", nil) >= 10) then
+		        return caster._autoCastWindrunnerR
+		    end
+		
+		    -- Try consider fire arrow buff
+		    if(fireArrowLevel >= 3) then
+		        local fireArrowBuffModifier = caster:FindModifierByName("modifier_fire_shots_jungle")
+		        local isFireArrowBuffModifierAlmostEnded = fireArrowBuffModifier and fireArrowBuffModifier:GetRemainingTime() / fireArrowBuffModifier:GetDuration() < 0.5 or false
+		
+		        if(fireArrowBuffModifier == nil) then
+		            if(isWReady) then
+		                return caster._autoCastWindrunnerW
+		            end
+		        else
+		            if(isWReady and isFireArrowBuffModifierAlmostEnded) then
+		                return caster._autoCastWindrunnerW
+		            end
+		        end
+		    else
+		        if(isWReady) then
+		            return caster._autoCastWindrunnerW
+		        end
+		    end
+		else
+		    if(isRReady) then
+		        return caster._autoCastWindrunnerR
+		    end
+		
+		    if(isWReady) then
+		        return caster._autoCastWindrunnerW
+		    end
+		end
+		
+		if(isQReady) then
+		    return caster._autoCastWindrunnerQ
+		end
+	end
+	    
     return nil
 end
 
@@ -1170,23 +1532,25 @@ function modifier_auto_casts:GetNextAbilityForBloodseekerAutoCasts(caster, abili
         caster._autoCastBloodseekerD = caster:FindAbilityByName("Ghost5")
         self:DetermineAutoCastOrderForAbility(caster._autoCastBloodseekerD)
     end
-
-    if(ability == caster._autoCastBloodseekerD and self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerD) and caster:GetModifierStackCount("modifier_elementalfury", nil) >= 10) then
-        return caster._autoCastBloodseekerD
-    end
-
-    if(ability == caster._autoCastBloodseekerQ and self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerQ)) then
-        return caster._autoCastBloodseekerQ
-    end
-
-    if(ability == caster._autoCastBloodseekerW and self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerW)) then
-        return caster._autoCastBloodseekerW
-    end
-
-    if(ability == caster._autoCastBloodseekerE and self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerE)) then
-        return caster._autoCastBloodseekerE
-    end
-
+	
+	if(ability == caster._autoCastBloodseekerQ or ability == caster._autoCastBloodseekerW or ability == caster._autoCastBloodseekerE or ability == caster._autoCastBloodseekerD) then
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerD) and caster:GetModifierStackCount("modifier_elementalfury", nil) >= 10) then
+            return caster._autoCastBloodseekerD
+        end
+        
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerQ)) then
+            return caster._autoCastBloodseekerQ
+        end
+        
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerW)) then
+            return caster._autoCastBloodseekerW
+        end
+        
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastBloodseekerE)) then
+            return caster._autoCastBloodseekerE
+        end
+	end
+	
     return nil
 end
 
@@ -1204,19 +1568,25 @@ function modifier_auto_casts:GetNextAbilityForDrowRangerAutoCasts(caster, abilit
         caster._autoCastDrowRangerD = caster:FindAbilityByName("Mindfreezing_Shot")
         self:DetermineAutoCastOrderForAbility(caster._autoCastDrowRangerD)
     end
-
-    if(ability == caster._autoCastDrowRangerD and self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerD)) then
-        return caster._autoCastDrowRangerD
+	
+    if(ability == caster._autoCastDrowRangerQ or ability == caster._autoCastDrowRangerE or ability == caster._autoCastDrowRangerD) then
+		local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerQ)
+		local isEReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerE)
+		local isDReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerD)
+		
+		if(isDReady) then
+			return caster._autoCastDrowRangerD
+		end
+		
+		if(isQReady) then
+			return caster._autoCastDrowRangerQ
+		end
+		
+		if(isEReady) then
+			return caster._autoCastDrowRangerE
+		end
     end
-
-    if(ability == caster._autoCastDrowRangerE and self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerE)) then
-        return caster._autoCastDrowRangerE
-    end
-
-    if(ability == caster._autoCastDrowRangerQ and self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerQ)) then
-        return caster._autoCastDrowRangerQ
-    end
-
+	
     return nil
 end
 
@@ -1235,28 +1605,36 @@ function modifier_auto_casts:GetNextAbilityForDazzleAutoCasts(caster, ability, t
         self:DetermineAutoCastOrderForAbility(caster._autoCastDazzleE)
     end
     
-    local focusPoints = caster:GetModifierStackCount("modifier_combopoint", nil)
-    local tigerFuryBuffModifier = caster:FindModifierByName("modifier_tigerfury")
-    local isTigerFuryBuffModifierAlmostEnded = tigerFuryBuffModifier and tigerFuryBuffModifier:GetRemainingTime() / tigerFuryBuffModifier:GetDuration() < 0.5 or false  
-    
-    if(ability == caster._autoCastDazzleQ and self:IsAbilityReadyForAutoCast(caster._autoCastDazzleQ) and focusPoints < 4) then
-        return caster._autoCastDazzleQ
+    if(ability == caster._autoCastDazzleQ or ability == caster._autoCastDazzleW or ability == caster._autoCastDazzleE) then
+		local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastDazzleQ)
+		local isWReady = self:IsAbilityReadyForAutoCast(caster._autoCastDazzleW)
+		local isEReady = self:IsAbilityReadyForAutoCast(caster._autoCastDazzleE)
+		
+		local focusPoints = caster:GetModifierStackCount("modifier_combopoint", nil)
+	
+		if(isWReady and focusPoints >= 4) then
+			local tigerFuryBuffModifier = caster:FindModifierByName("modifier_tigerfury")
+			
+			if(tigerFuryBuffModifier == nil) then
+				return caster._autoCastDazzleW
+			else
+				local isTigerFuryBuffModifierAlmostEnded = tigerFuryBuffModifier:GetRemainingTime() / tigerFuryBuffModifier:GetDuration() < 0.5 
+				
+				if(isTigerFuryBuffModifierAlmostEnded) then
+					return caster._autoCastDazzleW
+				end
+			end
+		end
+		
+		if(isQReady and focusPoints < 4) then
+			return caster._autoCastDazzleQ
+		end
+		
+		if(isEReady and focusPoints >= 4) then
+			return caster._autoCastDazzleE
+		end
     end
-    
-    if(ability == caster._autoCastDazzleW and self:IsAbilityReadyForAutoCast(caster._autoCastDazzleW) and focusPoints >= 4) then
-        if(tigerFuryBuffModifier == nil) then
-            return caster._autoCastDazzleW
-        else
-            if(isTigerFuryBuffModifierAlmostEnded) then
-                return caster._autoCastDazzleW
-            end
-        end
-    end
-    	
-    if(ability == caster._autoCastDazzleE and self:IsAbilityReadyForAutoCast(caster._autoCastDazzleE) and focusPoints >= 4) then
-        return caster._autoCastDazzleE
-    end
-    
+	    
     return nil
 end
 
@@ -1271,11 +1649,11 @@ function modifier_auto_casts:GetNextAbilityForVengefulSpiritAutoCasts(caster, ab
         self:DetermineAutoCastOrderForAbility(caster._autoCastVengefulSpiritSunQ)
     end
 
-    if(ability == caster._autoCastVengefulSpiritMoonQ and self:IsAbilityReadyForAutoCast(caster._autoCastVengefulSpiritMoonQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastVengefulSpiritMoonQ)) then
         return caster._autoCastVengefulSpiritMoonQ
     end
 
-    if(ability == caster._autoCastVengefulSpiritSunQ and self:IsAbilityReadyForAutoCast(caster._autoCastVengefulSpiritSunQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastVengefulSpiritSunQ)) then
         return caster._autoCastVengefulSpiritSunQ
     end
 
@@ -1293,18 +1671,18 @@ function modifier_auto_casts:GetNextAbilityForSvenAutoCasts(caster, ability, tar
         self:DetermineAutoCastOrderForAbility(caster._autoCastSvenW)
     end
 
-    if(ability == caster._autoCastSvenW and self:IsAbilityReadyForAutoCast(caster._autoCastSvenW)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastSvenW)) then
         return caster._autoCastSvenW
     end
 
-    if(ability == caster._autoCastSvenQ and self:IsAbilityReadyForAutoCast(caster._autoCastSvenQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastSvenQ)) then
         return caster._autoCastSvenQ
     end
 
     return nil
 end
 
--- Axe: Q W E D spam
+-- Axe: Q W spam
 function modifier_auto_casts:GetNextAbilityForAxeAutoCasts(caster, ability, target)
     if(caster._autoCastAxeQ == nil) then
         caster._autoCastAxeQ = caster:FindAbilityByName("Wounding_Strike")
@@ -1314,30 +1692,20 @@ function modifier_auto_casts:GetNextAbilityForAxeAutoCasts(caster, ability, targ
         caster._autoCastAxeW = caster:FindAbilityByName("Mortal_Swing")
         self:DetermineAutoCastOrderForAbility(caster._autoCastAxeW)
     end
-    if(caster._autoCastAxeE == nil) then
-        caster._autoCastAxeE = caster:FindAbilityByName("Concussive_Blow")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastAxeE)
-    end
-    if(caster._autoCastAxeD == nil) then
-        caster._autoCastAxeD = caster:FindAbilityByName("Knee_Breaker")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastAxeD)
-    end
 
-    if(target ~= nil) then
-        if(ability == caster._autoCastAxeQ and self:IsAbilityReadyForAutoCast(caster._autoCastAxeQ) and target:HasModifier("modifier_wounding_strike_bleed_debuff") == false) then
-            return caster._autoCastAxeQ
+    if(target == nil) then
+		return
+    end
+	
+	if(self:IsAbilityReadyForAutoCast(caster._autoCastAxeQ) and target:HasModifier("modifier_wounding_strike_bleed_debuff") == false) then
+		return caster._autoCastAxeQ
+	end
+		
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastAxeW)) then
+        if(self:IsInternalTimerReady(0.05) == false) then
+        	return nil
         end
-    end
-    
-    if(ability == caster._autoCastAxeE and self:IsAbilityReadyForAutoCast(caster._autoCastAxeE)) then
-        return caster._autoCastAxeE
-    end
-
-    if(ability == caster._autoCastAxeD and self:IsAbilityReadyForAutoCast(caster._autoCastAxeD)) then
-        return caster._autoCastAxeD
-    end
-
-    if(ability == caster._autoCastAxeW and self:IsAbilityReadyForAutoCast(caster._autoCastAxeW)) then
+        
         local casterPosition = caster:GetAbsOrigin()
         local enemiesAround = FindNearbyEnemies(caster, casterPosition, caster._autoCastAxeW:GetSpecialValueFor("radius"))
 
@@ -1366,27 +1734,31 @@ function modifier_auto_casts:GetNextAbilityForLegionCommanderAutoCasts(caster, a
         --self:DetermineAutoCastOrderForAbility(caster._autoCastLegionCommanderD)
     end
 
-    if(ability == caster._autoCastLegionCommanderW and self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderW)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderW)) then
         return caster._autoCastLegionCommanderW
     end
-
-    if(caster._autoCastLegionCommanderD:GetLevel() >= 4) then
+	
+	if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ)) then
         -- Always spam when possible and required for cdr
-        if(ability == caster._autoCastLegionCommanderQ and self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ) and caster._autoCastLegionCommanderD:GetCooldownTimeRemaining() > 1) then
+        if(caster._autoCastLegionCommanderD:GetCooldownTimeRemaining() > 1) then
             return caster._autoCastLegionCommanderQ
         end
-    else
+		
         -- Spam only when enemies around
-        if(ability == caster._autoCastLegionCommanderQ and self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ)) then
+        if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderQ)) then
+            if(self:IsInternalTimerReady(0.05) == false) then
+            	return nil
+            end
+            
             local casterPosition = caster:GetAbsOrigin()
             local enemiesAround = FindNearbyEnemies(caster, casterPosition, caster._autoCastLegionCommanderQ:GetSpecialValueFor("range"))
             if(#enemiesAround > 0) then
                 return caster._autoCastLegionCommanderQ
             end
-
+            
             return nil
         end
-    end
+	end
 
     return nil
 end
@@ -1411,7 +1783,7 @@ function modifier_auto_casts:GetNextAbilityForBeastmasterAutoCasts(caster, abili
     local minRageToMaintain = caster._autoCastBeastmasterQ:GetLevel() >= 5 and (caster:GetMaxMana() - slaughterRageCost) or 40
     local currentRage = caster:GetMana()
 
-    if(ability == caster._autoCastBeastmasterD and self:IsAbilityReadyForAutoCast(caster._autoCastBeastmasterD) and currentRage >= minRageToMaintain) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastBeastmasterD) and currentRage >= minRageToMaintain) then
         if(caster._autoCastBeastmasterD:GetLevel() >= 4) then
             if(target:GetHealth() / target:GetMaxHealth() > 0.5) then
                 if(caster:GetMana() >= 40 + slaughterRageCost) then
@@ -1430,7 +1802,7 @@ function modifier_auto_casts:GetNextAbilityForBeastmasterAutoCasts(caster, abili
         end
     end
 
-    if(ability == caster._autoCastBeastmasterQ and self:IsAbilityReadyForAutoCast(caster._autoCastBeastmasterQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastBeastmasterQ)) then
         return caster._autoCastBeastmasterQ
     end
 
@@ -1462,11 +1834,11 @@ function modifier_auto_casts:GetNextAbilityForPudgeAutoCasts(caster, ability, ta
         self:DetermineAutoCastOrderForAbility(caster._autoCastPudgeW)
     end
 
-    if(ability == caster._autoCastPudgeW and self:IsAbilityReadyForAutoCast(caster._autoCastPudgeW)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastPudgeW)) then
         return caster._autoCastPudgeW
     end
 
-    if(ability == caster._autoCastPudgeQ and self:IsAbilityReadyForAutoCast(caster._autoCastPudgeQ)) then
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastPudgeQ)) then
         return caster._autoCastPudgeQ
     end
 
@@ -1542,3 +1914,55 @@ function modifier_auto_casts:GetNextAbilityForTerrorbladeAutoCasts(caster, abili
 
     return nil
 end
+
+-- Antimage: Q spam, TODO: Something smarter?
+function modifier_auto_casts:GetNextAbilityForAntimageAutoCasts(caster, ability, target)
+    if(caster._autoCastAntimageQ == nil) then
+        caster._autoCastAntimageQ = caster:FindAbilityByName("dh1")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastAntimageQ)
+    end
+	
+    if(ability == caster._autoCastAntimageQ and self:IsAbilityReadyForAutoCast(caster._autoCastAntimageQ)) then
+        return caster._autoCastAntimageQ
+    end
+	
+    return nil
+end
+
+-- Brewmaster: Q spam, TODO: Something smarter?
+function modifier_auto_casts:GetNextAbilityForBrewmasterAutoCasts(caster, ability, target)
+    if(caster._autoCastBrewmasterQ == nil) then
+        caster._autoCastBrewmasterQ = caster:FindAbilityByName("brew1")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastBrewmasterQ)
+    end
+	
+    if(ability == caster._autoCastBrewmasterQ and self:IsAbilityReadyForAutoCast(caster._autoCastBrewmasterQ)) then
+        return caster._autoCastBrewmasterQ
+    end
+	
+    return nil
+end
+
+-- Sniper: Q W spam
+function modifier_auto_casts:GetNextAbilityForSniperAutoCasts(caster, ability, target)
+    if(caster._autoCastSniperQ == nil) then
+        caster._autoCastSniperQ = caster:FindAbilityByName("beast1")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastSniperQ)
+    end
+	
+    if(caster._autoCastSniperW == nil) then
+        caster._autoCastSniperW = caster:FindAbilityByName("Hunter_Assassinate")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastSniperW)
+    end
+	
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastSniperQ)) then
+        return caster._autoCastSniperQ
+    end
+	
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastSniperW)) then
+        return caster._autoCastSniperW
+    end
+	
+    return nil
+end
+
