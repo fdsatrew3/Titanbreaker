@@ -36624,6 +36624,7 @@
 			"armor"	"0 0 1 1"
 			"armordur"	"0 0 15 15"
 			"cap"	"5"
+			"aggro"	"0 125 125 125"
 		}
 	}
 	"Protect1"
