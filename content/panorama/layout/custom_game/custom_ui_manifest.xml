@@ -16,9 +16,7 @@
     	<CustomUIElement type="Hud" layoutfile="file://{resources}/layout/custom_game/barebones_attachments.xml" /> 
 
 		<CustomUIElement type="Hud"			layoutfile="file://{resources}/layout/custom_game/titanbreaker_scoreboard_top.xml" />
-		
-		<CustomUIElement type="Hud"			layoutfile="file://{resources}/layout/custom_game/auto_casts_config_window.xml" />
-		
+
 		<!--<CustomUIElement type="Hud" 				layoutfile="file://{resources}/layout/custom_game/weapon_choice.xml" />-->
 	</Panel>
 </root>
