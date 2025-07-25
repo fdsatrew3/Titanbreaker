@@ -148,6 +148,7 @@ function modifier_auto_casts:OnCreated()
         ["mars1"] = true,
         -- Eventually will kill player? (Dragon Knight)
         ["Protect1"] = true,
+        ["Protect2"] = true,
         -- Eventually will kill player? (Phantom Lancer)
         ["pala1"] = true,
         -- Eventually will kill player? (Terrorblade)
@@ -1879,8 +1880,17 @@ function modifier_auto_casts:GetNextAbilityForDragonKnightAutoCasts(caster, abil
         caster._autoCastDragonKnightQ = caster:FindAbilityByName("Protect1")
         self:DetermineAutoCastOrderForAbility(caster._autoCastDragonKnightQ)
     end
-
-    if(ability == caster._autoCastDragonKnightQ and self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightQ)) then
+	
+    if(caster._autoCastDragonKnightW == nil) then
+        caster._autoCastDragonKnightW = caster:FindAbilityByName("Protect2")
+        self:DetermineAutoCastOrderForAbility(caster._autoCastDragonKnightW)
+    end
+	
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW)) then
+        return caster._autoCastDragonKnightW
+    end
+	
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightQ)) then
         return caster._autoCastDragonKnightQ
     end
 
