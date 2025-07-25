@@ -15095,6 +15095,18 @@ function GlobalOnAbilityExecuted( event )
         local myevent = {caster = caster, amount = 10, ability = ability, chooseability = 5 }
         ReduceCooldown(myevent)
     end
+    if ability == caster:GetAbilityByIndex(0) then
+        caster.firstabilitytarget = target
+        if caster.Pet and (not caster.Pet:IsNull()) and caster.Pet:IsAlive() and not caster.Pet.IsCasting then
+            local order = 
+            {
+                UnitIndex = caster.Pet:entindex(),
+                OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+                TargetIndex = target:entindex()
+            }
+            ExecuteOrderFromTable(order)
+        end
+    end
     if GetManaRefundAmount(caster) >= 1 and ability and ability:GetManaCost(-1) >= 1 then
         Timers:CreateTimer(0.05, function()
             RestoreResource({caster = caster, amount = GetManaRefundAmount(caster), flat = true})
