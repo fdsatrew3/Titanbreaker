@@ -30,7 +30,8 @@ modifier_auto_casts = class({
         {
             MODIFIER_EVENT_ON_ABILITY_FULLY_CAST,
             MODIFIER_EVENT_ON_ABILITY_END_CHANNEL,
-            MODIFIER_EVENT_ON_ORDER
+            MODIFIER_EVENT_ON_ORDER,
+			--MODIFIER_EVENT_ON_ATTACK_LANDED
         }
     end,
     GetAttributes = function()
@@ -40,6 +41,15 @@ modifier_auto_casts = class({
         return false
     end
 })
+
+--[[
+function modifier_auto_casts:OnAttackLanded(kv)
+	if(self.parent ~= kv.attacker) then
+		return
+	end
+	
+	--print("!!!!!!!!!!!!!!!!!!!!!!!!!! OnAttackLanded !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+end --]]
 
 function modifier_auto_casts:OnCreated()
     if(not IsServer()) then
@@ -309,7 +319,9 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
     if(target ~= nil) then
         self:SetLastAutoCastTarget(target)
     end
-    
+	
+	self:TryAutoAttackAfterAutoCast(target)
+	
     -- In very rare cases this modifier timer can perfectly align with cast time of abilities and send auto casts orders while player casting cast time ability and this breaking queue
     if(isChannel == true) then
     	if(self:IsAutocastsAbility(ability)) then
@@ -327,10 +339,18 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
     		self:_OnIntervalThinkInternal(true)
     	end
     end
-	
-    if(target ~= nil and self:IsMustAutoAttackAfterAutoCast() and self.parent:GetAttackTarget() ~= target) then
-    	--print("MoveToTargetToAttack")
-    	self.parent:MoveToTargetToAttack(target)
+end
+
+function modifier_auto_casts:TryAutoAttackAfterAutoCast(target)
+    if(target ~= nil and self:IsMustAutoAttackAfterAutoCast() and self.parent:GetAttackTarget() ~= target and self.parent:IsAttacking() == false) then
+    	--print("!!!!! MoveToTargetToAttack !!!!")
+    	ExecuteOrderFromTable({
+    		UnitIndex = self.parent:entindex(),
+    		OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+    		TargetIndex = target:entindex(),
+    		Queue = false
+    	})
+    	--self.parent:MoveToTargetToAttack(target)
     end
 end
 
@@ -398,6 +418,7 @@ function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility
     	if(ignoreCurrentActiveAbilityInternal == true) then
     		--print("Failed autocast. Set flag")
     		self:SetIsAutoCastFailed(true)
+    		self:TryAutoAttackAfterAutoCast(lastAutoCastTarget)
     	end
     else
     	self:PerformAutoCastOfAbility(abilityToAutoCast, lastAutoCastTarget)
@@ -440,7 +461,7 @@ function modifier_auto_casts:PerformAutoCastOfAbility(abilityToAutoCast, target)
 		--print("abilityToAutoCast", abilityToAutoCast:GetAbilityName())
 	end 
 --]]
-	
+		
     --print("autoCastOrder", autoCastOrder)
 	
     -- Unsupported behavior or something wrong, too bad
@@ -466,6 +487,19 @@ function modifier_auto_casts:PerformAutoCastOfAbility(abilityToAutoCast, target)
 		end
 	end
 	
+    --print("==========================")
+    --print("caster", caster:GetUnitName())
+    --print("autoCastOrder", autoCastOrder)
+    --print("target", target)
+    --print("abilityToAutoCast", abilityToAutoCast:GetAbilityName())
+    --print("ability:GetAutoCastState()", abilityToAutoCast:GetAutoCastState())
+    --print("ability:GetLevel() > 0", abilityToAutoCast:GetLevel())
+    --print("ability._autoCastCaster:GetMana()", abilityToAutoCast._autoCastCaster:GetMana())
+    --print("ability:GetManaCost(-1)", abilityToAutoCast:GetManaCost(-1))
+    --print("ability:IsActivated()", abilityToAutoCast:IsActivated())
+    --print("ability:GetCooldownTimeRemaining()", abilityToAutoCast:GetCooldownTimeRemaining())
+    --print("self:IsAbilityReadyForAutoCast(abilityToAutoCast)", self:IsAbilityReadyForAutoCast(abilityToAutoCast))
+    
     --print("target", target)
     	
     if(autoCastOrder == DOTA_UNIT_ORDER_CAST_NO_TARGET) then
