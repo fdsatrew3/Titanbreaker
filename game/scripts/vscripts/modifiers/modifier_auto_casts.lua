@@ -232,7 +232,7 @@ function modifier_auto_casts:OnOrder(kv)
         if(self.abilitiesWithAutoCastsCount < 1) then
             self:StartIntervalThink(-1)
         else
-            self:StartIntervalThink(0.01)
+            self:StartIntervalThink(0.05)
         end
     end
     
@@ -342,16 +342,27 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
 end
 
 function modifier_auto_casts:TryAutoAttackAfterAutoCast(target)
-    if(target ~= nil and self:IsMustAutoAttackAfterAutoCast() and self.parent:GetAttackTarget() ~= target and self.parent:IsAttacking() == false) then
-    	--print("!!!!! MoveToTargetToAttack !!!!")
-    	ExecuteOrderFromTable({
-    		UnitIndex = self.parent:entindex(),
-    		OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
-    		TargetIndex = target:entindex(),
-    		Queue = false
-    	})
-    	--self.parent:MoveToTargetToAttack(target)
+    if(target == nil) then
+        return
     end
+    
+    if(self:IsMustAutoAttackAfterAutoCast() == false) then
+		--print("IsMustAutoAttackAfterAutoCast check")
+        return
+    end
+        
+    if(self.parent:GetTeamNumber() == target:GetTeamNumber()) then
+		--print("Ally check")
+        return
+    end
+    
+    --print("!!!!! MoveToTargetToAttack !!!!")
+    ExecuteOrderFromTable({
+    	UnitIndex = self.parent:entindex(),
+    	OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+    	TargetIndex = target:entindex(),
+    	Queue = false
+    })
 end
 
 function modifier_auto_casts:OnIntervalThink()
@@ -403,7 +414,7 @@ function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility
 			
     		abilityToAutoCast = self:GetNextAbilityForAutoCast(self.parent, ability, lastAutoCastTarget, ignoreCurrentActiveAbilityInternal)
     		--print("Checking ", ability:GetAbilityName(), " result = ", abilityToAutoCast)
-						
+			
     		if(abilityToAutoCast ~= nil) then
     			--print("BREAK WITH", abilityToAutoCast:GetAbilityName())
     			break
@@ -648,6 +659,7 @@ function modifier_auto_casts:GetNextAbilityForAutoCast(caster, ability, target, 
             return
         end
     end
+	
     -- Waiting for silence
     if(caster:IsSilenced()) then
     		--print("Silenced return")
@@ -706,7 +718,7 @@ function modifier_auto_casts:GetNextAbilityForAutoCast(caster, ability, target, 
         end)
     
         if(status ~= true) then
-            print("modifier_auto_casts:GetNextAbilityForAutoCast error: ", result)
+            --print("modifier_auto_casts:GetNextAbilityForAutoCast error: ", result)
             return nil
         end
     
@@ -795,7 +807,7 @@ function modifier_auto_casts:IsAbilityCanBeAutoCastedWhileRunning(ability)
     return false
 end
 
-function modifier_auto_casts:DetermineAutoCastOrderForAbility(ability)
+function modifier_auto_casts:DetermineAutoCastBehaviorForAbility(ability)
     if(not ability or ability.GetAutoCastState == nil) then
         return
     end
@@ -803,6 +815,8 @@ function modifier_auto_casts:DetermineAutoCastOrderForAbility(ability)
     local abilityName = ability:GetAbilityName()
     local abilityBehavior = COverthrowGameMode:GetAbilityBehaviorSafe(ability)
     
+    -- Determine cast order required
+	
     -- Special behaviors that allow abilities to be casted while running: DOTA_ABILITY_BEHAVIOR_DONT_CANCEL_MOVEMENT, DOTA_ABILITY_BEHAVIOR_IMMEDIATE?
     if(ability._autoCastWhileRunning == nil) then
         if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_DONT_CANCEL_MOVEMENT) == DOTA_ABILITY_BEHAVIOR_DONT_CANCEL_MOVEMENT) then
@@ -815,7 +829,18 @@ function modifier_auto_casts:DetermineAutoCastOrderForAbility(ability)
             ability._autoCastWhileRunning = false
         end
     end
+	
+    -- Determine cast targets allowed (fix for things like DK spam W on allies after using protection ability)
+    local abilityTargetTeam = ability:GetAbilityTargetTeam()
     
+    if(abilityTargetTeam == DOTA_UNIT_TARGET_TEAM_ENEMY) then
+    	ability._autoCastsTargetTeam = DOTA_TEAM_BADGUYS
+    elseif(abilityTargetTeam == DOTA_UNIT_TARGET_TEAM_FRIENDLY) then
+    	ability._autoCastsTargetTeam = DOTA_TEAM_GOODGUYS
+    else
+    	ability._autoCastsTargetTeam = DOTA_TEAM_NOTEAM
+    end
+	
     if(self.movementAbilities[abilityName] == true) then
     	ability._autoCastMovementAbility = true
     end
@@ -838,6 +863,16 @@ function modifier_auto_casts:DetermineAutoCastOrderForAbility(ability)
     end
 end
 
+function modifier_auto_casts:GetAbilityTargetTeam(ability)
+    if(not ability or ability._autoCastsTargetTeam == nil) then
+		--print("ability", ability)
+		--print("ability._autoCastsTargetTeam", ability._autoCastsTargetTeam)
+        return DOTA_TEAM_NOTEAM
+    end
+    
+	return ability._autoCastsTargetTeam
+end
+
 function modifier_auto_casts:IsAbilityReadyForAutoCast(ability)
     if(not ability or ability.GetAutoCastState == nil) then
         return false
@@ -851,6 +886,18 @@ function modifier_auto_casts:IsAbilityReadyForAutoCast(ability)
     	ability._autoCastCaster = caster
     end
     
+	-- If this ability can't be casted while running check allowed targets too to prevent bugs like dk spam W on allies after using any support/protection ability
+	if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) == false) then
+		local target = self:GetLastAutoCastTarget()
+		--print("ability", ability:GetAbilityName())
+		--print("target", target)
+		if(target ~= nil and self:GetAbilityTargetTeam(ability) ~= target:GetTeamNumber()) then
+			--print("self:GetAbilityTargetTeam(ability)", self:GetAbilityTargetTeam(ability))
+			--print("target:GetTeamNumber()", target:GetTeamNumber())
+			return false
+		end
+	end
+	
     -- IsActivated() = not hidden by stance/shapeshift/etc
     return ability:GetAutoCastState() and ability:GetLevel() > 0 and ability._autoCastCaster:GetMana() >= ability:GetManaCost(-1) and ability:IsActivated() and ability:GetCooldownTimeRemaining() < 0.01
 end
@@ -859,15 +906,15 @@ end
 function modifier_auto_casts:GetNextAbilityForPugnaAutoCasts(caster, ability, target)
     if(caster._autoCastPugnaSoulFlame == nil) then
         caster._autoCastPugnaSoulFlame = caster:FindAbilityByName("destro1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastPugnaSoulFlame)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastPugnaSoulFlame)
     end
     if(caster._autoCastPugnaIgnite == nil) then
         caster._autoCastPugnaIgnite = caster:FindAbilityByName("destro2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastPugnaIgnite)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastPugnaIgnite)
     end
     if(caster._autoCastPugnaChaosBlast == nil) then
         caster._autoCastPugnaChaosBlast = caster:FindAbilityByName("destro3")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastPugnaChaosBlast)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastPugnaChaosBlast)
     end
     
     if(ability == caster._autoCastPugnaSoulFlame or ability == caster._autoCastPugnaIgnite or ability == caster._autoCastPugnaChaosBlast) then
@@ -896,11 +943,11 @@ end
 function modifier_auto_casts:GetNextAbilityForOracleAutoCasts(caster, ability, target)
     if(caster._autoCastOracleHolyLight == nil) then
         caster._autoCastOracleHolyLight = caster:FindAbilityByName("holy1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastOracleHolyLight)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastOracleHolyLight)
     end
     if(caster._autoCastOracleDivineNova == nil) then
         caster._autoCastOracleDivineNova = caster:FindAbilityByName("holy3")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastOracleDivineNova)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastOracleDivineNova)
     end
 
     local isOracleDivineNovaReadyForAutocast = self:IsAbilityReadyForAutoCast(caster._autoCastOracleDivineNova)
@@ -922,15 +969,15 @@ end
 function modifier_auto_casts:GetNextAbilityForGrimstrokeAutoCasts(caster, ability, target)
     if(caster._autoCastDemo1 == nil) then
         caster._autoCastDemo1 = caster:FindAbilityByName("demo1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDemo1)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDemo1)
     end
     if(caster._autoCastDemo2 == nil) then
         caster._autoCastDemo2 = caster:FindAbilityByName("demo2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDemo2)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDemo2)
     end
     if(caster._autoCastDemo3 == nil) then
         caster._autoCastDemo3 = caster:FindAbilityByName("demo3")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDemo3)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDemo3)
     end
 
     if(ability == caster._autoCastDemo1 or ability == caster._autoCastDemo2 or ability == caster._autoCastDemo3) then
@@ -959,15 +1006,15 @@ end
 function modifier_auto_casts:GetNextAbilityForWarlockAutoCasts(caster, ability, target)
     if(caster._autoCastWarlockQ == nil) then
         caster._autoCastWarlockQ = caster:FindAbilityByName("Agony")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastWarlockQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastWarlockQ)
     end
     if(caster._autoCastWarlockW == nil) then
         caster._autoCastWarlockW = caster:FindAbilityByName("Pain_Warlock")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastWarlockW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastWarlockW)
     end
     if(caster._autoCastWarlockD == nil) then
         caster._autoCastWarlockD = caster:FindAbilityByName("dark_ranger_life_drain")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastWarlockD)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastWarlockD)
     end
 	
     if(target == nil) then
@@ -1024,15 +1071,15 @@ end
 function modifier_auto_casts:GetNextAbilityForShadowShamanAutoCasts(caster, ability, target)
     if(caster._autoCastShadowShamanQ == nil) then
         caster._autoCastShadowShamanQ = caster:FindAbilityByName("Lightning_Bolt")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastShadowShamanQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastShadowShamanQ)
     end
     if(caster._autoCastShadowShamanE == nil) then
         caster._autoCastShadowShamanE = caster:FindAbilityByName("Spirit_Shock")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastShadowShamanE)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastShadowShamanE)
     end
     if(caster._autoCastShadowShamanD == nil) then
         caster._autoCastShadowShamanD = caster:FindAbilityByName("Lavaburst")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastShadowShamanD)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastShadowShamanD)
     end
 
     if(ability == caster._autoCastShadowShamanQ or ability == caster._autoCastShadowShamanE or ability == caster._autoCastShadowShamanD) then
@@ -1064,19 +1111,19 @@ end
 function modifier_auto_casts:GetNextAbilityForLinaAutoCasts(caster, ability, target)
     if(caster._autoCastLinaQ == nil) then
         caster._autoCastLinaQ = caster:FindAbilityByName("Magma_Bolt")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastLinaQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastLinaQ)
     end
     if(caster._autoCastLinaW == nil) then
         caster._autoCastLinaW = caster:FindAbilityByName("Fire_Lance")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastLinaW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastLinaW)
     end
     if(caster._autoCastLinaE == nil) then
         caster._autoCastLinaE = caster:FindAbilityByName("Molten_Lava")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastLinaE)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastLinaE)
     end
     if(caster._autoCastLinaD == nil) then
         caster._autoCastLinaD = caster:FindAbilityByName("Dragon_Claw")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastLinaD)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastLinaD)
     end
 
     if(ability == caster._autoCastLinaQ or ability == caster._autoCastLinaW or ability == caster._autoCastLinaE or ability == caster._autoCastLinaD) then
@@ -1109,11 +1156,11 @@ end
 function modifier_auto_casts:GetNextAbilityForInvokerAutoCasts(caster, ability, target)
     if(caster._autoCastInvokerQ == nil) then
         caster._autoCastInvokerQ = caster:FindAbilityByName("Arcane1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastInvokerQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastInvokerQ)
     end
     if(caster._autoCastInvokerW == nil) then
         caster._autoCastInvokerW = caster:FindAbilityByName("Arcane2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastInvokerW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastInvokerW)
     end
 
     if(ability == caster._autoCastInvokerQ or ability == caster._autoCastInvokerW) then
@@ -1136,15 +1183,15 @@ end
 function modifier_auto_casts:GetNextAbilityForDarkSeerAutoCasts(caster, ability, target)
     if(caster._autoCastMindstorm == nil) then
         caster._autoCastMindstorm = caster:FindAbilityByName("shadow1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastMindstorm)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastMindstorm)
     end
     if(caster._autoCastMindshatter == nil) then
         caster._autoCastMindshatter = caster:FindAbilityByName("shadow11")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastMindshatter)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastMindshatter)
     end
     if(caster._autoCastDreamFeast == nil) then
         caster._autoCastDreamFeast = caster:FindAbilityByName("shadow3")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDreamFeast)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDreamFeast)
     end
 	
     if(ability == caster._autoCastMindstorm or ability == caster._autoCastMindshatter or ability == caster._autoCastDreamFeast) then
@@ -1170,7 +1217,7 @@ end
 function modifier_auto_casts:GetNextAbilityForOmniknightAutoCasts(caster, ability, target)
     if(caster._autoCastDivineLight == nil) then
         caster._autoCastDivineLight = caster:FindAbilityByName("Divine_Light")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDivineLight)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDivineLight)
     end
 
     if(ability == caster._autoCastDivineLight and self:IsAbilityReadyForAutoCast(caster._autoCastDivineLight)) then
@@ -1184,11 +1231,11 @@ end
 function modifier_auto_casts:GetNextAbilityForCrystalMaidenAutoCasts(caster, ability, target)
     if(caster._autoCastCMIceBolt == nil) then
         caster._autoCastCMIceBolt = caster:FindAbilityByName("Ice_Bolt")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastCMIceBolt)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastCMIceBolt)
     end
     if(caster._autoCastCMFrostShatter == nil) then
         caster._autoCastCMFrostShatter = caster:FindAbilityByName("Frost_Shatter")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastCMFrostShatter)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastCMFrostShatter)
     end
     
     if(target == nil) then
@@ -1232,7 +1279,7 @@ end
 function modifier_auto_casts:GetNextAbilityForCrystalMaidenPetAutoCasts(caster, ability, target)
     if(caster._autoCastWaterElementalQ == nil) then
         caster._autoCastWaterElementalQ = caster:FindAbilityByName("Ice_Bolt_Pet")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastWaterElementalQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastWaterElementalQ)
     end
 	
     if(ability == caster._autoCastWaterElementalQ and self:IsAbilityReadyForAutoCast(caster._autoCastWaterElementalQ)) then
@@ -1246,7 +1293,7 @@ end
 function modifier_auto_casts:GetNextAbilityForNatureProphetAutoCasts(caster, ability, target)
     if(caster._autoCastNatureProphetQ == nil) then
         caster._autoCastNatureProphetQ = caster:FindAbilityByName("Lifebloom")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastNatureProphetQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastNatureProphetQ)
     end
             
     if(ability == caster._autoCastNatureProphetQ and self:IsAbilityReadyForAutoCast(caster._autoCastNatureProphetQ)) then
@@ -1284,7 +1331,7 @@ end
 function modifier_auto_casts:GetNextAbilityForWitchDoctorAutoCasts(caster, ability, target)
     if(caster._autoCastWitchDoctorQ == nil) then
         caster._autoCastWitchDoctorQ = caster:FindAbilityByName("resto1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastWitchDoctorQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastWitchDoctorQ)
     end
             
     if(ability == caster._autoCastWitchDoctorQ and self:IsAbilityReadyForAutoCast(caster._autoCastWitchDoctorQ)) then
@@ -1298,7 +1345,7 @@ end
 function modifier_auto_casts:GetNextAbilityForSilencerAutoCasts(caster, ability, target)
     if(caster._autoCastSilencerQ == nil) then
         caster._autoCastSilencerQ = caster:FindAbilityByName("Light_of_Heaven")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastSilencerQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastSilencerQ)
     end
             
     if(ability == caster._autoCastSilencerQ and self:IsAbilityReadyForAutoCast(caster._autoCastSilencerQ)) then
@@ -1312,7 +1359,7 @@ end
 function modifier_auto_casts:GetNextAbilityForEnchantressAutoCasts(caster, ability, target)
     if(caster._autoCastEnchantressQ == nil) then
         caster._autoCastEnchantressQ = caster:FindAbilityByName("ench1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastEnchantressQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastEnchantressQ)
     end
             
     if(ability == caster._autoCastEnchantressQ and self:IsAbilityReadyForAutoCast(caster._autoCastEnchantressQ)) then
@@ -1326,11 +1373,11 @@ end
 function modifier_auto_casts:GetNextAbilityForPhantomAssassinAutoCasts(caster, ability, target)
     if(caster._autoCastPhantomAssassinE == nil) then
         caster._autoCastPhantomAssassinE = caster:FindAbilityByName("Fatal_Throw")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastPhantomAssassinE)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastPhantomAssassinE)
     end
     if(caster._autoCastPhantomAssassinD == nil) then
         caster._autoCastPhantomAssassinD = caster:FindAbilityByName("Ambush")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastPhantomAssassinD)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastPhantomAssassinD)
     end
 		
 	if(ability == caster._autoCastPhantomAssassinD or ability == caster._autoCastPhantomAssassinE) then
@@ -1350,15 +1397,15 @@ end
 function modifier_auto_casts:GetNextAbilityForJuggernautAutoCasts(caster, ability, target)
     if(caster._autoCastJuggernautQ == nil) then
         caster._autoCastJuggernautQ = caster:FindAbilityByName("deadly1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastJuggernautQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastJuggernautQ)
     end
     if(caster._autoCastJuggernautW == nil) then
         caster._autoCastJuggernautW = caster:FindAbilityByName("deadly2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastJuggernautW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastJuggernautW)
     end
     if(caster._autoCastJuggernautE == nil) then
         caster._autoCastJuggernautE = caster:FindAbilityByName("deadly3")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastJuggernautE)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastJuggernautE)
     end
     
     if(not caster.yinyangsystem) then
@@ -1428,11 +1475,11 @@ end
 function modifier_auto_casts:GetNextAbilityForRikiAutoCasts(caster, ability, target)
     if(caster._autoCastRikiQ == nil) then
         caster._autoCastRikiQ = caster:FindAbilityByName("hawk1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastRikiQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastRikiQ)
     end
     if(caster._autoCastRikiW == nil) then
         caster._autoCastRikiW = caster:FindAbilityByName("hawk2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastRikiW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastRikiW)
     end
     
 	if(ability == caster._autoCastRikiW or ability == caster._autoCastRikiW) then
@@ -1454,15 +1501,15 @@ end
 function modifier_auto_casts:GetNextAbilityForBountyHunterAutoCasts(caster, ability, target)
     if(caster._autoCastBountyHunterQ == nil) then
         caster._autoCastBountyHunterQ = caster:FindAbilityByName("combat1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBountyHunterQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBountyHunterQ)
     end
     if(caster._autoCastBountyHunterW == nil) then
         caster._autoCastBountyHunterW = caster:FindAbilityByName("combat3")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBountyHunterW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBountyHunterW)
     end
     if(caster._autoCastBountyHunterE == nil) then
         caster._autoCastBountyHunterE = caster:FindAbilityByName("combat2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBountyHunterE)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBountyHunterE)
     end
 	
 	if(ability == caster._autoCastBountyHunterQ or ability == caster._autoCastBountyHunterW or ability == caster._autoCastBountyHunterE) then
@@ -1490,15 +1537,15 @@ end
 function modifier_auto_casts:GetNextAbilityForWindRunnerAutoCasts(caster, ability, target)
     if(caster._autoCastWindrunnerQ == nil) then
         caster._autoCastWindrunnerQ = caster:FindAbilityByName("wind1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastWindrunnerQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastWindrunnerQ)
     end
     if(caster._autoCastWindrunnerW == nil) then
         caster._autoCastWindrunnerW = caster:FindAbilityByName("wind2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastWindrunnerW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastWindrunnerW)
     end
     if(caster._autoCastWindrunnerR == nil) then
         caster._autoCastWindrunnerR = caster:FindAbilityByName("wind7")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastWindrunnerR)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastWindrunnerR)
     end
 
 	if(ability == caster._autoCastWindrunnerQ or ability == caster._autoCastWindrunnerW or ability == caster._autoCastWindrunnerR) then
@@ -1554,19 +1601,19 @@ end
 function modifier_auto_casts:GetNextAbilityForBloodseekerAutoCasts(caster, ability, target)
     if(caster._autoCastBloodseekerQ == nil) then
         caster._autoCastBloodseekerQ = caster:FindAbilityByName("Ghost1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBloodseekerQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBloodseekerQ)
     end
     if(caster._autoCastBloodseekerW == nil) then
         caster._autoCastBloodseekerW = caster:FindAbilityByName("Ghost2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBloodseekerW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBloodseekerW)
     end
     if(caster._autoCastBloodseekerE == nil) then
         caster._autoCastBloodseekerE = caster:FindAbilityByName("Ghost3")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBloodseekerE)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBloodseekerE)
     end
     if(caster._autoCastBloodseekerD == nil) then
         caster._autoCastBloodseekerD = caster:FindAbilityByName("Ghost5")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBloodseekerD)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBloodseekerD)
     end
 	
 	if(ability == caster._autoCastBloodseekerQ or ability == caster._autoCastBloodseekerW or ability == caster._autoCastBloodseekerE or ability == caster._autoCastBloodseekerD) then
@@ -1594,15 +1641,15 @@ end
 function modifier_auto_casts:GetNextAbilityForDrowRangerAutoCasts(caster, ability, target)
     if(caster._autoCastDrowRangerQ == nil) then
         caster._autoCastDrowRangerQ = caster:FindAbilityByName("Focussed_Shot")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDrowRangerQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDrowRangerQ)
     end
     if(caster._autoCastDrowRangerE == nil) then
         caster._autoCastDrowRangerE = caster:FindAbilityByName("Inspiring_Shot")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDrowRangerE)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDrowRangerE)
     end
     if(caster._autoCastDrowRangerD == nil) then
         caster._autoCastDrowRangerD = caster:FindAbilityByName("Mindfreezing_Shot")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDrowRangerD)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDrowRangerD)
     end
 	
     if(ability == caster._autoCastDrowRangerQ or ability == caster._autoCastDrowRangerE or ability == caster._autoCastDrowRangerD) then
@@ -1630,15 +1677,15 @@ end
 function modifier_auto_casts:GetNextAbilityForDazzleAutoCasts(caster, ability, target)
     if(caster._autoCastDazzleQ == nil) then
         caster._autoCastDazzleQ = caster:FindAbilityByName("Feral2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDazzleQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDazzleQ)
     end
     if(caster._autoCastDazzleW == nil) then
         caster._autoCastDazzleW = caster:FindAbilityByName("Feral3")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDazzleW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDazzleW)
     end
     if(caster._autoCastDazzleE == nil) then
         caster._autoCastDazzleE = caster:FindAbilityByName("Feral4")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDazzleE)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDazzleE)
     end
     
     if(ability == caster._autoCastDazzleQ or ability == caster._autoCastDazzleW or ability == caster._autoCastDazzleE) then
@@ -1678,11 +1725,11 @@ end
 function modifier_auto_casts:GetNextAbilityForVengefulSpiritAutoCasts(caster, ability, target)
     if(caster._autoCastVengefulSpiritMoonQ == nil) then
         caster._autoCastVengefulSpiritMoonQ = caster:FindAbilityByName("moon11")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastVengefulSpiritMoonQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastVengefulSpiritMoonQ)
     end
     if(caster._autoCastVengefulSpiritSunQ == nil) then
         caster._autoCastVengefulSpiritSunQ = caster:FindAbilityByName("moon1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastVengefulSpiritSunQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastVengefulSpiritSunQ)
     end
 
     if(self:IsAbilityReadyForAutoCast(caster._autoCastVengefulSpiritMoonQ)) then
@@ -1700,11 +1747,11 @@ end
 function modifier_auto_casts:GetNextAbilityForSvenAutoCasts(caster, ability, target)
     if(caster._autoCastSvenQ == nil) then
         caster._autoCastSvenQ = caster:FindAbilityByName("frostdk1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastSvenQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastSvenQ)
     end
     if(caster._autoCastSvenW == nil) then
         caster._autoCastSvenW = caster:FindAbilityByName("frostdk2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastSvenW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastSvenW)
     end
 
     if(self:IsAbilityReadyForAutoCast(caster._autoCastSvenW)) then
@@ -1722,11 +1769,11 @@ end
 function modifier_auto_casts:GetNextAbilityForAxeAutoCasts(caster, ability, target)
     if(caster._autoCastAxeQ == nil) then
         caster._autoCastAxeQ = caster:FindAbilityByName("Wounding_Strike")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastAxeQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastAxeQ)
     end
     if(caster._autoCastAxeW == nil) then
         caster._autoCastAxeW = caster:FindAbilityByName("Mortal_Swing")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastAxeW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastAxeW)
     end
 
     if(target == nil) then
@@ -1759,15 +1806,15 @@ end
 function modifier_auto_casts:GetNextAbilityForLegionCommanderAutoCasts(caster, ability, target)
     if(caster._autoCastLegionCommanderQ == nil) then
         caster._autoCastLegionCommanderQ = caster:FindAbilityByName("Retri1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastLegionCommanderQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastLegionCommanderQ)
     end
     if(caster._autoCastLegionCommanderW == nil) then
         caster._autoCastLegionCommanderW = caster:FindAbilityByName("Retri2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastLegionCommanderW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastLegionCommanderW)
     end
     if(caster._autoCastLegionCommanderD == nil) then
         caster._autoCastLegionCommanderD = caster:FindAbilityByName("Retri4")
-        --self:DetermineAutoCastOrderForAbility(caster._autoCastLegionCommanderD)
+        --self:DetermineAutoCastBehaviorForAbility(caster._autoCastLegionCommanderD)
     end
 
     if(self:IsAbilityReadyForAutoCast(caster._autoCastLegionCommanderW)) then
@@ -1803,11 +1850,11 @@ end
 function modifier_auto_casts:GetNextAbilityForBeastmasterAutoCasts(caster, ability, target)
     if(caster._autoCastBeastmasterQ == nil) then
         caster._autoCastBeastmasterQ = caster:FindAbilityByName("fury1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBeastmasterQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBeastmasterQ)
     end
     if(caster._autoCastBeastmasterD == nil) then
         caster._autoCastBeastmasterD = caster:FindAbilityByName("fury4")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBeastmasterD)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBeastmasterD)
     end
 
     if(target == nil) then
@@ -1849,7 +1896,7 @@ end
 function modifier_auto_casts:GetNextAbilityForUrsaAutoCasts(caster, ability, target)
     if(caster._autoCastBearQ == nil) then
         caster._autoCastBearQ = caster:FindAbilityByName("bear1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBearQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBearQ)
     end
 
     if(ability == caster._autoCastBearQ and self:IsAbilityReadyForAutoCast(caster._autoCastBearQ)) then
@@ -1863,11 +1910,11 @@ end
 function modifier_auto_casts:GetNextAbilityForPudgeAutoCasts(caster, ability, target)
     if(caster._autoCastPudgeQ == nil) then
         caster._autoCastPudgeQ = caster:FindAbilityByName("unholy_1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastPudgeQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastPudgeQ)
     end
     if(caster._autoCastPudgeW == nil) then
         caster._autoCastPudgeW = caster:FindAbilityByName("unholy_2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastPudgeW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastPudgeW)
     end
 
     if(self:IsAbilityReadyForAutoCast(caster._autoCastPudgeW)) then
@@ -1885,7 +1932,7 @@ end
 function modifier_auto_casts:GetNextAbilityForWraithKingAutoCasts(caster, ability, target)
     if(caster._autoCastWraithKingQ == nil) then
         caster._autoCastWraithKingQ = caster:FindAbilityByName("Corrupting_Strike")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastWraithKingQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastWraithKingQ)
     end
 
     if(ability == caster._autoCastWraithKingQ and self:IsAbilityReadyForAutoCast(caster._autoCastWraithKingQ)) then
@@ -1899,7 +1946,7 @@ end
 function modifier_auto_casts:GetNextAbilityForMarsAutoCasts(caster, ability, target)
     if(caster._autoCastMarsQ == nil) then
         caster._autoCastMarsQ = caster:FindAbilityByName("mars1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastMarsQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastMarsQ)
     end
 
     if(ability == caster._autoCastMarsQ and self:IsAbilityReadyForAutoCast(caster._autoCastMarsQ)) then
@@ -1913,12 +1960,12 @@ end
 function modifier_auto_casts:GetNextAbilityForDragonKnightAutoCasts(caster, ability, target)
     if(caster._autoCastDragonKnightQ == nil) then
         caster._autoCastDragonKnightQ = caster:FindAbilityByName("Protect1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDragonKnightQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDragonKnightQ)
     end
 	
     if(caster._autoCastDragonKnightW == nil) then
         caster._autoCastDragonKnightW = caster:FindAbilityByName("Protect2")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastDragonKnightW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastDragonKnightW)
     end
 	
     if(self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW)) then
@@ -1936,7 +1983,7 @@ end
 function modifier_auto_casts:GetNextAbilityForPhantomLancerAutoCasts(caster, ability, target)
     if(caster._autoCastPhantomLancerQ == nil) then
         caster._autoCastPhantomLancerQ = caster:FindAbilityByName("pala1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastPhantomLancerQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastPhantomLancerQ)
     end
 
     if(ability == caster._autoCastPhantomLancerQ and self:IsAbilityReadyForAutoCast(caster._autoCastPhantomLancerQ)) then
@@ -1950,7 +1997,7 @@ end
 function modifier_auto_casts:GetNextAbilityForTerrorbladeAutoCasts(caster, ability, target)
     if(caster._autoCastTerrorbladeQ == nil) then
         caster._autoCastTerrorbladeQ = caster:FindAbilityByName("terror1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastTerrorbladeQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastTerrorbladeQ)
     end
 
     if(ability == caster._autoCastTerrorbladeQ and self:IsAbilityReadyForAutoCast(caster._autoCastTerrorbladeQ)) then
@@ -1964,7 +2011,7 @@ end
 function modifier_auto_casts:GetNextAbilityForAntimageAutoCasts(caster, ability, target)
     if(caster._autoCastAntimageQ == nil) then
         caster._autoCastAntimageQ = caster:FindAbilityByName("dh1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastAntimageQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastAntimageQ)
     end
 	
     if(ability == caster._autoCastAntimageQ and self:IsAbilityReadyForAutoCast(caster._autoCastAntimageQ)) then
@@ -1978,7 +2025,7 @@ end
 function modifier_auto_casts:GetNextAbilityForBrewmasterAutoCasts(caster, ability, target)
     if(caster._autoCastBrewmasterQ == nil) then
         caster._autoCastBrewmasterQ = caster:FindAbilityByName("brew1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastBrewmasterQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastBrewmasterQ)
     end
 	
     if(ability == caster._autoCastBrewmasterQ and self:IsAbilityReadyForAutoCast(caster._autoCastBrewmasterQ)) then
@@ -1992,12 +2039,12 @@ end
 function modifier_auto_casts:GetNextAbilityForSniperAutoCasts(caster, ability, target)
     if(caster._autoCastSniperQ == nil) then
         caster._autoCastSniperQ = caster:FindAbilityByName("beast1")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastSniperQ)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastSniperQ)
     end
 	
     if(caster._autoCastSniperW == nil) then
         caster._autoCastSniperW = caster:FindAbilityByName("Hunter_Assassinate")
-        self:DetermineAutoCastOrderForAbility(caster._autoCastSniperW)
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastSniperW)
     end
 	
     if(self:IsAbilityReadyForAutoCast(caster._autoCastSniperQ)) then
