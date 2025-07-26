@@ -31,7 +31,7 @@ modifier_auto_casts = class({
             MODIFIER_EVENT_ON_ABILITY_FULLY_CAST,
             MODIFIER_EVENT_ON_ABILITY_END_CHANNEL,
             MODIFIER_EVENT_ON_ORDER,
-			--MODIFIER_EVENT_ON_ATTACK_LANDED
+            --MODIFIER_EVENT_ON_ATTACK_LANDED
         }
     end,
     GetAttributes = function()
