@@ -308,10 +308,6 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
     
     if(target ~= nil) then
         self:SetLastAutoCastTarget(target)
-        
-        if(self:IsMustAutoAttackAfterAutoCast()) then
-        	self.parent:MoveToTargetToAttack(target)
-        end
     end
     
     -- In very rare cases this modifier timer can perfectly align with cast time of abilities and send auto casts orders while player casting cast time ability and this breaking queue
@@ -330,6 +326,11 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
     		--print("Non Channel thing", "ability", ability:GetAbilityName())
     		self:_OnIntervalThinkInternal(true)
     	end
+    end
+	
+    if(target ~= nil and self:IsMustAutoAttackAfterAutoCast() and self.parent:GetAttackTarget() ~= target) then
+    	--print("MoveToTargetToAttack")
+    	self.parent:MoveToTargetToAttack(target)
     end
 end
 
