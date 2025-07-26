@@ -320,7 +320,7 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
         self:SetLastAutoCastTarget(target)
     end
 	
-	self:TryAutoAttackAfterAutoCast(target)
+    self:TryAutoAttackAfterAutoCast(target)
 	
     -- In very rare cases this modifier timer can perfectly align with cast time of abilities and send auto casts orders while player casting cast time ability and this breaking queue
     if(isChannel == true) then
