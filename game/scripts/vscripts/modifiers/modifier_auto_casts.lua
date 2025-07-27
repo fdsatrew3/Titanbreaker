@@ -826,11 +826,14 @@ function modifier_auto_casts:DetermineAutoCastBehaviorForAbility(ability)
     -- Determine cast targets allowed (fix for things like DK spam W on allies after using protection ability)
     local abilityTargetTeam = ability:GetAbilityTargetTeam()
 
-    if(abilityTargetTeam == DOTA_UNIT_TARGET_TEAM_ENEMY) then
-    	ability._autoCastsTargetTeam = DOTA_TEAM_BADGUYS
-    elseif(abilityTargetTeam == DOTA_UNIT_TARGET_TEAM_FRIENDLY) then
+    -- Must be in that order (friendly -> enemy -> fallback) to fix issues with pudge like abilities that can target both teams
+    if(bit.band(abilityTargetTeam, DOTA_UNIT_TARGET_TEAM_FRIENDLY) == DOTA_UNIT_TARGET_TEAM_FRIENDLY) then
     	ability._autoCastsTargetTeam = DOTA_TEAM_GOODGUYS
-    else
+    end
+	if(bit.band(abilityTargetTeam, DOTA_UNIT_TARGET_TEAM_ENEMY) == DOTA_UNIT_TARGET_TEAM_ENEMY) then
+    	ability._autoCastsTargetTeam = DOTA_TEAM_BADGUYS
+    end
+	if(ability._autoCastsTargetTeam == nil) then
     	ability._autoCastsTargetTeam = DOTA_TEAM_NOTEAM
     end
 	
@@ -880,7 +883,7 @@ function modifier_auto_casts:IsAbilityReadyForAutoCast(ability)
 		if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) == false) then
 			return false
 		end
-	else
+	else		
 		if(self:GetAbilityTargetTeam(ability) ~= lastAutoCastTarget:GetTeamNumber()) then
 			return false
 		end
