@@ -342,16 +342,33 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
 end
 
 function modifier_auto_casts:TryAutoAttackAfterAutoCast(target)
-    if(target ~= nil and self:IsMustAutoAttackAfterAutoCast() and self.parent:GetAttackTarget() ~= target and self.parent:IsAttacking() == false) then
-    	--print("!!!!! MoveToTargetToAttack !!!!")
-    	ExecuteOrderFromTable({
-    		UnitIndex = self.parent:entindex(),
-    		OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
-    		TargetIndex = target:entindex(),
-    		Queue = false
-    	})
-    	--self.parent:MoveToTargetToAttack(target)
+    if(target == nil) then
+        return
     end
+
+    if(self:IsMustAutoAttackAfterAutoCast() == false) then
+		--print("IsMustAutoAttackAfterAutoCast check")
+        return
+    end
+	
+    if(self.parent:GetTeamNumber() == target:GetTeamNumber()) then
+		--print("Ally check")
+        return
+    end
+	
+    if(self.parent:GetAttackTarget() ~= target and self.parent:IsAttacking() == false) then
+		--print("Ally check")
+        return
+    end
+		
+    --print("!!!!! MoveToTargetToAttack !!!!")
+    ExecuteOrderFromTable({
+    	UnitIndex = self.parent:entindex(),
+    	OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
+    	TargetIndex = target:entindex(),
+    	Queue = false
+    })
+    --self.parent:MoveToTargetToAttack(target)
 end
 
 function modifier_auto_casts:OnIntervalThink()
