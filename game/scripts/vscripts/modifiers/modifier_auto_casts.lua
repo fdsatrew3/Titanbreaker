@@ -342,7 +342,7 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
 end
 
 function modifier_auto_casts:TryAutoAttackAfterAutoCast(target)
-    if(target ~= nil and self:IsMustAutoAttackAfterAutoCast() and self.parent:GetAttackTarget() ~= target and self.parent:IsAttacking() == false) then
+    if(target ~= nil and self:IsMustAutoAttackAfterAutoCast() and self.parent:GetAttackTarget() ~= target and self.parent:IsAttacking() == false and target:GetTeamNumber() ~= self.parent:GetTeamNumber()) then
     	--print("!!!!! MoveToTargetToAttack !!!!")
 		--[[
     	ExecuteOrderFromTable({
