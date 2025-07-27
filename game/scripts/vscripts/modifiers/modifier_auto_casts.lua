@@ -837,6 +837,17 @@ function modifier_auto_casts:DetermineAutoCastOrderForAbility(ability)
     	ability._autoCastMovementAbility = true
     end
     
+    -- Determine cast targets allowed (fix for things like DK spam W on allies after using protection ability)
+    local abilityTargetTeam = ability:GetAbilityTargetTeam()
+
+    if(abilityTargetTeam == DOTA_UNIT_TARGET_TEAM_ENEMY) then
+    	ability._autoCastsTargetTeam = DOTA_TEAM_BADGUYS
+    elseif(abilityTargetTeam == DOTA_UNIT_TARGET_TEAM_FRIENDLY) then
+    	ability._autoCastsTargetTeam = DOTA_TEAM_GOODGUYS
+    else
+    	ability._autoCastsTargetTeam = DOTA_TEAM_NOTEAM
+    end
+	
     -- Grimstroke Hellfire, maybe something else
     if(bit.band(abilityBehavior, DOTA_ABILITY_BEHAVIOR_NO_TARGET) == DOTA_ABILITY_BEHAVIOR_NO_TARGET) then
         ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_NO_TARGET
@@ -853,6 +864,16 @@ function modifier_auto_casts:DetermineAutoCastOrderForAbility(ability)
         ability._autoCastOrder = DOTA_UNIT_ORDER_CAST_POSITION
         return
     end
+end
+
+function modifier_auto_casts:GetAbilityTargetTeam(ability)
+    if(not ability or ability._autoCastsTargetTeam == nil) then
+		--print("ability", ability)
+		--print("ability._autoCastsTargetTeam", ability._autoCastsTargetTeam)
+        return DOTA_TEAM_NOTEAM
+    end
+
+	return ability._autoCastsTargetTeam
 end
 
 function modifier_auto_casts:IsAbilityReadyForAutoCast(ability)
