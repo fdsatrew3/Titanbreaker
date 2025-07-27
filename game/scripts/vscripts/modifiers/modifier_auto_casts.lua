@@ -1945,7 +1945,7 @@ function modifier_auto_casts:GetNextAbilityForMarsAutoCasts(caster, ability, tar
     return nil
 end
 
--- Dragon Knight: Q spam, TODO: Something smarter?
+-- Dragon Knight: Q W spam
 function modifier_auto_casts:GetNextAbilityForDragonKnightAutoCasts(caster, ability, target)
     if(caster._autoCastDragonKnightQ == nil) then
         caster._autoCastDragonKnightQ = caster:FindAbilityByName("Protect1")
