@@ -313,8 +313,8 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
     	return
     end
     		
-    print("== _OnAbilityFinishedCasting ===")
-    print("Finished cast of ", ability:GetAbilityName(), " just now")
+    --print("== _OnAbilityFinishedCasting ===")
+    --print("Finished cast of ", ability:GetAbilityName(), " just now")
     
     if(target ~= nil) then
         self:SetLastAutoCastTarget(target)
@@ -404,8 +404,8 @@ function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility
 			--]]
 			
     		abilityToAutoCast = self:GetNextAbilityForAutoCast(self.parent, ability, lastAutoCastTarget, ignoreCurrentActiveAbilityInternal)
-    		print("lastAutoCastTarget", lastAutoCastTarget)
-			print("Checking ", ability:GetAbilityName(), " result = ", abilityToAutoCast)
+    		--print("lastAutoCastTarget", lastAutoCastTarget)
+			--print("Checking ", ability:GetAbilityName(), " result = ", abilityToAutoCast)
 						
     		if(abilityToAutoCast ~= nil) then
     			--print("BREAK WITH", abilityToAutoCast:GetAbilityName())
@@ -415,7 +415,7 @@ function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility
     end
     --print("END pairs(self.abilitiesWithAutoCasts)")
     
-	print("abilityToAutoCast", abilityToAutoCast)
+	--print("abilityToAutoCast", abilityToAutoCast)
 	
     if(abilityToAutoCast == nil) then
     	if(ignoreCurrentActiveAbilityInternal == true) then
@@ -1957,8 +1957,8 @@ function modifier_auto_casts:GetNextAbilityForDragonKnightAutoCasts(caster, abil
         self:DetermineAutoCastBehaviorForAbility(caster._autoCastDragonKnightW)
     end
 	
-	print("self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW)", self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW))
-	print("self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightQ)", self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightQ))
+	--print("self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW)", self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW))
+	--print("self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightQ)", self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightQ))
 	
     if(self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW)) then
         return caster._autoCastDragonKnightW
