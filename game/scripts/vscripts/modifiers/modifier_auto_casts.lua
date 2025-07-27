@@ -1988,17 +1988,26 @@ function modifier_auto_casts:GetNextAbilityForPhantomLancerAutoCasts(caster, abi
     return nil
 end
 
--- Terrorblade: Q spam, TODO: Something smarter?
+-- Terrorblade: Q W spam
 function modifier_auto_casts:GetNextAbilityForTerrorbladeAutoCasts(caster, ability, target)
     if(caster._autoCastTerrorbladeQ == nil) then
         caster._autoCastTerrorbladeQ = caster:FindAbilityByName("terror1")
         self:DetermineAutoCastBehaviorForAbility(caster._autoCastTerrorbladeQ)
     end
-
-    if(ability == caster._autoCastTerrorbladeQ and self:IsAbilityReadyForAutoCast(caster._autoCastTerrorbladeQ)) then
+	
+    if(caster._autoCastTerrorbladeW == nil) then
+        caster._autoCastTerrorbladeW = caster:FindAbilityByName("terror2")
+        self:DetermineAutoCastBehaviorForAbility(caster._autoCastTerrorbladeW)
+    end
+	
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastTerrorbladeW)) then
+        return caster._autoCastTerrorbladeW
+    end
+	
+    if(self:IsAbilityReadyForAutoCast(caster._autoCastTerrorbladeQ)) then
         return caster._autoCastTerrorbladeQ
     end
-
+	
     return nil
 end
 
