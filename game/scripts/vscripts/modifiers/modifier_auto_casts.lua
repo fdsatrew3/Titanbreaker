@@ -1014,8 +1014,6 @@ function modifier_auto_casts:GetNextAbilityForWarlockAutoCasts(caster, ability, 
 
         if(isWarlockQReadyForAutocast) then
             local dotModifier = target:FindModifierByName("modifier_dot1")
-			
-            -- Due to instant cast time trying prevent issues with low spell haste upkeep		
             if(dotModifier == nil or dotModifier:GetRemainingTime() / dotModifier:GetDuration() < 0.8) then
                 return caster._autoCastWarlockQ
             end
@@ -1639,21 +1637,21 @@ function modifier_auto_casts:GetNextAbilityForDrowRangerAutoCasts(caster, abilit
     end
 	
     if(ability == caster._autoCastDrowRangerQ or ability == caster._autoCastDrowRangerE or ability == caster._autoCastDrowRangerD) then
-		local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerQ)
-		local isEReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerE)
-		local isDReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerD)
-		
-		if(isDReady) then
-			return caster._autoCastDrowRangerD
-		end
-		
-		if(isQReady) then
-			return caster._autoCastDrowRangerQ
-		end
-		
-		if(isEReady) then
-			return caster._autoCastDrowRangerE
-		end
+        local isQReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerQ)
+        local isEReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerE)
+        local isDReady = self:IsAbilityReadyForAutoCast(caster._autoCastDrowRangerD)
+        
+        if(isDReady) then
+        	return caster._autoCastDrowRangerD
+        end
+        
+        if(isQReady) then
+        	return caster._autoCastDrowRangerQ
+        end
+        
+        if(isEReady) then
+        	return caster._autoCastDrowRangerE
+        end
     end
 	
     return nil
@@ -1953,10 +1951,7 @@ function modifier_auto_casts:GetNextAbilityForDragonKnightAutoCasts(caster, abil
         caster._autoCastDragonKnightW = caster:FindAbilityByName("Protect2")
         self:DetermineAutoCastBehaviorForAbility(caster._autoCastDragonKnightW)
     end
-	
-	--print("self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW)", self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW))
-	--print("self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightQ)", self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightQ))
-	
+		
     if(self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW)) then
         return caster._autoCastDragonKnightW
     end
