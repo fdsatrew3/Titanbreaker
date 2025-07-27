@@ -35,12 +35,47 @@ function Init()
         DebugLoadSave(hero, steamid)
     end, "loadhero", FCVAR_CHEAT)
 	
+    Convars:RegisterCommand("debugautocasts", function(_)
+        DebugTestAutoCasts()
+    end, "debugautocasts", FCVAR_CHEAT)
+	
     local villageDummyPoint = Vector(-14972.935547, 14804.335938, 128.000000)
     
     CreateUnitByName("npc_dota_creature_tutorial_dummy", villageDummyPoint, false, nil, nil, DOTA_TEAM_BADGUYS)
 
     _G._debugToolsInit = true
 
+end
+
+function DebugTestAutoCasts()
+    if not IsInToolsMode() then -- just to be 100% safe
+        return
+    end
+		
+	local hero = PlayerResource:GetSelectedHeroEntity(0)
+	local q = hero:GetAbilityByIndex(0)
+	local w = hero:GetAbilityByIndex(1)
+	local e = hero:GetAbilityByIndex(2)
+	local d = hero:GetAbilityByIndex(3)
+
+	if(q:GetAutoCastState()) then
+		q:ToggleAutoCast()
+	end
+	
+	if(w:GetAutoCastState()) then
+		w:ToggleAutoCast()
+	end
+	
+	if(e:GetAutoCastState()) then
+		e:ToggleAutoCast()
+	end
+	
+	if(d:GetAutoCastState()) then
+		d:ToggleAutoCast()
+	end
+	
+	hero:RemoveModifierByName("modifier_auto_casts")
+	hero:AddNewModifier(hero, nil, "modifier_auto_casts", {duration = -1})
 end
 
 function DebugDropTempleItem(lootQuality, isSoul, isArti)
