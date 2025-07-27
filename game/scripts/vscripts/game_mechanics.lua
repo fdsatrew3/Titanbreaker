@@ -12734,7 +12734,9 @@ function SwordSwipe(event)
     end
 	event.attributefactor = event.attributefactor + event.attributefactor*targetamount*event.aoebonus/100
     --event.includeauto = event.includeauto + event.includeauto*targetamount*event.aoebonus/100
-
+	
+	local maxHpAggro = ability:GetSpecialValueFor("aggro")
+	
 	if #enemies > 0 then
 		for _,enemy in pairs(enemies) do
 			if enemy ~= nil then
@@ -12746,6 +12748,12 @@ function SwordSwipe(event)
                     ParticleManager:ReleaseParticleIndex(particle)
 					event.target = enemy
 					DamageUnit(event)
+					
+					if(maxHpAggro > 0) then
+						event.health = maxHpAggro
+						COverthrowGameMode:AggroOnEnemy(event)
+						event.health = nil
+					end
 				end
 			end
 		end
