@@ -313,8 +313,8 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
     	return
     end
     		
-    --print("== _OnAbilityFinishedCasting ===")
-    --print("Finished cast of ", ability:GetAbilityName(), " just now")
+    print("== _OnAbilityFinishedCasting ===")
+    print("Finished cast of ", ability:GetAbilityName(), " just now")
     
     if(target ~= nil) then
         self:SetLastAutoCastTarget(target)
@@ -404,7 +404,8 @@ function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility
 			--]]
 			
     		abilityToAutoCast = self:GetNextAbilityForAutoCast(self.parent, ability, lastAutoCastTarget, ignoreCurrentActiveAbilityInternal)
-    		--print("Checking ", ability:GetAbilityName(), " result = ", abilityToAutoCast)
+    		print("lastAutoCastTarget", lastAutoCastTarget)
+			print("Checking ", ability:GetAbilityName(), " result = ", abilityToAutoCast)
 						
     		if(abilityToAutoCast ~= nil) then
     			--print("BREAK WITH", abilityToAutoCast:GetAbilityName())
@@ -414,7 +415,7 @@ function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility
     end
     --print("END pairs(self.abilitiesWithAutoCasts)")
     
-	--print("abilityToAutoCast", abilityToAutoCast)
+	print("abilityToAutoCast", abilityToAutoCast)
 	
     if(abilityToAutoCast == nil) then
     	if(ignoreCurrentActiveAbilityInternal == true) then
@@ -873,6 +874,18 @@ function modifier_auto_casts:IsAbilityReadyForAutoCast(ability)
     	caster = ability:GetCaster()
     	ability._autoCastCaster = caster
     end
+	
+	local lastAutoCastTarget = self:GetLastAutoCastTarget()
+	if(lastAutoCastTarget == nil) then
+		if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) == false) then
+			return false
+		end
+	else
+		if(self:GetAbilityTargetTeam(ability) ~= lastAutoCastTarget:GetTeamNumber()) then
+			return false
+		end
+	end
+	
     
     -- IsActivated() = not hidden by stance/shapeshift/etc
     return ability:GetAutoCastState() and ability:GetLevel() > 0 and ability._autoCastCaster:GetMana() >= ability:GetManaCost(-1) and ability:IsActivated() and ability:GetCooldownTimeRemaining() < 0.01
@@ -1943,6 +1956,9 @@ function modifier_auto_casts:GetNextAbilityForDragonKnightAutoCasts(caster, abil
         caster._autoCastDragonKnightW = caster:FindAbilityByName("Protect2")
         self:DetermineAutoCastBehaviorForAbility(caster._autoCastDragonKnightW)
     end
+	
+	print("self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW)", self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW))
+	print("self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightQ)", self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightQ))
 	
     if(self:IsAbilityReadyForAutoCast(caster._autoCastDragonKnightW)) then
         return caster._autoCastDragonKnightW
