@@ -37,7 +37,7 @@ function Init()
 	
     local villageDummyPoint = Vector(-14972.935547, 14804.335938, 128.000000)
     
-    CreateUnitByName("npc_dota_creature_tutorial_dummy", villageDummyPoint, false, nil, nil, DOTA_TEAM_NEUTRALS)
+    CreateUnitByName("npc_dota_creature_tutorial_dummy", villageDummyPoint, false, nil, nil, DOTA_TEAM_BADGUYS)
 
     _G._debugToolsInit = true
 
