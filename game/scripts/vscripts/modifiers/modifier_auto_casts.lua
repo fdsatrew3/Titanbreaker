@@ -31,7 +31,7 @@ modifier_auto_casts = class({
             MODIFIER_EVENT_ON_ABILITY_FULLY_CAST,
             MODIFIER_EVENT_ON_ABILITY_END_CHANNEL,
             MODIFIER_EVENT_ON_ORDER,
-			--MODIFIER_EVENT_ON_ATTACK_LANDED
+            --MODIFIER_EVENT_ON_ATTACK_LANDED
         }
     end,
     GetAttributes = function()
@@ -221,7 +221,7 @@ function modifier_auto_casts:OnOrder(kv)
         if(kv.ability:GetAutoCastState() == false) then
             self.abilitiesWithAutoCasts[kv.ability] = true
             self.abilitiesWithAutoCastsCount = self.abilitiesWithAutoCastsCount + 1
-        	self:DetermineSummonsAutoCastsAbility(kv.ability)
+            self:DetermineSummonsAutoCastsAbility(kv.ability)
         else
             self.abilitiesWithAutoCasts[kv.ability] = nil
             self.abilitiesWithAutoCastsCount = math.max(self.abilitiesWithAutoCastsCount - 1, 0)
@@ -319,25 +319,25 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChanne
     if(target ~= nil) then
         self:SetLastAutoCastTarget(target)
     end
-	
-	self:TryAutoAttackAfterAutoCast(target)
-	
+    
+    self:TryAutoAttackAfterAutoCast(target)
+    
     -- In very rare cases this modifier timer can perfectly align with cast time of abilities and send auto casts orders while player casting cast time ability and this breaking queue
     if(isChannel == true) then
-    	if(self:IsAutocastsAbility(ability)) then
-    		self:SetIsAutoCastFailed(false)
-    	end
-    	--print("Channel thing", "ability", ability:GetAbilityName())
-    	self:_OnIntervalThinkInternal(true)
+        if(self:IsAutocastsAbility(ability)) then
+        	self:SetIsAutoCastFailed(false)
+        end
+        --print("Channel thing", "ability", ability:GetAbilityName())
+        self:_OnIntervalThinkInternal(true)
     else
-    	-- This called before dota internal do caster:SetChanneling(true) in MODIFIER_EVENT_ON_ABILITY_FULLY_CAST so ignore it for channel abilities
-    	if(ability:GetChannelTime() < 0.01) then
-    		if(self:IsAutocastsAbility(ability)) then
-    			self:SetIsAutoCastFailed(false)
-    		end
-    		--print("Non Channel thing", "ability", ability:GetAbilityName())
-    		self:_OnIntervalThinkInternal(true)
-    	end
+        -- This called before dota internal do caster:SetChanneling(true) in MODIFIER_EVENT_ON_ABILITY_FULLY_CAST so ignore it for channel abilities
+        if(ability:GetChannelTime() < 0.01) then
+            if(self:IsAutocastsAbility(ability)) then
+                self:SetIsAutoCastFailed(false)
+            end
+            --print("Non Channel thing", "ability", ability:GetAbilityName())
+            self:_OnIntervalThinkInternal(true)
+        end
     end
 end
 
@@ -396,13 +396,7 @@ function modifier_auto_casts:_OnIntervalThinkInternal(ignoreCurrentActiveAbility
 		
     	--print("= PAIR ITERATION: ability", ability, "name", ability:GetAbilityName())
         -- Always try abilities that support casting while running or when player just finished current auto cast
-        if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) or ignoreCurrentActiveAbilityInternal == true or self:IsSummonsAutoCastsAbility(ability) == true) then
-			--[[
-			if(self.parent:IsRealHero() == false) then
-				--print("Pet autocasts attempt for ", ability:GetAbilityName())
-			end
-			--]]
-			
+        if(self:IsAbilityCanBeAutoCastedWhileRunning(ability) or ignoreCurrentActiveAbilityInternal == true or self:IsSummonsAutoCastsAbility(ability) == true) then		
     		abilityToAutoCast = self:GetNextAbilityForAutoCast(self.parent, ability, lastAutoCastTarget, ignoreCurrentActiveAbilityInternal)
     		--print("lastAutoCastTarget", lastAutoCastTarget)
 			--print("Checking ", ability:GetAbilityName(), " result = ", abilityToAutoCast)

@@ -9822,7 +9822,7 @@ function Waterelemental (event)
     event.ability:ApplyDataDrivenModifier(caster, caster.Pet, "modifier_pet_system", nil)
 	
 	-- Must be after all things (pet autocasts)
- 	caster.Pet:AddNewModifier(event.caster, nil, "modifier_auto_casts", {duration = -1})
+	caster.Pet:AddNewModifier(event.caster, nil, "modifier_auto_casts", {duration = -1})
 end
 
 -- Shaman --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
