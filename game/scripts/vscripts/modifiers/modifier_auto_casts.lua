@@ -245,6 +245,7 @@ function modifier_auto_casts:OnOrder(kv)
         end
     end
     
+	print("OnOrder", kv.order_type)
     if(self:IsOrderFromAutoCast()) then
         return
     end
@@ -1069,7 +1070,7 @@ function modifier_auto_casts:GetNextAbilityForDarkSeerAutoCasts(caster, target)
 end
 
 -- Omni: Q spam
-function modifier_auto_casts:GetNextAbilityForOmniknightAutoCasts(caster, ability, target)
+function modifier_auto_casts:GetNextAbilityForOmniknightAutoCasts(caster, target)
     if(caster._autoCastDivineLight == nil) then
         caster._autoCastDivineLight = caster:FindAbilityByName("Divine_Light")
         self:DetermineAutoCastBehaviorForAbility(caster._autoCastDivineLight)
@@ -1155,7 +1156,7 @@ function modifier_auto_casts:GetNextAbilityForNatureProphetAutoCasts(caster, tar
         end
 		
         local position = caster:GetAbsOrigin()
-        local allies = FindNearbyAllies(caster, caster:GetAbsOrigin(), ability:GetEffectiveCastRange(position, caster))
+        local allies = FindNearbyAllies(caster, caster:GetAbsOrigin(), caster._autoCastNatureProphetQ:GetEffectiveCastRange(position, caster))
         local isCastRequired = false
         local maxStacks = GetMaxBuffStackBonus(caster) + 3
 
