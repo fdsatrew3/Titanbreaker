@@ -310,26 +310,26 @@ function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target)
 end
 
 function modifier_auto_casts:TryAutoAttackAfterAutoCast(target)
-	if(target == nil) then
-		return
-	end
-	
-	if(self:IsMustAutoAttackAfterAutoCast() == false) then
-		return
-	end
-	
-	if(target:GetTeamNumber() == self.parent:GetTeamNumber()) then
-		return
-	end
-	
-	if(self.parent:IsAttacking()) then
-		return
-	end
-	
-	if(self.parent:GetAttackTarget() == target) then
-		return
-	end
-	
+    if(target == nil) then
+        return
+    end
+    
+    if(self:IsMustAutoAttackAfterAutoCast() == false) then
+        return
+    end
+    
+    if(target:GetTeamNumber() == self.parent:GetTeamNumber()) then
+        return
+    end
+    
+    if(self.parent:IsAttacking()) then
+        return
+    end
+    
+    if(self.parent:GetAttackTarget() == target) then
+        return
+    end
+    
     if(self.parent:IsChanneling()) then
         return
     end
@@ -337,12 +337,12 @@ function modifier_auto_casts:TryAutoAttackAfterAutoCast(target)
     if(self.parent:IsInvisible()) then
         return
     end
-	
+    
     if(self.parent:GetCurrentActiveAbility() ~= nil) then
         return
     end
-	
-	self.parent:MoveToTargetToAttack(target)
+    
+    self.parent:MoveToTargetToAttack(target)
 end
 
 function modifier_auto_casts:OnIntervalThink()
