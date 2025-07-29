@@ -296,7 +296,7 @@ function modifier_auto_casts:OnAbilityFullyCast(kv)
         return
     end
     
-    self:_OnAbilityFinishedCasting(kv.ability, kv.target, false)
+    self:_OnAbilityFinishedCasting(kv.ability, kv.target)
 end
 
 function modifier_auto_casts:OnAbilityEndChannel(kv)
@@ -304,48 +304,57 @@ function modifier_auto_casts:OnAbilityEndChannel(kv)
         return
     end
     
-    self:_OnAbilityFinishedCasting(kv.ability, kv.target, true)
+    self:_OnAbilityFinishedCasting(kv.ability, kv.target)
 end
 
--- target can be nil
-function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target, isChannel)
+function modifier_auto_casts:_OnAbilityFinishedCasting(ability, target)
     if(self:IsAbilityCanBeAutoCastedWhileRunning(ability)) then
     	return
     end
     		    
     if(target ~= nil) then
         self:SetLastAutoCastTarget(target)
-    end
-    
-    if(isChannel == true) then
-        self:TryAutoAttackAfterAutoCast(target)
-    else
-        -- This called before dota internal do caster:SetChanneling(true) in MODIFIER_EVENT_ON_ABILITY_FULLY_CAST so ignore it for channel abilities
-        if(ability:GetChannelTime() < 0.01) then
-            self:TryAutoAttackAfterAutoCast(target)
-        end
-    end
-	
+    end	
 end
 
 function modifier_auto_casts:TryAutoAttackAfterAutoCast(target)
-    if(target ~= nil and self:IsMustAutoAttackAfterAutoCast() and self.parent:GetAttackTarget() ~= target and self.parent:IsAttacking() == false and target:GetTeamNumber() ~= self.parent:GetTeamNumber()) then
-    	--print("!!!!! MoveToTargetToAttack !!!!")
-		--[[
-    	ExecuteOrderFromTable({
-    		UnitIndex = self.parent:entindex(),
-    		OrderType = DOTA_UNIT_ORDER_ATTACK_TARGET,
-    		TargetIndex = target:entindex(),
-    		Queue = false
-    	})
-		--]]
-    	self.parent:MoveToTargetToAttack(target)
+	if(target == nil) then
+		return
+	end
+	
+	if(self:IsMustAutoAttackAfterAutoCast() == false) then
+		return
+	end
+	
+	if(target:GetTeamNumber() == self.parent:GetTeamNumber()) then
+		return
+	end
+	
+	if(self.parent:IsAttacking()) then
+		return
+	end
+	
+	if(self.parent:GetAttackTarget() == target) then
+		return
+	end
+	
+    if(self.parent:IsChanneling()) then
+        return
     end
+    
+    if(self.parent:IsInvisible()) then
+        return
+    end
+	
+    if(self.parent:GetCurrentActiveAbility() ~= nil) then
+        return
+    end
+	
+	self.parent:MoveToTargetToAttack(target)
 end
 
 function modifier_auto_casts:OnIntervalThink()
     local lastAutoCastTarget = self:GetLastAutoCastTarget()
-    local abilityToAutoCast = nil
     
 	if self.parent.owner ~= nil and self:IsUnitSupportAutoCasts(self.parentName) then
 		if(self._autoCastsSummonOwnerModifier == nil) then
@@ -359,14 +368,7 @@ function modifier_auto_casts:OnIntervalThink()
 		end
 	end
 	
-    for ability, _ in pairs(self.abilitiesWithAutoCasts) do
-		abilityToAutoCast = self:GetNextAbilityForAutoCast(self.parent, lastAutoCastTarget)
-		
-		print("Checking", ability:GetAbilityName(), "result = ", abilityToAutoCast)
-		if(abilityToAutoCast ~= nil) then
-			break
-		end
-    end
+    local abilityToAutoCast = self:GetNextAbilityForAutoCast(self.parent, lastAutoCastTarget)
 	
     if(abilityToAutoCast == nil) then
     	self:TryAutoAttackAfterAutoCast(lastAutoCastTarget)
