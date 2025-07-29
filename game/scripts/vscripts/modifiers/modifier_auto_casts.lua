@@ -31,7 +31,7 @@ modifier_auto_casts = class({
             MODIFIER_EVENT_ON_ABILITY_FULLY_CAST,
             MODIFIER_EVENT_ON_ABILITY_END_CHANNEL,
             MODIFIER_EVENT_ON_ORDER,
-            MODIFIER_EVENT_ON_ATTACK_LANDED
+            --MODIFIER_EVENT_ON_ATTACK_LANDED
         }
     end,
     GetAttributes = function()
@@ -42,23 +42,15 @@ modifier_auto_casts = class({
     end
 })
 
-
-function modifier_auto_casts:OnAbilityExecuted(kv)
-	if(self.parent ~= kv.unit) then
-		return
-	end
-	
-	print("OnAbilityExecuted", self.parent:GetCurrentActiveAbility())
-end
-
-
+--[[
 function modifier_auto_casts:OnAttackLanded(kv)
 	if(self.parent ~= kv.attacker) then
 		return
 	end
 	
-	print("!!!!!!!!!!!!!!!!!!!!!!!!!! OnAttackLanded !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	--print("!!!!!!!!!!!!!!!!!!!!!!!!!! OnAttackLanded !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 end
+--]]
 
 function modifier_auto_casts:OnCreated()
     if(not IsServer()) then
@@ -245,7 +237,6 @@ function modifier_auto_casts:OnOrder(kv)
         end
     end
     
-	print("OnOrder", kv.order_type)
     if(self:IsOrderFromAutoCast()) then
         return
     end
