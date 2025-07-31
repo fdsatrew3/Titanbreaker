@@ -7,6 +7,7 @@ function shadow3:Precache(context)
     -- tentacle particles
     PrecacheResource("particle", "particles/status_fx/status_effect_fiendsgrip.vpcf", context)
     PrecacheResource("particle", "particles/units/unit_greevil/greevil_blackhole_n.vpcf", context)
+    PrecacheUnitByNameSync("npc_dota_creature_shadow_tentacle", context)
 end
 
 function shadow3:OnSpellStart()
