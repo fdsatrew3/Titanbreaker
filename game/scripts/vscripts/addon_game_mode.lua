@@ -9595,7 +9595,7 @@ function PVEAggroAdd(event)
  end
  
  if source:HasModifier("modifier_fanatism_aggro") then
-   bonus_aggro = bonus_aggro * 2
+   bonus_aggro = bonus_aggro * 1.5
  end
  if source:HasModifier("modifier_item_shield_aggro") then
    bonus_aggro = bonus_aggro * 2
