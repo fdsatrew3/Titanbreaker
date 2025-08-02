@@ -13959,12 +13959,6 @@
 				"ModifierName"	"modifier_fanatism_2"
 				"Duration"	"%buffduration"
 			}
-			"ApplyModifier"
-			{
-				"Target"	"CASTER"
-				"ModifierName"	"modifier_fanatism_aggro"
-				"Duration"	"%buffaggro"
-			}
 			"FireSound"
 			{
 				"EffectName"	"Hero_Magnataur.Empower.Cast"
@@ -13997,12 +13991,6 @@
 		}
 		"Modifiers"
 		{
-			"modifier_fanatism_aggro"
-			{
-				"Passive"	"0"
-				"IsHidden"	"1"
-				"IsDebuff"	"0"
-			}
 			"modifier_pala3_counter"
 			{
 				"Passive"	"1"
@@ -14096,14 +14084,13 @@
 		}
 		"AbilityValues"
 		{
-			"dmgfromstat"	"250"
+			"dmgfromstat"	"150"
 			"as"	"0 100 100 100"
 			"res"	"25 25 50 50"
 			"mana"	"10 20 20 20"
 			"lifesteal"	"0 3 3 3"
 			"counter"	"0 0 0 30"
 			"buffduration"	"10"
-			"buffaggro"	"0 0 10 10"
 		}
 	}
 	"pala2"
@@ -36343,7 +36330,7 @@
 					{
 						"ScriptFile"	"addon_game_mode.lua"
 						"Function"	"AggroOnEnemy"
-						"health"	"175"
+						"health"	"200"
 					}
 				}
 			}
@@ -36611,7 +36598,7 @@
 			"armor"	"0 0 1 1"
 			"armordur"	"0 0 15 15"
 			"cap"	"5"
-			"aggro"	"0 0 125 125"
+			"aggro"	"0 0 150 150"
 		}
 	}
 	"Protect1"

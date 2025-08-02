@@ -1527,7 +1527,7 @@ function COverthrowGameMode:InitGameMode()
  self.act_affixes = {
   "pve_act_affix_reincarnation",
   "pve_act_affix_sanguine",
-  "pve_act_affix_chainbreaker",
+  --"pve_act_affix_chainbreaker",
   "pve_act_affix_shieldmaster",
   "pve_act_affix_defiler",
   "pve_act_affix_avenger",
@@ -1538,7 +1538,7 @@ function COverthrowGameMode:InitGameMode()
   "pve_act_affix_reflexes",
   "pve_act_affix_horde",
   "pve_act_affix_pack",
-  "pve_temple_affix_iron"
+  --"pve_temple_affix_iron"
 }
 self.affixes = {
   "pve_temple_deathrattle",
