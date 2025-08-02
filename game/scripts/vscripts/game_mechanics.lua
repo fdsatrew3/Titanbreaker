@@ -4059,6 +4059,7 @@ function GetElementalDamageModifierAdditive( event, caster, real_caster, target,
             value = value + 0.0025 * speed
         end
     end
+	--[[
     local int_to_holy_pala = caster:FindAbilityByName("pala4")
     if event.holydmg and int_to_holy_pala and int_to_holy_pala:GetLevel() >= 4 then
         local bonus_fire = GetIntellectCustom(caster) * 0.001
@@ -4074,8 +4075,8 @@ function GetElementalDamageModifierAdditive( event, caster, real_caster, target,
         --    bonus_fire = 0.3
         --end
         value = value + bonus_fire
-    end
-    int_to_holy_pala = caster:FindAbilityByName("Lightning_Bolt")
+    end --]]
+    local int_to_holy_pala = caster:FindAbilityByName("Lightning_Bolt")
     if event.naturedmg and int_to_holy_pala and int_to_holy_pala:GetLevel() >= 4 then
         local bonus_fire = GetIntellectCustom(caster) * 0.001
         --if bonus_fire > 0.3 then
