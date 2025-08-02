@@ -5803,10 +5803,11 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
     if dk_blood_stacks > 0 then
         multiplicative_bonus = multiplicative_bonus * (1 + 0.1 * dk_blood_stacks)
     end
+	--[[
     local pala_retal_stacks = caster:GetModifierStackCount("modifier_strikeofvengeance3", nil)
     if pala_retal_stacks > 0 then
         multiplicative_bonus = multiplicative_bonus * (1 + 0.1 * pala_retal_stacks)
-    end
+    end--]]
     if event.immolatebonus ~= nil and target then
         if target:HasModifier("modifier_magmaburn2") then
             multiplicative_bonus = multiplicative_bonus * (1 + event.immolatebonus/100.0)

@@ -16,6 +16,10 @@ end
 
 COverthrowGameMode.nextBossID = 1
 
+if(PlayerResource ~= nil) then
+	PlayerResource:GetSelectedHeroEntity(1):SetAbsOrigin(PlayerResource:GetSelectedHeroEntity(0):GetAbsOrigin())
+end
+
 ---------------------------------------------------------------------------
 -- Required .lua files
 ---------------------------------------------------------------------------
@@ -9589,6 +9593,11 @@ function PVEAggroAdd(event)
  if source:HasModifier("modifier_dh_aa_heal") then
    bonus_aggro = bonus_aggro * 2
  end
+ 
+ local pala_holy_vengeance_stacks = source:source:GetModifierStackCount("modifier_strikeofvengeance3", nil)
+ if pala_holy_vengeance_stacks > 0 then
+   bonus_aggro = bonus_aggro * (1 + 0.1 * pala_holy_vengeance_stacks)
+ end
  if source:HasModifier("modifier_fanatism_aggro") then
    bonus_aggro = bonus_aggro * 3
  end
@@ -12120,6 +12129,16 @@ function COverthrowGameMode:FilterDamage( filterTable )
     return true
   end
   
+  if victim:IsRealHero() then
+    filterTable["damage"] = 0
+    return true
+  end
+  
+  if victim:GetUnitName() ~= "temple_throne_boss_1" then
+    filterTable["damage"] = filterTable["damage"] * 999999
+    return true
+  end
+  
   if attacker:HasModifier("modifier_mol_peace") or victim:HasModifier("modifier_mol_peace") then
     filterTable["damage"] = 0
     return true
@@ -13622,7 +13641,7 @@ local aggro_amount = GetDedicatedServerKeyV2("GetAggroKeyVTWO") --GetDedicatedSe
               if allowed_ml < 1 then
                 allowed_ml = 1
               end
-              return allowed_ml
+              return 1000
             end
 
             function SellTempleItem(event, args)
@@ -14360,7 +14379,7 @@ for i=1, #all do
     for j=0, #data-2 do
       --print("j value " .. j)
       --print(data[j])
-      if data[j] and steamid > 0 then
+      if data[j] and steamid >= 0 then
         local id = tonumber(data[j])
         --print("id vs steamid bots " .. id .. " " .. steamid)
         if id and steamid == id and not hero.auto_loaded then
@@ -18130,6 +18149,10 @@ function COverthrowGameMode:OnPlayerLevelUp(keys)
     local max_allowed_hp = 1000000000
     if hp > max_allowed_hp then
       target.incoming_damage_factor = max_allowed_hp / hp
+	  
+	  if(target:GetUnitName() == "temple_throne_boss_1") then
+		target:AddNewModifier(target, nil, "modifier_dazzle_shallow_grave", {duration = -1})
+	  end
       hp = max_allowed_hp
     end
 
