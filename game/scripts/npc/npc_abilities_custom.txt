@@ -13614,27 +13614,6 @@
 				"EffectName"	"particles/items2_fx/urn_of_shadows_damage.vpcf"
 				"EffectAttachType"	"attach_hitloc"
 			}
-			"modifier_strikeofvengeance3"
-			{
-				"IsBuff"	"1"
-				"IsDebuff"	"0"
-				"TextureName"	"fix/call1"
-			}
-			"modifier_vengeance_3"
-			{
-				"Passive"	"1"
-				"IsHidden"	"1"
-				"IsDebuff"	"0"
-				"OnAttacked"
-				{
-					"RunScript"
-					{
-						"ScriptFile"	"game_mechanics.lua"
-						"Function"	"StrikeOfVengeance3"
-						"on"	"%vengeance3"
-					}
-				}
-			}
 		}
 		"AbilityValues"
 		{
@@ -14303,15 +14282,15 @@
 		}
 		"AbilityValues"
 		{
-			"dmgfromstat"	"450 600 600 600"
-			"spelldmg"	"450 600 600 600"
+			"dmgfromstat"	"225 300 300 300"
+			"spelldmg"	"225 300 300 300"
 			"chance"	"0 100 100 100"
 			"heal"	"5 10 10 10"
 			"armordur"	"0 0 10 10"
 			"msdur"	"0 3 3 3"
 			"range"	"450 450 750 750"
 			"healchance"	"0 0 100 100"
-			"aggro"	"0 0 0 200"
+			"aggro"	"0 0 0 100"
 		}
 	}
 	"pala1"
@@ -14343,6 +14322,12 @@
 				"ScriptFile"	"addon_game_mode.lua"
 				"Function"	"AggroOnEnemy"
 				"damagetaken"	"250"
+			}
+			"RunScript"
+			{
+				"ScriptFile"	"addon_game_mode.lua"
+				"Function"	"AggroOnEnemy"
+				"health"	"%aggro"
 			}
 			"RunScript"
 			{
@@ -14484,6 +14469,7 @@
 			"asslow"	"0 0 -10 -10"
 			"duration"	"6"
 			"evasion"	"10 10 10 15"
+			"aggro"	"0 150 150 150"
 		}
 	}
 	"moon5"

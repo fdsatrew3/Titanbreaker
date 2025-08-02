@@ -9594,10 +9594,6 @@ function PVEAggroAdd(event)
    bonus_aggro = bonus_aggro * 2
  end
  
- local pala_holy_vengeance_stacks = source:source:GetModifierStackCount("modifier_strikeofvengeance3", nil)
- if pala_holy_vengeance_stacks > 0 then
-   bonus_aggro = bonus_aggro * (1 + 0.1 * pala_holy_vengeance_stacks)
- end
  if source:HasModifier("modifier_fanatism_aggro") then
    bonus_aggro = bonus_aggro * 3
  end
