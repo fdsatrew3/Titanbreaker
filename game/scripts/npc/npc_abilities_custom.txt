@@ -14479,7 +14479,7 @@
 		}
 		"AbilityValues"
 		{
-			"dmgfromstat"	"450"
+			"dmgfromstat"	"200 200 200 250"
 			"slow"	"0 0 -20 -20"
 			"asslow"	"0 0 -10 -10"
 			"duration"	"6"
