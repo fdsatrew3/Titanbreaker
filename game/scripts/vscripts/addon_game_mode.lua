@@ -18,6 +18,7 @@ COverthrowGameMode.nextBossID = 1
 
 if(PlayerResource ~= nil) then
 	--PlayerResource:GetSelectedHeroEntity(0):SetAbilityPoints(1)
+	--PlayerResource:GetSelectedHeroEntity(1):GetAbilityByIndex(0):SetLevel(4)
 	PlayerResource:GetSelectedHeroEntity(1):SetAbsOrigin(PlayerResource:GetSelectedHeroEntity(0):GetAbsOrigin())
 end
 

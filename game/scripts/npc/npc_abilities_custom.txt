@@ -36330,7 +36330,7 @@
 					{
 						"ScriptFile"	"addon_game_mode.lua"
 						"Function"	"AggroOnEnemy"
-						"health"	"200"
+						"health"	"300"
 					}
 				}
 			}
@@ -36598,7 +36598,7 @@
 			"armor"	"0 0 1 1"
 			"armordur"	"0 0 15 15"
 			"cap"	"5"
-			"aggro"	"0 0 150 150"
+			"aggro"	"0 0 175 175"
 		}
 	}
 	"Protect1"
