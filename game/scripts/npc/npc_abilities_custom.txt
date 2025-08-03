@@ -44343,6 +44343,12 @@
 						"isaoe"	"1"
 						"shadowdmg"	"1"
 					}
+					"RunScript"
+					{
+						"ScriptFile"	"addon_game_mode.lua"
+						"Function"	"AggroOnEnemy"
+						"health"	"%aggro"
+					}
 					"Random"
 					{
 						"Chance"	"%chance"
@@ -44425,6 +44431,7 @@
 			"msslow"	"0 0 -10 -10"
 			"chance"	"0 0 0 100"
 			"buffduration"	"10"
+			"aggro"	"0 45 45 45"
 		}
 	}
 	"runic_system"

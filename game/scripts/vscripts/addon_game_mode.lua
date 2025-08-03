@@ -18,6 +18,7 @@ COverthrowGameMode.nextBossID = 1
 
 if(PlayerResource ~= nil) then
 	--PlayerResource:GetSelectedHeroEntity(0):SetAbilityPoints(1)
+	--PlayerResource:GetSelectedHeroEntity(0):GetAbilityByIndex(1):SetLevel(4)
 	--PlayerResource:GetSelectedHeroEntity(1):GetAbilityByIndex(0):SetLevel(4)
 	PlayerResource:GetSelectedHeroEntity(1):SetAbsOrigin(PlayerResource:GetSelectedHeroEntity(0):GetAbsOrigin())
 end
@@ -9603,9 +9604,6 @@ function PVEAggroAdd(event)
    bonus_aggro = bonus_aggro * 2
  end
  if source:HasModifier("modifier_item_bootshp4") then
-  bonus_aggro = bonus_aggro * 2
-end
- if GetLevelOfAbility(caster, "Death_For_Life") >= 2 then
   bonus_aggro = bonus_aggro * 2
 end
 
