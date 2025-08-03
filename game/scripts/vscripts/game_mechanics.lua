@@ -4780,9 +4780,6 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
         event.spellcastfrenzy = 0.01
         event.spellcastfrenzy_max = 0.75
     end
-    if caster:HasModifier("modifier_taunt123") and GetLevelOfAbility(caster, "mars6") >= 4 then
-        multiplicative_bonus = multiplicative_bonus * 2
-    end
     if caster:HasModifier("modifier_manacost_reduction") then
         multiplicative_bonus = multiplicative_bonus * 2
     end
@@ -4912,9 +4909,6 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
     
     if caster:HasModifier("modifier_unholyaura") then
         multiplicative_bonus = multiplicative_bonus * 1.15
-    end
-    if isaoe and GetLevelOfAbility(caster, "mars4") >= 3 and caster:GetPhysicalArmorValue(false) > 0 then
-        multiplicative_bonus = multiplicative_bonus * (1 + 0.01 * caster:GetPhysicalArmorValue(false))
     end
     if isaoe and caster:HasModifier("modifier_stormcrow") then
         multiplicative_bonus = multiplicative_bonus * 2
