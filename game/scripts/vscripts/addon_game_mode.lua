@@ -9605,6 +9605,10 @@ function PVEAggroAdd(event)
  if source:HasModifier("modifier_item_bootshp4") then
   bonus_aggro = bonus_aggro * 2
 end
+ if GetLevelOfAbility(caster, "Death_For_Life") >= 2 then
+  bonus_aggro = bonus_aggro * 2
+end
+
 if source:HasModifier("modifier_mythic_aggro") then
  bonus_aggro = bonus_aggro + source:GetModifierStackCount("modifier_mythic_aggro", nil) / 100
 end

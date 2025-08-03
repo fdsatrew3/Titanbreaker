@@ -5799,10 +5799,6 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
     if event.consumesuncharge and caster.starfallDamage then
         multiplicative_bonus = multiplicative_bonus * caster.starfallDamage
     end
-    local dk_blood_stacks = caster:GetModifierStackCount("modifier_strikeofvengeance2", nil)
-    if dk_blood_stacks > 0 then
-        multiplicative_bonus = multiplicative_bonus * (1 + 0.1 * dk_blood_stacks)
-    end
     if event.immolatebonus ~= nil and target then
         if target:HasModifier("modifier_magmaburn2") then
             multiplicative_bonus = multiplicative_bonus * (1 + event.immolatebonus/100.0)
@@ -5862,11 +5858,6 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
     local attackSpeedForFury2 = GetAttackSpeedCustom(caster)
     if fury_as_abil and fury_as_abil:GetLevel() >= 4 and attackSpeedForFury2 > 0 then
         multiplicative_bonus = multiplicative_bonus * (1 + 0.1 * attackSpeedForFury2)
-    end
-    local dk_resi_dmg = caster:FindAbilityByName("Rot")
-    if dk_resi_dmg and dk_resi_dmg:GetLevel() >= 4 then
-        local spellResToDmg = math.min(0.25, caster:Script_GetMagicalArmorValue(false, nil))
-        multiplicative_bonus = multiplicative_bonus * (1 + spellResToDmg)
     end
     if caster:HasModifier("item_mother_of_dragons") then
         multiplicative_bonus = multiplicative_bonus * 1.15
@@ -17709,23 +17700,6 @@ function StrikeOfVengeance( event )
     end
 end
 
-function StrikeOfVengeance2( event )
-    local caster = event.caster
-    --local dmg = event.dmg
-    if event.on and event.on == 1 then
-        event.buff = "modifier_strikeofvengeance2"
-        event.dur = 20
-        event.target = caster
-        event.max = 10
-        event.self = true
-        ApplyBuffStack(event)
-
-        --ability:ApplyDataDrivenModifier(caster, caster, buff, {Duration = -1})
-        --caster:SetModifierStackCount(buff, ability, dmg)
-        --caster.lastdamagetaken = dmg
-    end
-end
-
 function SanctifiedCrusaderRetaliation( event )
     event.target:AddNewModifier(event.caster, event.ability, "modifier_godschosen_2", {duration = event.Duration})
 end
@@ -26908,9 +26882,6 @@ function GetTotalDamageTakenFactor(caster, attacker)
     if caster:HasModifier("modifier_interruptimune") then
         factor = factor * 0.5
     end
-    if caster:HasModifier("modifier_deathwish_def") then
-        factor = factor * 0.5
-    end
     if caster:HasModifier("modifier_dk_tank_def") then
         factor = factor * 0.5
     end
@@ -31739,6 +31710,10 @@ function InfestedWoundDamageReduction(event)
 end
 
 function InfestedWoundWormAttackBuff(event)
+	if(event.active ~= 1) then
+		return
+	end
+	
     local hero = event.attacker:GetOwnerEntity()
 
     ApplyBuffStack({

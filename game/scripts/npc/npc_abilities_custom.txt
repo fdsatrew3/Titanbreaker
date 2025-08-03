@@ -43426,37 +43426,6 @@
 					}
 				}
 			}
-			"modifier_deathwish_def"
-			{
-				"Passive"	"0"
-				"IsDebuff"	"0"
-				"IsBuff"	"1"
-				"IsHidden"	"0"
-				"IsPurgable"	"1"
-				"TextureName"	"fix/strike_blood"
-				"OnCreated"
-				{
-					"AttachEffect"
-					{
-						"EffectName"	"particles/econ/items/wraith_king/wraith_king_ti6_bracer/wraith_king_ti6_witness_ambient.vpcf"
-						"EffectAttachType"	"attach_hitloc"
-						"Target"	"TARGET"
-						"ControlPointEntities"
-						{
-							"TARGET"	"attach_attack1"
-							"TARGET"	"attach_attack1"
-							"TARGET"	"attach_attack1"
-							"TARGET"	"attach_attack1"
-						}
-					}
-					"AttachEffect"
-					{
-						"EffectName"	"particles/econ/items/wraith_king/wraith_king_ti6_bracer/wraith_king_ti6_hellfireblast_debuff.vpcf"
-						"EffectAttachType"	"attach_hitloc"
-						"Target"	"TARGET"
-					}
-				}
-			}
 		}
 		"AbilityValues"
 		{
@@ -43506,7 +43475,7 @@
 			{
 				"ScriptFile"	"addon_game_mode.lua"
 				"Function"	"AggroOnEnemy"
-				"health"	"100"
+				"health"	"%aggro"
 			}
 			"RunScript"
 			{
@@ -43624,27 +43593,6 @@
 				"IsHidden"	"0"
 				"IsPurgable"	"1"
 			}
-			"modifier_vengeance_2"
-			{
-				"Passive"	"1"
-				"IsHidden"	"1"
-				"IsDebuff"	"0"
-				"OnTakeDamage"
-				{
-					"RunScript"
-					{
-						"ScriptFile"	"game_mechanics.lua"
-						"Function"	"StrikeOfVengeance2"
-						"on"	"%vengeance2"
-					}
-				}
-			}
-			"modifier_strikeofvengeance2"
-			{
-				"IsBuff"	"1"
-				"IsDebuff"	"0"
-				"TextureName"	"fix/strike_red"
-			}
 		}
 		"precache"
 		{
@@ -43657,6 +43605,7 @@
 			"dmgfromstat"	"7 10 10 10"
 			"lifestealbonus"	"0 0 20 20"
 			"vengeance2"	"0 0 0 1"
+			"aggro"	"0 100 100 100"
 		}
 	}
 	"Fatal_Grasp"
@@ -44258,6 +44207,7 @@
 						"ScriptFile"	"game_mechanics.lua"
 						"Function"	"InfestedWoundWormAttackBuff"
 						"duration"	"%strdur"
+						"active"	"%str_proc"
 						"maxstacks"	"35"
 					}
 					"RunScript"
@@ -44284,14 +44234,15 @@
 		"AbilityValues"
 		{
 			"dmgfromstat"	"750 1000 1000 1000"
-			"str"	"0 0 3 3"
-			"strdur"	"0 0 12 12"
+			"str"	"3"
+			"str_proc"	"0 0 1 1"
+			"strdur"	"45"
 			"worm"	"0 0 1 1"
 			"critdmg"	"1 1 1.5 1.5"
 			"buffduration"	"3"
 			"heal"	"0 100 100 100"
 			"worm_str_to_dmg_pct"	"100"
-			"worm_duration"	"9"
+			"worm_duration"	"12"
 		}
 	}
 	"Rot"
