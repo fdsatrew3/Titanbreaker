@@ -5858,10 +5858,6 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
             ParticleManager:ReleaseParticleIndex(particle)
         end
     end
-    local bearroartalent = caster:FindAbilityByName("bear6")
-    if bearroartalent and bearroartalent:GetLevel() >= 3 and caster:HasModifier("modifier_bear_roar_armor") then
-        multiplicative_bonus = multiplicative_bonus * 1.5
-    end
     local fury_as_abil = caster:FindAbilityByName("fury2")
     local attackSpeedForFury2 = GetAttackSpeedCustom(caster)
     if fury_as_abil and fury_as_abil:GetLevel() >= 4 and attackSpeedForFury2 > 0 then

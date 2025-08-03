@@ -7907,7 +7907,7 @@
 		"DOTA_Tooltip_ability_pve_temple_affix_axemaster"                              "Twin Axes"
 		"DOTA_Tooltip_ability_pve_temple_affix_axemaster_Description"                  "After a short delay, throw Axes like a boomerang, dealing high Damage."
 
-		"npc_dota_hero_ursa"                                                              "Grizzly Guardian"
+		"npc_dota_hero_ursa"                                                              "[Tank] Grizzly Guardian"
 
 		//4.5 bear druid
 		"DOTA_Tooltip_ability_bear1"                                                      "Mangle"
@@ -7949,7 +7949,7 @@
 		"DOTA_Tooltip_ability_bear5_taunt"                                                "Taunt duration:"
 
 		"DOTA_Tooltip_ability_bear6"                                                      "Grizzly Roar"
-		"DOTA_Tooltip_ability_bear6_Description"                                          "Gain 100 Rage and Fear all nearby enemies, causing them to lose control.<font color=\"#FFBB00\">\n\nRank 2: Grant nearby allies increased Movement and Attack Speed as well as bonus Armor. \nRank 3: You gain 50%% increased Damage while under the effect and when the fear ends, enemies take 25%% increased Damage from all sources for the same duration as the fear. \nRank 4: Passively increase your total Agility and gain 3 Health per Agility.\nRank 5: Swift Mend - Passively gain Health Regeneration equal to 25%% of your Agility.\n</font>"
+		"DOTA_Tooltip_ability_bear6_Description"                                          "Gain 100 Rage and Fear all nearby enemies, causing them to lose control.<font color=\"#FFBB00\">\n\nRank 2: Grant nearby allies increased Movement and Attack Speed as well as bonus Armor. \nRank 3: When the fear ends, enemies take 25%% increased Damage from all sources for the same duration as the fear. \nRank 4: Passively increase your total Agility and gain 3 Health per Agility.\nRank 5: Swift Mend - Passively gain Health Regeneration equal to 25%% of your Agility.\n</font>"
 		"DOTA_Tooltip_ability_bear6_fearduration"                                         "Fear Duration:"
 		"DOTA_Tooltip_ability_bear6_buffduration"                                         "Buff Duration:"
 		"DOTA_Tooltip_ability_bear6_radius"                                               "Radius:"
