@@ -5277,9 +5277,6 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
         if caster:HasModifier("modifier_invisible") and GetLevelOfAbility(caster, "combat6") >= 5 then
             multiplicative_bonus = multiplicative_bonus * 2
         end
-        if caster:HasModifier("modifier_metamorph_terror2") then
-            multiplicative_bonus = multiplicative_bonus * 1.25
-        end
         if caster:HasModifier("modifier_talent_flurry") then
             multiplicative_bonus = multiplicative_bonus * (1 + 0.15 * caster.talents[164])
         end
