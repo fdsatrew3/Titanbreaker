@@ -3795,7 +3795,7 @@ function GetElementalDamageModifierAdditive( event, caster, real_caster, target,
             if caster:GetPrimaryAttribute() == 0 and caster.talents[148] > 0 then
                 value = value + caster.talents[148] * GetPhysicalDamageBonusFromStr(caster, GetStrengthCustom(caster))
             end
-            if GetLevelOfAbility(caster, "brew5") >= 4 then
+            if GetLevelOfAbility(caster, "brew5") >= 4 and COverthrowGameMode:IsPrimalTankAbilityLearned(caster) == false then
                 value = value + 0.5
             end
             value = value + 0.2 * caster.talents[100] + 0.15 * caster.talents[50]
@@ -5266,7 +5266,7 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
         local buffstacks = caster:GetModifierStackCount("modifier_talent_thirst", nil)
         multiplicative_bonus = multiplicative_bonus * (1 + 0.05 * buffstacks * caster.talents[173])
         buffstacks = caster:GetModifierStackCount("modifier_bof_stack", nil)
-        if buffstacks > 0 then
+        if buffstacks > 0 and COverthrowGameMode:IsPrimalTankAbilityLearned(caster) then
             multiplicative_bonus = multiplicative_bonus * (1 + 0.01 * buffstacks)
         end
         buffstacks = caster:GetModifierStackCount("modifier_cotb", nil)
@@ -31104,7 +31104,9 @@ function Brew3(event)
 
     local abilityName = lastAbility:GetName()
     if abilityName == "brew1" then
-        ability:ApplyDataDrivenModifier(caster, caster, "modifier_brew_fire", {Duration = 30})
+		if(COverthrowGameMode:IsPrimalTankAbilityLearned(caster) == false) then
+            ability:ApplyDataDrivenModifier(caster, caster, "modifier_brew_fire", {Duration = 30})
+		end
         Brew3Fire(caster)
     end
     if abilityName == "brew2" then
@@ -31122,7 +31124,9 @@ function Brew3(event)
     end
     if abilityName == "brew6" then
         ability:ApplyDataDrivenModifier(caster, caster, "modifier_invisible", {Duration = 10})
-        ability:ApplyDataDrivenModifier(caster, caster, "modifier_brew_shadow", {Duration = 30})
+		if(COverthrowGameMode:IsPrimalTankAbilityLearned(caster) == false) then
+            ability:ApplyDataDrivenModifier(caster, caster, "modifier_brew_shadow", {Duration = 30})
+		end
         local particle = ParticleManager:CreateParticle("particles/items_fx/phylactery_target_shadow.vpcf", PATTACH_POINT_FOLLOW, caster)
         ParticleManager:ReleaseParticleIndex(particle)
     end
@@ -31295,7 +31299,7 @@ function Brew5Taunt(event)
     local caster = event.caster
     local ability = event.ability
 
-    if ability:GetLevel() >= 2 and GetLevelOfAbility(caster, "brew2") >= 3 then
+    if ability:GetLevel() >= 2 and COverthrowGameMode:IsPrimalTankAbilityLearned(caster) then
         ability:ApplyDataDrivenModifier(caster, caster, "modifier_taunt123", {Duration = event.duration})
     end
 end
@@ -31304,7 +31308,7 @@ function Brew1AggroEnemy(event)
     local caster = event.caster
     local ability = event.ability
 
-    if ability:GetLevel() >= 2 and GetLevelOfAbility(caster, "brew2") >= 3 then
+    if ability:GetLevel() >= 2 and COverthrowGameMode:IsPrimalTankAbilityLearned(caster) then
 		COverthrowGameMode:AggroOnEnemy(event)
     end
 end
