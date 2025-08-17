@@ -3677,10 +3677,6 @@ function GetElementalDamageModifierAdditive( event, caster, real_caster, target,
     if event.arcanedmg and caster.nec and caster.nec > 0 and caster.hpPercentValue and caster.manaPercentValue then
         value = value + 0.01 * (caster.hpPercentValue + caster.manaPercentValue) * caster.nec
     end
-
-    if event.chaosdmg and caster:HasModifier("modifier_dh_soulpact_chaos") then
-        value = value + 0.25
-    end
     
     if event.naturedmg and caster:HasModifier("modifier_pathbuff_119") then
         value = value + 0.25
@@ -3703,12 +3699,6 @@ function GetElementalDamageModifierAdditive( event, caster, real_caster, target,
     end
     if caster:HasModifier("modifier_item_myth_agi") then
         value = value + 0.25
-    end
-    if event.chaosdmg then
-        local dh_agi_talent = caster:FindAbilityByName("terror3")
-        if dh_agi_talent and dh_agi_talent:GetLevel() >= 4 then
-            value = value + GetAgilityCustom(caster) * 0.001
-        end
     end
     if event.shadowdmg and target then
         local tentacleAuraModifier = target:FindModifierByName("modifier_shadow_cleric_dream_feast_tentacle_debuff")
@@ -5685,12 +5675,6 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
     local fire_dot_talent = caster:FindAbilityByName("Molten_Lava")
     if fire_dot_talent and fire_dot_talent:GetLevel() >= 4 then
         multiplicative_bonus = multiplicative_bonus * 1.25
-    end
-    if isaoe then
-        fire_dot_talent = caster:FindAbilityByName("terror5")
-        if fire_dot_talent and fire_dot_talent:GetLevel() >= 4 then
-            multiplicative_bonus = multiplicative_bonus * 1.5
-        end
     end
     if event.isdot and caster:HasModifier("modifier_item_ancient_dot") then
         multiplicative_bonus = multiplicative_bonus * 1.25
