@@ -16,13 +16,6 @@ end
 
 COverthrowGameMode.nextBossID = 1
 
-if(PlayerResource ~= nil) then
-	--PlayerResource:GetSelectedHeroEntity(0):SetAbilityPoints(1)
-	--PlayerResource:GetSelectedHeroEntity(0):GetAbilityByIndex(1):SetLevel(4)
-	--PlayerResource:GetSelectedHeroEntity(1):GetAbilityByIndex(0):SetLevel(4)
-	PlayerResource:GetSelectedHeroEntity(1):SetAbsOrigin(PlayerResource:GetSelectedHeroEntity(0):GetAbsOrigin())
-end
-
 ---------------------------------------------------------------------------
 -- Required .lua files
 ---------------------------------------------------------------------------
@@ -1529,7 +1522,7 @@ function COverthrowGameMode:InitGameMode()
  self.act_affixes = {
   "pve_act_affix_reincarnation",
   "pve_act_affix_sanguine",
-  --"pve_act_affix_chainbreaker",
+  "pve_act_affix_chainbreaker",
   "pve_act_affix_shieldmaster",
   "pve_act_affix_defiler",
   "pve_act_affix_avenger",
@@ -1540,7 +1533,7 @@ function COverthrowGameMode:InitGameMode()
   "pve_act_affix_reflexes",
   "pve_act_affix_horde",
   "pve_act_affix_pack",
-  --"pve_temple_affix_iron"
+  "pve_temple_affix_iron"
 }
 self.affixes = {
   "pve_temple_deathrattle",
@@ -12134,17 +12127,7 @@ function COverthrowGameMode:FilterDamage( filterTable )
     filterTable["damage"] = 0
     return true
   end
-  
-  if victim:IsRealHero() then
-    filterTable["damage"] = 0
-    return true
-  end
-  
-  if victim:GetUnitName() ~= "temple_throne_boss_1" then
-    filterTable["damage"] = filterTable["damage"] * 999999
-    return true
-  end
-  
+    
   if attacker:HasModifier("modifier_mol_peace") or victim:HasModifier("modifier_mol_peace") then
     filterTable["damage"] = 0
     return true
@@ -13647,7 +13630,7 @@ local aggro_amount = GetDedicatedServerKeyV2("GetAggroKeyVTWO") --GetDedicatedSe
               if allowed_ml < 1 then
                 allowed_ml = 1
               end
-              return 1000
+              return allowed_ml
             end
 
             function SellTempleItem(event, args)
@@ -14385,7 +14368,7 @@ for i=1, #all do
     for j=0, #data-2 do
       --print("j value " .. j)
       --print(data[j])
-      if data[j] and steamid >= 0 then
+      if data[j] and steamid > 0 then
         local id = tonumber(data[j])
         --print("id vs steamid bots " .. id .. " " .. steamid)
         if id and steamid == id and not hero.auto_loaded then
@@ -18155,10 +18138,6 @@ function COverthrowGameMode:OnPlayerLevelUp(keys)
     local max_allowed_hp = 1000000000
     if hp > max_allowed_hp then
       target.incoming_damage_factor = max_allowed_hp / hp
-	  
-	  if(target:GetUnitName() == "temple_throne_boss_1") then
-		target:AddNewModifier(target, nil, "modifier_dazzle_shallow_grave", {duration = -1})
-	  end
       hp = max_allowed_hp
     end
 
