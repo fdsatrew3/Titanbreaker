@@ -12288,7 +12288,7 @@
 			"taunt"	"0 0 5 5"
 			"res"	"0 0 -10 -10"
 			"duration"	"5"
-			"bonus_movement_speed"	"0 0 0 25"
+			"bonus_movement_speed"	"0 0 0 0 25"
 		}
 	}
 	"spectre1"
