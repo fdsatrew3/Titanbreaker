@@ -11249,5 +11249,28 @@
 		"DOTA_Tooltip_modifier_ox_aura_hp"                                              "Healing of the Ox"
 
 		"DOTA_Tooltip_modifier_da_dmg"                                              "Deadly Arsenal"
+
+
+		"DOTA_Tooltip_ability_item_crown_of_wisdom"  "<font color=\"#ffd700\">[Divine] Crown of Wisdom"
+		"DOTA_Tooltip_ability_item_crown_of_wisdom_Description"  "<font color=\"#FF6600\">When you have spent at least 3 Path Points in each Path Tree (exluding Bonuses from Items), increase all Damage by 150%%.</font>"
+		"DOTA_Tooltip_ability_item_crown_of_wisdom_lore"  "Wisdom comes at a price."
+
+		"DOTA_Tooltip_ability_item_crown_of_purity"  "<font color=\"#ffd700\">[Divine] Crown of Purity"
+		"DOTA_Tooltip_ability_item_crown_of_purity_Description"  "<font color=\"#FF6600\">When you have spent all Path Points in a single Path Tree (exluding Bonuses from Items), increase all Damage by 100%%.</font>"
+
+		"DOTA_Tooltip_ability_item_hearteater"  "<font color=\"#ffd700\">[Divine] Hearteater, Book of Regret"
+		"DOTA_Tooltip_ability_item_hearteater_Description"  "Hearteat\n<font color=\"#FF6600\">Eat one of your Lives to gain 100%% increased Damage for 60 secs (must stay equipped for Bonus to take effect).</font>"
+		"DOTA_Tooltip_ability_item_crown_of_wisdom_lore"  "You will regret."
+
+		"DOTA_Tooltip_ability_item_grandmaster"  "<font color=\"#ffd700\">[Divine] Grandmaster Cloak"
+		"DOTA_Tooltip_ability_item_grandmaster_Description"  "<font color=\"#FF6600\">Gain 10 Path Points. Unequipping this Item results in a Damage and Healing penalty.</font>"
+
+		"DOTA_Tooltip_ability_item_heavy_bulwark"  "<font color=\"#ffd700\">[Divine] Heavy Bulwark"
+		"DOTA_Tooltip_ability_item_heavy_bulwark_Description"  "<font color=\"#FF6600\">After taking Damage, reduce all Damage taken by 40%% for 3 secs.</font>"
+		"DOTA_Tooltip_ability_item_heavy_bulwark_lore"  "Is it too late though?"
+
+		"DOTA_Tooltip_ability_item_solitaires_shroud"  "<font color=\"#ffd700\">[Divine] Solitaire's Shroud"
+		"DOTA_Tooltip_ability_item_solitaires_shroud_Description"  "<font color=\"#FF6600\">While you are the only Hero alive, increase Damage and Health by 35%%, and gain 35%% Damage Reduction.</font>"
+		"DOTA_Tooltip_ability_item_solitaires_shroud_lore"  "Against all odds."
 	}
 }

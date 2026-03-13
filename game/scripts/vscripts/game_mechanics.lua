@@ -455,6 +455,9 @@ function DamageUnit( event )
     if caster and caster.triumpABPGiven and not HeroHasNeutralItem(caster, "item_neutral_31") then
         return
     end
+    if caster and caster.grandmasterGiven and not caster:HasModifier("modifier_grandmaster") then
+        return
+    end
     if event.ComesFromPet and caster.owner then
         caster = caster.owner
     end
@@ -4587,6 +4590,18 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
     if caster:HasModifier("modifier_mage_1") then
         multiplicative_bonus = multiplicative_bonus * 1.5
     end
+    if caster:HasModifier("modifier_crown_of_wisdom") and caster.crownOfWisdom then
+        multiplicative_bonus = multiplicative_bonus * 2.5
+    end
+    if caster:HasModifier("modifier_crown_of_purity") and caster.crownOfPurity then
+        multiplicative_bonus = multiplicative_bonus * 2
+    end
+    if caster:HasModifier("modifier_hearteater") and caster:HasModifier("modifier_hearteater_active") then
+        multiplicative_bonus = multiplicative_bonus * 2
+    end
+    if caster:HasModifier("modifier_solitaires_shroud") and CountHeroesAlive() <= 1 then
+        multiplicative_bonus = multiplicative_bonus * 1.35
+    end
     if caster:HasModifier("modifier_da_dmg") then
         multiplicative_bonus = multiplicative_bonus * (1 + 0.25 * caster.talents[158])
     end
@@ -5287,7 +5302,7 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
         buffstacks = caster:GetModifierStackCount("modifier_cotb", nil)
         multiplicative_bonus = multiplicative_bonus * (1 + 0.05 * buffstacks)
         if process_procs and caster.talents[174] > 0 and ability and COverthrowGameMode:GetAbilityIndexCustom(ability) == 4 or COverthrowGameMode:GetAbilityIndexCustom(ability) == 5 then
-            multiplicative_bonus = multiplicative_bonus * (1 + 0.3 * caster.talents[174])
+            multiplicative_bonus = multiplicative_bonus * (1 + 0.2 * caster.talents[174])
         end
         if caster:HasModifier("modifier_invisible") and GetLevelOfAbility(caster, "combat6") >= 5 then
             multiplicative_bonus = multiplicative_bonus * 2
@@ -7083,6 +7098,9 @@ function HealUnit( event )
     	return
     end
     if caster and caster.has_used_ravencraft_abilitypoint_item and not caster:HasModifier("modifier_pathbuff_088") then
+        return
+    end
+    if caster and caster.grandmasterGiven and not caster:HasModifier("modifier_grandmaster") then
         return
     end
     if caster and caster.triumpABPGiven and not HeroHasNeutralItem(caster, "item_neutral_31") then
@@ -20677,6 +20695,9 @@ function GetHealthPercentageBonus( hero, armor, magicres )
     if hero:HasModifier("modifier_metamorph_terror2") then
         percent_bonus = percent_bonus + 0.25
     end
+    if hero:HasModifier("modifier_solitaires_shroud") and CountHeroesAlive() <= 1 then
+        percent_bonus = percent_bonus + 0.35
+    end
     if hero:HasModifier("modifier_item_btshp2") then
         percent_bonus = percent_bonus + 0.1
     end
@@ -26603,6 +26624,12 @@ function GetTotalDamageTakenFactor(caster, attacker)
     if caster:HasModifier("modifier_symbiosos_fur") then
         factor = factor * 0.75
     end
+    if caster:HasModifier("modifier_heavy_bulwark_def") then
+        factor = factor * 0.6
+    end
+    if caster:HasModifier("modifier_solitaires_shroud") and CountHeroesAlive() <= 1 then
+        factor = factor * 0.65
+    end
     if caster:HasModifier("modifier_barrelroll") then
         factor = factor * 0.4
     end
@@ -31867,4 +31894,79 @@ function JungleRangerEntanglingJumpKnockback(event)
 	end
 	
 	KnockBack(event)
+end
+
+function CrownOfWisdomCheck(event)
+    local caster = event.caster
+
+    for i=1, 10 do
+        local hasSpentThree = COverthrowGameMode:TalentPointsSpentInTree(caster, i) >= 3
+
+        if not hasSpentThree then
+            caster.crownOfWisdom = false
+            return
+        end
+    end
+
+    caster.crownOfWisdom = true
+end
+
+function CrownOfPurityCheck(event)
+    local caster = event.caster
+
+    local treesTouched = 0
+    for i=1, 10 do
+        local hasSpentOne = COverthrowGameMode:TalentPointsSpentInTree(caster, i) >= 1
+
+        if hasSpentOne then
+            treesTouched = treesTouched + 1
+
+            if treesTouched >= 2 then
+                caster.crownOfPurity = false
+                return
+            end
+        end
+    end
+
+    caster.crownOfPurity = true
+end
+
+function Hearteater(event)
+    local caster = event.caster
+
+    if caster.pvelives <= 0 then
+        return
+    end
+
+    AddLivesToHero(caster, -1)
+    ApplyBuff({caster = caster, target = caster, dur = 60, buff = "modifier_hearteater_active", ability = event.ability})
+end
+
+function GrandmasterCheck(event)
+    local caster = event.caster
+
+    if caster.grandmasterGiven then
+        return
+    end
+
+    COverthrowGameMode:AddTalentPoint(caster, 10)
+    caster.grandmasterGiven = true
+end
+
+function HeavyBulwark(event)
+    local caster = event.caster
+
+    ApplyBuff({caster = caster, target = caster, dur = 3, buff = "modifier_heavy_bulwark_def", ability = event.ability})
+end
+
+function CountHeroesAlive()
+    local count = 0
+    local all = HeroList:GetAllHeroes()
+    for i=1, #all do
+        if all[i] and all[i]:IsAlive() then
+            count = count + 1
+        end
+    end
+
+    return count
 end

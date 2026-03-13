@@ -6728,7 +6728,7 @@ function GetAllItems(unit, always_show_boss_specific_drops, return_drop_quantity
 			table.insert(items[12], "item_nameless")
 			table.insert(items[12], "item_killer")
 			table.insert(items[12], "item_pathbuff_152")
-			
+			table.insert(items[12], "item_solitaires_shroud")
 		end
 		if (unit and unit.act and unit.act == 5) or always_show_boss_specific_drops then --dragon
 			table.insert(items[5], "item_mother_of_dragons")
@@ -6762,7 +6762,7 @@ function GetAllItems(unit, always_show_boss_specific_drops, return_drop_quantity
 			table.insert(items[10], "item_class_sanct2")
 			table.insert(items[12], "item_summoner")
 			table.insert(items[12], "item_thunderclub")
-			
+			table.insert(items[12], "item_crown_of_wisdom")
 		end
 		if (unit and unit.act and unit.act == 7) or always_show_boss_specific_drops then --graveyard
 			table.insert(items[5], "item_shield_aggro")
@@ -6782,6 +6782,7 @@ function GetAllItems(unit, always_show_boss_specific_drops, return_drop_quantity
 			table.insert(items[10], "item_class_dh2")
 			table.insert(items[10], "item_class_ds2")
 			table.insert(items[12], "item_pathbuff_156")
+			table.insert(items[12], "item_hearteater")
 		end
 		if (unit and unit.act and unit.act == 8) or always_show_boss_specific_drops then --forge
 			table.insert(items[5], "item_dreihander")
@@ -6817,7 +6818,7 @@ function GetAllItems(unit, always_show_boss_specific_drops, return_drop_quantity
 			table.insert(items[10], "item_class_plated2")
 			table.insert(items[10], "item_class_bm2")
 			table.insert(items[12], "item_pikepower")
-			
+			table.insert(items[12], "item_heavy_bulwark")
 		end
 		if (unit and unit.act and unit.act == 10) or always_show_boss_specific_drops then --invoker
 			table.insert(items[5], "item_aa_mana3")
@@ -6835,6 +6836,7 @@ function GetAllItems(unit, always_show_boss_specific_drops, return_drop_quantity
 			table.insert(items[10], "item_class_invo2")
 			table.insert(items[12], "item_fusion")
 			table.insert(items[12], "item_wandwisdom")
+			table.insert(items[12], "item_grandmaster")
 			
 		end
 		if (unit and unit.act and unit.act == 11) or always_show_boss_specific_drops then
@@ -6853,7 +6855,7 @@ function GetAllItems(unit, always_show_boss_specific_drops, return_drop_quantity
 			table.insert(items[12], "item_endboss")
 			table.insert(items[12], "item_pathbuff_158")
 			table.insert(items[12], "item_divinedef")
-			
+			table.insert(items[12], "item_crown_of_purity")
 		end
 		if (unit and unit.act and unit.act == 12) or always_show_boss_specific_drops then --jugnle
 			table.insert(items[5], "item_beastbracer")

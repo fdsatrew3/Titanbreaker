@@ -311,7 +311,7 @@
 		"talent171"								"Voodoo Magic: Gain Spellpower equal to 10% / 20% / 30% of missing Mana."
 		"talent172"								"Fresh Blood: Gain % Damage equal to 3% / 6% / 9% of your Health Regeneration. Capped at 150% Bonus Damage."
 		"talent173"								"Bloodthirst: Enemies dying nearby grant 5% / 10% / 15% increased Damage and Health Regeneration for 10 secs, stacking 5 times."
-		"talent174"								"Gargantuan: Increase the Damage of your 5th and 6th Ability by 30% / 60% / 90% and your Strength by 7% / 14% / 21%."
+		"talent174"								"Gargantuan: Increase the Damage of your 5th and 6th Ability by 20% / 40% / 60% and your Strength by 7% / 14% / 21%."
 		"talent175"								"Tribal Power: Gain an Aura increasing all Attributes by 10 / 20 / 30. Stacks with other Heroes."
 		"talent176"								"Slash and Burn: When you deal Physical Ability Damage with no other Elemental Type involved, there is a 33% / 66% / 100% chance for the Damage being increased by 50% and being also of type Fire.\nThis applies before other Elemental Damage altering effects."
 		"talent177"								"Stampede: Summon 3 Jungle Beasts for 10 secs when casting an Ability with a base cooldown of 20 secs or higher, dealing 100% / 200% / 300% of Attack Damage and Spellpower as Nature Damage.\nFor every Jungle Beast active, gain 5% / 10% / 15% increased Summon Damage. Max 9 Jungle Beasts."

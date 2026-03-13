@@ -13699,6 +13699,10 @@ local aggro_amount = GetDedicatedServerKeyV2("GetAggroKeyVTWO") --GetDedicatedSe
          end
        end
 
+       function COverthrowGameMode:TalentPointsSpentInTree(hero, tree)
+        return TalentPointsSpentInTree(hero, tree)
+    end
+
        function TalentPointsSpentInTree(hero, tree)
          local sum = 0
          if tree <= 4 then
@@ -13987,6 +13991,10 @@ function ItemAddTalentPoint(event)
      caster.talentpointsfromitem = points
    end
  end)
+end
+
+function COverthrowGameMode:AddTalentPoint(hero, amount)
+    AddTalentPoint(hero, amount)
 end
 
 function AddTalentPoint(hero, amount)

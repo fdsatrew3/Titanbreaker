@@ -1,5 +1,276 @@
 "DOTAAbilities"
 {
+	"item_solitaires_shroud"
+	{
+		"BaseClass"	"item_datadriven"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityTextureName"	"item_sisters_shroud"
+		"Model"	"models/props_gameplay/treasure_chest001.vmdl"
+		"Effect"	"particles/generic_gameplay/dropped_item.vpcf"
+		"ItemQuality"	"artifact"
+		"ItemCost"	"50000"
+		"ItemKillable"	"0"
+		"ItemSellable"	"1"
+		"ItemPurchasable"	"0"
+		"ItemDroppable"	"1"
+		"ItemShareability"	"ITEM_NOT_SHAREABLE"
+		"SideShop"	"0"
+		"SecretShop"	"1"
+		"ItemStackable"	"0"
+		"ItemPermanent"	"1"
+		"ItemDisassembleRule"	"DOTA_ITEM_DISASSEMBLE_ALWAYS"
+		"Modifiers"
+		{
+			"modifier_solitaires_shroud"
+			{
+				"Passive"	"1"
+				"IsHidden"	"1"
+				"Properties"
+				{
+				}
+			}
+		}
+		"AbilityValues"
+		{
+			"stat1"	"250"
+		}
+	}
+	"item_heavy_bulwark"
+	{
+		"BaseClass"	"item_datadriven"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityTextureName"	"item_ash_legion_shield"
+		"Model"	"models/props_gameplay/treasure_chest001.vmdl"
+		"Effect"	"particles/generic_gameplay/dropped_item.vpcf"
+		"ItemQuality"	"artifact"
+		"ItemCost"	"50000"
+		"ItemKillable"	"0"
+		"ItemSellable"	"1"
+		"ItemPurchasable"	"0"
+		"ItemDroppable"	"1"
+		"ItemShareability"	"ITEM_NOT_SHAREABLE"
+		"SideShop"	"0"
+		"SecretShop"	"1"
+		"ItemStackable"	"0"
+		"ItemPermanent"	"1"
+		"ItemDisassembleRule"	"DOTA_ITEM_DISASSEMBLE_ALWAYS"
+		"Modifiers"
+		{
+			"modifier_heavy_bulwark"
+			{
+				"Passive"	"1"
+				"IsHidden"	"1"
+				"Properties"
+				{
+				}
+				"OnTakeDamage"
+				// "%attack_damage" is set to the damage value after mitigation
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"game_mechanics.lua"
+						"Function"	"HeavyBulwark"
+					}
+				}
+			}
+			"modifier_heavy_bulwark_def"
+			{
+				"Passive"	"0"
+				"IsHidden"	"0"
+			}
+		}
+		"AbilityValues"
+		{
+			"stat1"	"250"
+		}
+	}
+	"item_grandmaster"
+	{
+		"BaseClass"	"item_datadriven"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityTextureName"	"item_pyrrhic_cloak"
+		"Model"	"models/props_gameplay/treasure_chest001.vmdl"
+		"Effect"	"particles/generic_gameplay/dropped_item.vpcf"
+		"ItemQuality"	"artifact"
+		"ItemCost"	"50000"
+		"ItemKillable"	"0"
+		"ItemSellable"	"1"
+		"ItemPurchasable"	"0"
+		"ItemDroppable"	"1"
+		"ItemShareability"	"ITEM_NOT_SHAREABLE"
+		"SideShop"	"0"
+		"SecretShop"	"1"
+		"ItemStackable"	"0"
+		"ItemPermanent"	"1"
+		"ItemDisassembleRule"	"DOTA_ITEM_DISASSEMBLE_ALWAYS"
+		"Modifiers"
+		{
+			"modifier_grandmaster"
+			{
+				"Passive"	"1"
+				"IsHidden"	"1"
+				"Properties"
+				{
+				}
+				"OnCreated"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"game_mechanics.lua"
+						"Function"	"GrandmasterCheck"
+					}
+				}
+			}
+		}
+		"AbilityValues"
+		{
+			"stat1"	"250"
+		}
+	}
+	"item_hearteater"
+	{
+		"BaseClass"	"item_datadriven"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_NO_TARGET | DOTA_ABILITY_BEHAVIOR_IMMEDIATE"
+		"AbilityTextureName"	"item_dezun_bloodrite"
+		"Model"	"models/props_gameplay/treasure_chest001.vmdl"
+		"Effect"	"particles/generic_gameplay/dropped_item.vpcf"
+		"ItemQuality"	"artifact"
+		"ItemCost"	"50000"
+		"ItemKillable"	"0"
+		"ItemSellable"	"1"
+		"ItemPurchasable"	"0"
+		"ItemDroppable"	"1"
+		"ItemShareability"	"ITEM_NOT_SHAREABLE"
+		"SideShop"	"0"
+		"SecretShop"	"1"
+		"ItemStackable"	"0"
+		"ItemPermanent"	"1"
+		"ItemDisassembleRule"	"DOTA_ITEM_DISASSEMBLE_ALWAYS"
+		"AbilityCooldown"	"60"
+		"AbilityManaCost"	"0"
+		"AbilityCastRange"	"1500"
+		"OnSpellStart"
+		{
+			"RunScript"
+			{
+				"ScriptFile"	"game_mechanics.lua"
+				"Function"	"Hearteater"
+			}
+		}
+		"Modifiers"
+		{
+			"modifier_hearteater"
+			{
+				"Passive"	"1"
+				"IsHidden"	"1"
+			}
+			"modifier_hearteater_active"
+			{
+				"Passive"	"0"
+				"IsHidden"	"0"
+			}
+		}
+		"AbilityValues"
+		{
+			"stat1"	"50"
+			"stat2"	"5"
+		}
+	}
+	"item_crown_of_wisdom"
+	{
+		"BaseClass"	"item_datadriven"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityTextureName"	"item_divine_regalia"
+		"Model"	"models/props_gameplay/treasure_chest001.vmdl"
+		"Effect"	"particles/generic_gameplay/dropped_item.vpcf"
+		"ItemQuality"	"artifact"
+		"ItemCost"	"50000"
+		"ItemKillable"	"0"
+		"ItemSellable"	"1"
+		"ItemPurchasable"	"0"
+		"ItemDroppable"	"1"
+		"ItemShareability"	"ITEM_NOT_SHAREABLE"
+		"SideShop"	"0"
+		"SecretShop"	"1"
+		"ItemStackable"	"0"
+		"ItemPermanent"	"1"
+		"ItemDisassembleRule"	"DOTA_ITEM_DISASSEMBLE_ALWAYS"
+		"Modifiers"
+		{
+			"modifier_crown_of_wisdom"
+			{
+				"Passive"	"1"
+				"IsHidden"	"1"
+				"Properties"
+				{
+				}
+				"OnCreated"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"game_mechanics.lua"
+						"Function"	"CrownOfWisdomCheck"
+					}
+				}
+			}
+		}
+		"AbilityValues"
+		{
+			"stat1"	"250"
+		}
+	}
+	"item_crown_of_purity"
+	{
+		"BaseClass"	"item_datadriven"
+		"AbilityBehavior"	"DOTA_ABILITY_BEHAVIOR_PASSIVE"
+		"AbilityTextureName"	"item_divine_regalia_broken"
+		"Model"	"models/props_gameplay/treasure_chest001.vmdl"
+		"Effect"	"particles/generic_gameplay/dropped_item.vpcf"
+		"ItemQuality"	"artifact"
+		"ItemCost"	"50000"
+		"ItemKillable"	"0"
+		"ItemSellable"	"1"
+		"ItemPurchasable"	"0"
+		"ItemDroppable"	"1"
+		"ItemShareability"	"ITEM_NOT_SHAREABLE"
+		"SideShop"	"0"
+		"SecretShop"	"1"
+		"ItemStackable"	"0"
+		"ItemPermanent"	"1"
+		"ItemDisassembleRule"	"DOTA_ITEM_DISASSEMBLE_ALWAYS"
+		"Modifiers"
+		{
+			"modifier_crown_of_purity"
+			{
+				"Passive"	"1"
+				"IsHidden"	"1"
+				"Properties"
+				{
+				}
+				"ThinkInterval"  "10"
+				"OnIntervalThink"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"game_mechanics.lua"
+						"Function"	"CrownOfPurityCheck"
+					}
+				}
+				"OnCreated"
+				{
+					"RunScript"
+					{
+						"ScriptFile"	"game_mechanics.lua"
+						"Function"	"CrownOfPurityCheck"
+					}
+				}
+			}
+		}
+		"AbilityValues"
+		{
+			"stat1"	"250"
+		}
+	}
 	"item_spellbook_mage_1"
 	{
 		"BaseClass"	"item_datadriven"
