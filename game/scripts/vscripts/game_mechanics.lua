@@ -21153,6 +21153,13 @@ function GetMaxManaBonusFromInt(hero, int)
     return manaPerInt * int
 end
 
+function GetMaxManaBonusFromHeroLevel(hero)
+    if hero.resourcesystem then
+        return 0
+    end
+    return GetHeroLevel(hero) * 5
+end
+
 -- Be aware that this also called over time from panorama to display right value in hero stats tooltip
 function GetAbilityDamageBonusFromInt(hero, int)
     return 0.00015 * GetIntellectCustom(hero)
@@ -21888,7 +21895,8 @@ function PassiveStatCalculation(event)
     --now we can calc real AA and AS and mana and HP, (primary attribute must give aa dmg): order is important! important: need to substract what we already have at the end
     --Mana
     local manaFromInt = GetMaxManaBonusFromInt(hero, realBaseStats[INT])
-    local maxManaBonusesFromNonItems = manaFromInt + hero.talents[120] * 100 + hero.talents[180] * 50
+    local manaFromHeroLevel = GetMaxManaBonusFromHeroLevel(hero)
+    local maxManaBonusesFromNonItems = manaFromInt + manaFromHeroLevel + hero.talents[120] * 100 + hero.talents[180] * 50
     if GetLevelOfAbility(hero, "special_bonus_unique_nether_wizard_5") >= 1 then
         maxManaBonusesFromNonItems = maxManaBonusesFromNonItems + 500
     end
@@ -22157,7 +22165,7 @@ function PassiveStatCalculation(event)
         if not hero.resourcesystem then --mana user
             if hero.talents[74] > 0 and not hero:HasModifier("modifier_oocmana") then
                 if hero:GetMana() / hero:GetMaxMana() > 0.25 then
-                    percent_bonus = percent_bonus - 0.15
+                    percent_bonus = percent_bonus - 0.1
                     hero.path_sacrifice_souls_paid = 4
                 else
                     hero.path_sacrifice_souls_paid = false
@@ -28752,12 +28760,12 @@ function GetManaRegenerationPerSec( hero )
     local regen = 0
     local regenFactor = 1
     if hero.talents and hero.talents[75] > 0 then
-        regen = regen + hero.talents[75]
+        regen = regen + hero.talents[75] * 2
     end
     local maxMana = hero:GetMaxMana()
     if not hero.resourcesystem then
         regenFactor = GetManaRegenerationFactor(hero)
-        regen = regen + 1
+        regen = regen + 1 + GetHeroLevel(hero) * 0.05
         if hero.talents and hero.talents[113] > 0 then
             regen = regen + 0.002 * hero:GetMaxMana() * hero.talents[113]
         end

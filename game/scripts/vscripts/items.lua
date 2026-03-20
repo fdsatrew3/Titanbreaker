@@ -7435,7 +7435,7 @@ function COverthrowGameMode:DropTempleItem( unit, reward, drop_type, buy_quality
 							--heal
 							if all[i]:IsAlive() then
 								all[i]:SetHealth(all[i]:GetHealth()+all[i]:GetMaxHealth()*0.5)
-								all[i]:SetMana(all[i]:GetMana()+all[i]:GetMaxMana()*0.5)
+								all[i]:SetMana(all[i]:GetMana()+all[i]:GetMaxMana() * 1)
 							end
 							local particle = ParticleManager:CreateParticle("particles/items2_fx/mekanism.vpcf", PATTACH_POINT_FOLLOW, all[i])
 							ParticleManager:ReleaseParticleIndex(particle)

@@ -168,8 +168,8 @@
 		"talent71"								"Overwhelm: + 5% / 10% / 15% Debuff Duration and after stunning an enemy, your Primary Attribute is increased by 10% / 20% / 30% for 12 secs."
 		"talent72"								"Dark Offering: Decrease all Healing received by 75% to gain a 15% / 30% / 45% Damage and Healing increase."
 		"talent73"								"Shadow Form: When you cast an Ability with a base cooldown of 60 secs or higher, enter a Shadow Form for 10 / 11 / 12 secs, increasing all Ability and Auto Attack Critical Strike Damage and Healing by 25% / 50% / 75%, gaining 50% Evasion, a Phased Effect and 5 secs invisibility."
-		"talent74"								"Sacrifice of Souls: Mana based Heroes sacrifice 15% of max Mana every 5 secs while above 25% of max Mana, while all other Heroes reduce all Energy gain by 50% to increase all Damage and Healing by 15% / 30% / 45%. In addition, after sacrificing, your next 3 Ability Damage instances gain twice that Bonus."
-		"talent75"								"Three Face God: Add 15% / 30% / 45% of your Strength, Agility and Intellect as base Damage to all Ability Damage and gain 1 / 2 / 3 Mana Regeneration and Energy Regeneration per sec."
+		"talent74"								"Sacrifice of Souls: Mana based Heroes sacrifice 10% of max Mana every 5 secs while above 25% of max Mana, while all other Heroes reduce all Energy gain by 50% to increase all Damage and Healing by 15% / 30% / 45%. In addition, after sacrificing, your next 3 Ability Damage instances gain twice that Bonus."
+		"talent75"								"Three Face God: Add 15% / 30% / 45% of your Strength, Agility and Intellect as base Damage to all Ability Damage and gain 2 / 4 / 6 Mana Regeneration and Energy Regeneration per sec."
 		//"talent75"								"Shadow Reflexes: Become a Master of Evasion, Blocking a portion of all incoming Damage, equal to 5% / 10% / 15% of your Primary Attribute and for each percent of Spell Resistance, gain + 0.25% / 0.5% / 0.75% Physical, Shadow and Chaos Damage."
 
 
