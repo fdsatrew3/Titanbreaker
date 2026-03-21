@@ -145,7 +145,7 @@ function shadow11:OnProjectileHit_ExtraData(target, location, extraData)
             target._shadowClericShadow11InnerCd  = nil
         end)
     end
-
+    
     DamageUnit({
         caster = caster,
         target = target,
@@ -153,7 +153,8 @@ function shadow11:OnProjectileHit_ExtraData(target, location, extraData)
         damage = 0,
         spelldamagefactor = self:GetSpecialValueFor("spelldmg") * extraData.damageFactor,
         attributefactor = self:GetSpecialValueFor("dmgfromstat") * extraData.damageFactor,
-        shadowdmg = 1
+        shadowdmg = 1,
+        isaoe = 1
     })
     
     if(target._shadowClericShadow11SecondInnerCd == nil and self:GetLevel() >= 3) then
