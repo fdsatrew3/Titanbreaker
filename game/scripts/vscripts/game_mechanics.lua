@@ -16306,43 +16306,46 @@ function ApplyBuff(event)
         end)
     end]]
 	--adjust time of buff
-	if duration and event.cursebladespecial and caster:HasModifier("modifier_item_curseblade") and not isBuff then
-    	duration = duration * GetCCPower(event)
-	end
-	if duration and target:HasModifier("modifier_item_bootshp2") and not isBuff then
-    	duration = duration * 0.75
-	end
-    --debuff durations
-    if duration and not isBuff then
-        duration = duration * GetPrimalFearProcDuration(caster, target)
-        if caster:HasModifier("modifier_item_bootscurse") or caster:HasModifier("modifier_item_bootscurse_2") then
-            duration = duration * 1.15
+    if duration and duration > 0 then
+        --debuff durations
+        if not isBuff then
+            duration = duration * GetPrimalFearProcDuration(caster, target)
+            if caster:HasModifier("modifier_item_bootscurse") or caster:HasModifier("modifier_item_bootscurse_2") then
+                duration = duration * 1.15
+            end
+            if caster:HasModifier("modifier_item_ancient_dot") then
+                duration = duration * 1.25
+            end
+            if target:HasModifier("modifier_fanatic_rage") then
+                duration = duration * 2
+            end
+            if event.cursebladespecial and caster:HasModifier("modifier_item_curseblade") then
+                duration = duration * GetCCPower(event)
+            end
+            if target:HasModifier("modifier_item_bootshp2") then
+                duration = duration * 0.75
+            end
+            if caster.talents and caster.talents[5] then
+                duration = duration * (1 + caster.talents[5]*0.1)
+            end
+            if caster.talents and caster.talents[71] and caster.talents[71] > 0 then
+                duration = duration * (1 + 0.05 * caster.talents[71])
+            end
+            if caster:HasModifier("modifier_pathbuff_111") then
+                duration = duration * 1.05
+            end
         end
-        if caster:HasModifier("modifier_item_ancient_dot") then
-            duration = duration * 1.25
+        
+        --extra buff dur talent
+        if isBuff and caster.talents and caster.talents[5] and ((buff == "modifier_resto" or buff == "modifier_regrowth2" or buff == "modifier_prayerprotection" or buff == "modifier_pain_supression" or buff == "modifier_hot3" or buff == "modifier_eternallife" or buff == "modifier_regrowth" or buff == "modifier_bloodlust_ele") or (buff == "modifier_taunt123" and GetLevelOfAbility(caster, "holy55") >= 4 )) then
+            local extra_dur = 0
+            if caster:HasModifier("modifier_ancient_allstats") then
+                extra_dur = extra_dur + 2
+            end
+            duration = duration * (1 + (extra_dur + caster.talents[5])*0.05)
         end
-        if target:HasModifier("modifier_fanatic_rage") then
-            duration = duration * 2
-        end
     end
-    if duration and not isBuff and caster.talents and caster.talents[5] then
-        duration = duration * (1 + caster.talents[5]*0.1)
-    end
-    if caster.talents and caster.talents[71] and caster.talents[71] > 0 and duration and not isBuff then
-        duration = duration * (1 + 0.05 * caster.talents[71])
-    end
-    if duration and caster:HasModifier("modifier_pathbuff_111") then
-        duration = duration * 1.05
-    end
-    --extra buff dur talent
-    if duration and isBuff and caster.talents and caster.talents[5] and ((buff == "modifier_resto" or buff == "modifier_regrowth2" or buff == "modifier_prayerprotection" or buff == "modifier_pain_supression" or buff == "modifier_hot3" or buff == "modifier_eternallife" or buff == "modifier_regrowth" or buff == "modifier_bloodlust_ele") or (buff == "modifier_taunt123" and GetLevelOfAbility(caster, "holy55") >= 4 )) then
-        local extra_dur = 0
-        if caster:HasModifier("modifier_ancient_allstats") then
-            extra_dur = extra_dur + 2
-        end
-        duration = duration * (1 + (extra_dur + caster.talents[5])*0.05)
-
-    end
+	
 
     --shield reflect swap targets
     if (not isBuff) and (target:HasModifier("modifier_shieldreflect") or target:HasModifier("modifier_shieldreflect_charges") or target:HasModifier("modifier_buffreflect") or caster:HasModifier("modifier_dark_mirror")) then
@@ -17681,11 +17684,8 @@ function ApplyBuffStack( event )
 		    ApplyBuff(event)
         end
 		target:SetModifierStackCount(buff, ability, stackcount)
-		--target:Duration
         amount = stackcount
 	else
-		--print("run")
-		--ability:ApplyDataDrivenModifier(caster, target, buff, nil)
 		event.caster = caster
 		event.target = target
 		event.buff = buff
@@ -22065,7 +22065,7 @@ function PassiveStatCalculation(event)
         --if i == 133 then
         --    new_talent_value = 10
         --end
-        --if i == 132 then
+        --if i == 109 then
         --    new_talent_value = 3
         --end
         --new bottom row path caps
