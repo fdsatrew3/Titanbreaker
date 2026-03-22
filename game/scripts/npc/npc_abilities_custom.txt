@@ -59709,11 +59709,11 @@
 								"ScriptFile"	"game_mechanics.lua"
 								"Function"	"BloodWolfHeal"
 							}
-							"ApplyModifier"
+							"RunScript"
 							{
-								"ModifierName"	"modifier_phased"
-								"Target"	"TARGET"
-								"Duration"	"15"
+								"ScriptFile"	"game_mechanics.lua"
+								"Function"	"AddPhasedToSummon"
+								"duration"	"15"
 							}
 							"ApplyModifier"
 							{
@@ -59773,11 +59773,11 @@
 								"random"	"1"
 								"dontface"	"1"
 							}
-							"ApplyModifier"
+							"RunScript"
 							{
-								"ModifierName"	"modifier_phased"
-								"Target"	"TARGET"
-								"Duration"	"15"
+								"ScriptFile"	"game_mechanics.lua"
+								"Function"	"AddPhasedToSummon"
+								"duration"	"15"
 							}
 							"ApplyModifier"
 							{
@@ -59846,11 +59846,11 @@
 								"random"	"1"
 								"dontface"	"1"
 							}
-							"ApplyModifier"
+							"RunScript"
 							{
-								"ModifierName"	"modifier_phased"
-								"Target"	"TARGET"
-								"Duration"	"15"
+								"ScriptFile"	"game_mechanics.lua"
+								"Function"	"AddPhasedToSummon"
+								"duration"	"15"
 							}
 							"ApplyModifier"
 							{
@@ -59896,11 +59896,11 @@
 								"random"	"1"
 								"dontface"	"1"
 							}
-							"ApplyModifier"
+							"RunScript"
 							{
-								"ModifierName"	"modifier_phased"
-								"Target"	"TARGET"
-								"Duration"	"15"
+								"ScriptFile"	"game_mechanics.lua"
+								"Function"	"AddPhasedToSummon"
+								"duration"	"15"
 							}
 							"ApplyModifier"
 							{
