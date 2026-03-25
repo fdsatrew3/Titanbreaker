@@ -9269,7 +9269,7 @@ function COverthrowGameMode:AggroLowestMres(caster)
         end
       end
       --local h = all[i]:GetHealth() / all[i]:GetMaxHealth()
-      local armor = all[i]:Script_GetMagicalArmorValue(false, nil)
+      local armor = all[i]:Script_GetMagicalArmorValue(nil)
       if ((not bestArmor) or armor < bestArmor) and caster.aggrolist and caster.aggrolist[ownerid] and caster.aggrolist[ownerid] > 0 then
         unit = all[i]
         bestArmor = armor
@@ -9568,7 +9568,7 @@ function PVEAggroAdd(event)
         if aggro_bonus_armor < 1 then
           aggro_bonus_armor = 1
         end
-        local aggro_bonus_resist = 1 + source:Script_GetMagicalArmorValue(false, nil) * 100 * 0.1
+        local aggro_bonus_resist = 1 + source:Script_GetMagicalArmorValue(nil) * 100 * 0.1
         if aggro_bonus_resist < 1 then
           aggro_bonus_resist = 1
         end

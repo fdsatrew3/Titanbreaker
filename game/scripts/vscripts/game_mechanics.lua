@@ -3516,7 +3516,7 @@ function GetElementalDamageModifierAdditive( event, caster, real_caster, target,
         value = value + 0.1 *caster:GetModifierStackCount("modifier_ele_thunder_stacks", nil)
     end
     if event.holydmg and caster:HasModifier("modifier_class_sanct2") and caster:GetName() == "npc_dota_hero_phantom_lancer" then
-        value = value + 0.5 * caster:Script_GetMagicalArmorValue(false, nil)
+        value = value + 0.5 * caster:Script_GetMagicalArmorValue(nil)
     end
     if event.frostdmg and caster:HasModifier("modifier_npc_dota_hero_drow_ranger") and caster:HasModifier("modifier_manacost_reduction") then
         value = value + 2
@@ -3669,7 +3669,7 @@ function GetElementalDamageModifierAdditive( event, caster, real_caster, target,
         value = value + 0.0001 * GetIntellectCustom(caster) * caster.hog
     end
     if event.shadowdmg and caster.shw and caster.shw > 0 then
-        value = value + 0.01 * caster:Script_GetMagicalArmorValue(false, nil) * caster.shw
+        value = value + 0.01 * caster:Script_GetMagicalArmorValue(nil) * caster.shw
     end
     if event.naturedmg and caster.woz and caster.woz > 0 then
         value = value + 0.01 * math.max(0, GetAttackSpeedCustom(caster)) * caster.woz
@@ -3794,7 +3794,7 @@ function GetElementalDamageModifierAdditive( event, caster, real_caster, target,
                 value = value + 0.0001 * caster:GetPhysicalArmorValue(false) * caster.und
             end
             if caster.shw and caster.shw > 0 then
-                value = value + 0.01 * caster:Script_GetMagicalArmorValue(false, nil) * caster.shw
+                value = value + 0.01 * caster:Script_GetMagicalArmorValue(nil) * caster.shw
             end
             if caster:HasModifier("modifier_guardian_temple_phys") then
                 value = value + 0.3
@@ -3899,10 +3899,10 @@ function GetElementalDamageModifierAdditive( event, caster, real_caster, target,
     
     local arcane_resi_dmg = caster:FindAbilityByName("Arcane6")
     if event.firedmg and arcane_resi_dmg and arcane_resi_dmg:GetLevel() >= 4 then
-        value = value + caster:Script_GetMagicalArmorValue(false, nil)
+        value = value + caster:Script_GetMagicalArmorValue(nil)
     end
     if event.arcanedmg and arcane_resi_dmg and arcane_resi_dmg:GetLevel() >= 4 then
-        value = value + caster:Script_GetMagicalArmorValue(false, nil)
+        value = value + caster:Script_GetMagicalArmorValue(nil)
     end
     arcane_resi_dmg = caster:FindAbilityByName("frost_lake")
     if event.frostdmg and arcane_resi_dmg and arcane_resi_dmg:GetLevel() >= 4 then
@@ -5450,7 +5450,7 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
             end
             multiplicative_bonus = multiplicative_bonus * bonus_factor
         end
-        if caster.talents[51] and caster.talents[51] > 0 and caster:Script_GetMagicalArmorValue(false, nil) >= 0.7 and caster:GetPhysicalArmorValue(false) >= 46 then
+        if caster.talents[51] and caster.talents[51] > 0 and caster:Script_GetMagicalArmorValue(nil) >= 0.7 and caster:GetPhysicalArmorValue(false) >= 46 then
             multiplicative_bonus = multiplicative_bonus * (1 + 0.1 * caster.talents[51])
         end
         if caster.talents and caster.talents[111] and caster.talents[111] > 0 then
@@ -5887,7 +5887,7 @@ function GetAbilityDamageModifierMultiplicative( event, caster, real_caster, tar
     end
     local dk_resi_dmg = caster:FindAbilityByName("Rot")
     if dk_resi_dmg and dk_resi_dmg:GetLevel() >= 4 then
-        local spellResToDmg = math.min(0.25, caster:Script_GetMagicalArmorValue(false, nil))
+        local spellResToDmg = math.min(0.25, caster:Script_GetMagicalArmorValue(nil))
         multiplicative_bonus = multiplicative_bonus * (1 + spellResToDmg)
     end
     if caster:HasModifier("item_mother_of_dragons") then
@@ -21248,7 +21248,7 @@ function PassiveStatCalculation(event)
         hero.combat_system_ability:ApplyDataDrivenModifier(hero, hero, "modifier_attack_range2", {Duration = updateEveryXSecs + 1})
         hero:SetModifierStackCount("modifier_attack_range2", hero.combat_system_ability, attackRangeBonusToApply)
     end
-    local magicres = hero:Script_GetMagicalArmorValue(false, nil)
+    local magicres = hero:Script_GetMagicalArmorValue(nil)
     --spelldamage
     hero.spellpower = GetSpellpower(event)
     if isUpdateTickEvery5secs then
@@ -22391,7 +22391,7 @@ function PassiveStatCalculation(event)
         ability:ApplyDataDrivenModifier(hero, hero, "modifier_aa_temple_penalty", {Duration = dur})
     end
     hero:CalculateStatBonus(true)
-    hero.magicalResistance = hero:Script_GetMagicalArmorValue(false, nil)
+    hero.magicalResistance = hero:Script_GetMagicalArmorValue(nil)
     --re add auto crit if we had one active
     if system_aacrit_stacks > 0 and hero.combat_system_ability then
         hero.combat_system_ability:ApplyDataDrivenModifier(hero, hero, "system_aacrit", nil)
@@ -28345,7 +28345,7 @@ function GetHealingMultiplier(event, caster, ability, target, process_procs, isa
         if caster:HasModifier("modifier_guardian_self") and target:HasModifier("modifier_guardian") and event.FromGuardian ~= 1 then
             healing_bonus=healing_bonus + 0.25
         end
-        if target.talents and target.talents[51] and target.talents[51] > 0 and target:Script_GetMagicalArmorValue(false, nil) >= 0.7 and target:GetPhysicalArmorValue(false) >= 35 then
+        if target.talents and target.talents[51] and target.talents[51] > 0 and target:Script_GetMagicalArmorValue(nil) >= 0.7 and target:GetPhysicalArmorValue(false) >= 35 then
             healing_bonus = healing_bonus + 0.1 * target.talents[51]
         end
         local protpalatalent = target:FindAbilityByName("pala6")
